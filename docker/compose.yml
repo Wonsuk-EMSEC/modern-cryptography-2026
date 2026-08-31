@@ -1,0 +1,17 @@
+services:
+  course:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        STUDENT_UID: ${STUDENT_UID:-1000}
+        STUDENT_GID: ${STUDENT_GID:-1000}
+    image: modern-cryptography-2026
+    working_dir: /workspace
+    user: student
+    volumes:
+      - ..:/workspace
+    ports:
+      - "8888:8888"
+    stdin_open: true
+    tty: true
