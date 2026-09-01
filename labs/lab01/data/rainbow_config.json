@@ -1,0 +1,29 @@
+{
+  "alphabet": "abcd",
+  "length": 3,
+  "chain_length": 6,
+  "starts": [
+    "aaa",
+    "aad",
+    "abc",
+    "acb",
+    "ada",
+    "add",
+    "bac",
+    "bbb",
+    "bca",
+    "bcd",
+    "bdc",
+    "cab",
+    "cba",
+    "cbd",
+    "ccc",
+    "cdb",
+    "daa",
+    "dad",
+    "dbc",
+    "dcb",
+    "dda",
+    "ddd"
+  ]
+}

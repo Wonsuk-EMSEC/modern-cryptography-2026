@@ -1,0 +1,16 @@
+{
+  "dictionary_passwords": [
+    "spring2026",
+    "lab-access-01",
+    "blueberry",
+    "moderncrypto"
+  ],
+  "rainbow_passwords": [
+    "abc",
+    "bda",
+    "cbd",
+    "ddd"
+  ],
+  "wpa2_password": "offline-only",
+  "md5": "79054025255fb1a26e4bc422aef54eb4"
+}
