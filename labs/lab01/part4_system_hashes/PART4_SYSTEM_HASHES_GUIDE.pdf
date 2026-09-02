@@ -1,0 +1,226 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R 5 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 7 0 R /F2 8 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 2920 >>
+stream
+BT
+54 760 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 18 Tf
+(Part 4: System password hashes) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Ethical and authorized use: use only ../data/linux_hashes.txt. The parser) Tj
+0 -14 Td
+/F1 10 Tf
+(does not access /etc/shadow. Never obtain or test another person's hashes.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Run python3 analyze_shadow_hash.py ../data/linux_hashes.txt. A shadow-style) Tj
+0 -14 Td
+/F1 10 Tf
+(value uses $identifier$salt-or-parameters$verifier; the identifier selects the) Tj
+0 -14 Td
+/F1 10 Tf
+(password-hashing scheme. Classify this exercise as online or offline and) Tj
+0 -14 Td
+/F1 10 Tf
+(justify your answer.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Parse the supplied record) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(cd /workspace/labs/lab01/part4_system_hashes) Tj
+0 -14 Td
+/F2 9 Tf
+(python3 analyze_shadow_hash.py ../data/linux_hashes.txt) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Expected output has this structure:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+({'account': 'student_...', 'id': '6', 'algorithm': 'SHA-512-crypt',) Tj
+0 -14 Td
+/F2 9 Tf
+( 'salt_or_parameters': '...', 'verifier': '...'}) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The $6$ identifier selects SHA-512-crypt. The salt and verifier are stored) Tj
+0 -14 Td
+/F1 10 Tf
+(data; neither field is the plaintext password. Notice that the script accepts) Tj
+0 -14 Td
+/F1 10 Tf
+(an explicit local filename and never opens /etc/shadow automatically.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Optional local cracking command:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(john --wordlist=../data/lab01-small.txt ../data/linux_hashes.txt) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(To display John the Ripper's result for this supplied file, run:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(john --show ../data/linux_hashes.txt) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Runtime and exact status messages can vary. The important observation is that) Tj
+0 -14 Td
+/F1 10 Tf
+(all guesses are checked locally, without sending login attempts to a service.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Use only the supplied synthetic file. If an instructor separately provides a) Tj
+0 -14 Td
+/F1 10 Tf
+(Victim Ubuntu VM, it must be deliberately vulnerable and connected only to an) Tj
+0 -14 Td
+/F1 10 Tf
+(isolated host-only network. Worksheet \(manual observation only\): list the VM's) Tj
+0 -14 Td
+/F1 10 Tf
+(instructor-provided address, visible services, evidence of isolation, and which) Tj
+0 -14 Td
+/F1 10 Tf
+(service would authenticate users. Do not scan arbitrary addresses.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 7 0 R /F2 8 0 R >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 483 >>
+stream
+BT
+54 760 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Checkpoint questions) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(  1. Does the hash format reveal the plaintext?) Tj
+0 -14 Td
+/F1 10 Tf
+(  2. Which fields must be stored so legitimate verification remains possible?) Tj
+0 -14 Td
+/F1 10 Tf
+(  3. Is this an online or offline activity? What evidence supports your answer?) Tj
+0 -14 Td
+/F1 10 Tf
+(  4. Why must an optional Victim VM use an isolated host-only network?) Tj
+0 -14 Td
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+8 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000127 00000 n 
+0000000263 00000 n 
+0000003235 00000 n 
+0000003371 00000 n 
+0000003905 00000 n 
+0000003975 00000 n 
+trailer
+<< /Size 9 /Root 1 0 R >>
+startxref
+4043
+%%EOF

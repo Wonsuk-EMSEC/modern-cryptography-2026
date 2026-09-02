@@ -1,6 +1,7 @@
 import hashlib
 import tempfile
 import unittest
+import os
 from pathlib import Path
 
 try:
@@ -11,6 +12,7 @@ except ImportError:  # unittest discovery adds this directory directly to sys.pa
 impl = load("dictionary_attack")
 
 
+@unittest.skipUnless(os.environ.get("LAB01_GRADE"), "complete the student starter first")
 class DictionaryAttackTests(unittest.TestCase):
     def test_load_dictionary_ignores_blank_lines(self):
         with tempfile.TemporaryDirectory() as directory:

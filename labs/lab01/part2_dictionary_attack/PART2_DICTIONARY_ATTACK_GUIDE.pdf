@@ -1,0 +1,259 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R 5 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 7 0 R /F2 8 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 2812 >>
+stream
+BT
+54 760 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 18 Tf
+(Part 2: Dictionary attacks) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Ethical and authorized use: run these scripts only against the fictional) Tj
+0 -14 Td
+/F1 10 Tf
+(accounts and local files supplied with this lab. Do not use leaked wordlists,) Tj
+0 -14 Td
+/F1 10 Tf
+(real credentials, or external services.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The CSV schemas are account,sha256 and account,salt_hex,sha256. Complete) Tj
+0 -14 Td
+/F1 10 Tf
+(both starters, then run python3 compare_cost.py. Report recovered synthetic) Tj
+0 -14 Td
+/F1 10 Tf
+(accounts, computation counts, elapsed time, and guesses per second.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Inspect the local inputs) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(cd /workspace/labs/lab01/part2_dictionary_attack) Tj
+0 -14 Td
+/F2 9 Tf
+(head ../data/lab01-small.txt) Tj
+0 -14 Td
+/F2 9 Tf
+(sed -n '1,5p' ../data/unsalted_hashes.csv) Tj
+0 -14 Td
+/F2 9 Tf
+(sed -n '1,5p' ../data/salted_hashes.csv) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The wordlist contains only fictional classroom candidates. In the salted CSV,) Tj
+0 -14 Td
+/F1 10 Tf
+(decode salt_hex with bytes.fromhex\(...\) before concatenating it with the) Tj
+0 -14 Td
+/F1 10 Tf
+(UTF-8 candidate bytes.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Implement and run the attacks) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Both attack files are student starters. Before implementation, the following) Tj
+0 -14 Td
+/F1 10 Tf
+(commands intentionally stop at NotImplementedError:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(python3 crack_unsalted.py ../data/unsalted_hashes.csv ../data/lab01-small.txt) Tj
+0 -14 Td
+/F2 9 Tf
+(python3 crack_salted.py ../data/salted_hashes.csv ../data/lab01-small.txt) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(After completing crack\(\), each command should print a tuple with this shape:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(\({'fictional_account': 'recovered_candidate'}, HASH_COUNT, ELAPSED_SECONDS\)) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Do not hard-code account names, candidates, counts, or digests. For the) Tj
+0 -14 Td
+/F1 10 Tf
+(unsalted attack, hash each candidate once and compare it with every target. For) Tj
+0 -14 Td
+/F1 10 Tf
+(the salted attack, compute a separate digest for each candidate/account salt) Tj
+0 -14 Td
+/F1 10 Tf
+(pair.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Then compare the two experiments:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(python3 compare_cost.py ../data) Tj
+0 -14 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 7 0 R /F2 8 0 R >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 989 >>
+stream
+BT
+54 760 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Expected output format \(numbers depend on your implementation and machine\):) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(experiment   found   hashes    seconds     hashes/s) Tj
+0 -14 Td
+/F2 9 Tf
+(unsalted         N        N   0.000000            N) Tj
+0 -14 Td
+/F2 9 Tf
+(salted           N        N   0.000000            N) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Checkpoint questions) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(  1. Why can one unsalted candidate digest serve all accounts?) Tj
+0 -14 Td
+/F1 10 Tf
+(  2. Why must salted records be checked separately?) Tj
+0 -14 Td
+/F1 10 Tf
+(  3. Which computation count grows faster as the number of accounts increases?) Tj
+0 -14 Td
+/F1 10 Tf
+(  4. Why does salt prevent shared precomputation without making a weak password) Tj
+0 -14 Td
+/F1 10 Tf
+(   strong?) Tj
+0 -14 Td
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+8 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000127 00000 n 
+0000000263 00000 n 
+0000003127 00000 n 
+0000003263 00000 n 
+0000004303 00000 n 
+0000004373 00000 n 
+trailer
+<< /Size 9 /Root 1 0 R >>
+startxref
+4441
+%%EOF

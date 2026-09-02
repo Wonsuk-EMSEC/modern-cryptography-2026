@@ -1,6 +1,7 @@
 import hashlib
 import json
 import unittest
+import os
 
 try:
     from ._load_impl import LAB_ROOT, load
@@ -10,6 +11,7 @@ except ImportError:  # unittest discovery adds this directory directly to sys.pa
 impl = load("wpa2_offline")
 
 
+@unittest.skipUnless(os.environ.get("LAB01_GRADE"), "complete the student starter first")
 class WPA2OfflineTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

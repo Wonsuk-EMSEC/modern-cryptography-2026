@@ -1,0 +1,244 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R 5 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 7 0 R /F2 8 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 2669 >>
+stream
+BT
+54 760 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 18 Tf
+(Part 1: Hash and salt) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Ethical and authorized use: enter only fictional passwords made for this) Tj
+0 -14 Td
+/F1 10 Tf
+(lab. Never place a real password in source code, shell history, or screenshots.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Run python3 hash_password.py twice with the same input, then run) Tj
+0 -14 Td
+/F1 10 Tf
+(python3 salted_hash.py twice. SHA-256 is one-way hashing, not encryption:) Tj
+0 -14 Td
+/F1 10 Tf
+(there is no decryption key. Observe that unsalted digests repeat, while random) Tj
+0 -14 Td
+/F1 10 Tf
+(salts change the demonstration verifier.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(These constructions teach mechanics only. Neither raw SHA-256 nor) Tj
+0 -14 Td
+/F1 10 Tf
+(SHA256\(salt || password\) is appropriate production password storage.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Run the examples) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Start in this directory inside the course container:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(cd /workspace/labs/lab01/part1_hashing) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(First, hash the same fictional password twice. getpass deliberately does not) Tj
+0 -14 Td
+/F1 10 Tf
+(display the password while you type it.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(python3 hash_password.py) Tj
+0 -14 Td
+/F2 9 Tf
+(Educational demo only; SHA-256 alone is unsafe for password storage.) Tj
+0 -14 Td
+/F2 9 Tf
+(Password:) Tj
+0 -14 Td
+/F2 9 Tf
+(<64 hexadecimal characters>) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Run the command again with the same input. The two digests should be identical) Tj
+0 -14 Td
+/F1 10 Tf
+(because SHA-256 is deterministic.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Next, run the salted demonstration twice with the same fictional password:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(python3 salted_hash.py) Tj
+0 -14 Td
+/F2 9 Tf
+(Password:) Tj
+0 -14 Td
+/F2 9 Tf
+(salt=<32 hexadecimal characters>) Tj
+0 -14 Td
+/F2 9 Tf
+(digest=<64 hexadecimal characters>) Tj
+0 -14 Td
+/F2 9 Tf
+(Educational demo only; use a password KDF in production.) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The salt and digest should normally change on every run. The salt is stored) Tj
+0 -14 Td
+/F1 10 Tf
+(alongside the verifier; it is unique, not secret.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Run the focused tests:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 7 0 R /F2 8 0 R >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 655 >>
+stream
+BT
+54 760 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(pytest -q test_hashing.py) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Expected result: 2 passed.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Checkpoint questions) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(  1. Why is encryption, whose design permits decryption, the wrong default model) Tj
+0 -14 Td
+/F1 10 Tf
+(   for password verification?) Tj
+0 -14 Td
+/F1 10 Tf
+(  2. Why do identical inputs produce identical unsalted SHA-256 digests?) Tj
+0 -14 Td
+/F1 10 Tf
+(  3. What does a unique salt change, and what does it not prevent?) Tj
+0 -14 Td
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+8 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000127 00000 n 
+0000000263 00000 n 
+0000002984 00000 n 
+0000003120 00000 n 
+0000003826 00000 n 
+0000003896 00000 n 
+trailer
+<< /Size 9 /Root 1 0 R >>
+startxref
+3964
+%%EOF

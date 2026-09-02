@@ -90,16 +90,5 @@ def main() -> None:
     record["mic"] = hmac.new(kck, bytes.fromhex(record["eapol"]), hashlib.sha1).digest()[:16].hex()
     write_text("wpa2_capture.json", json.dumps(record, indent=2) + "\n")
 
-    answers = {
-        "dictionary_passwords": targets,
-        "rainbow_passwords": rainbow_passwords,
-        "wpa2_password": "offline-only",
-        "md5": hashlib.md5(bytes.fromhex("".join(COLLISION_A.split()))).hexdigest(),
-    }
-    (ROOT / "instructor" / "lab01" / "generated_answers.json").write_text(
-        json.dumps(answers, indent=2) + "\n", encoding="utf-8"
-    )
-
-
 if __name__ == "__main__":
     main()

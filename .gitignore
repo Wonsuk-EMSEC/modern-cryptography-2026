@@ -7,6 +7,7 @@ venv/
 
 # Jupyter
 .ipynb_checkpoints/
+.pytest_cache/
 
 # IDE
 .vscode/
@@ -19,6 +20,15 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.log
+*.pcap
+*.pcapng
+*.hccapx
+*.hc22000
+*.vdi
+*.vmdk
+*.ova
+auth_db.json
+benchmark-results.*
 
 # Secrets
 .env

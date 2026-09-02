@@ -1,15 +1,19 @@
 # Lab 01 instructor notes
 
-This directory contains reference implementations and answer-bearing generated
-metadata. Do not copy it into student distributions.
+This directory contains reference implementations and deterministic fixture
+generation. Do not copy it into student distributions.
 
 ## Preparation and validation
 
 `generate_data.py` deterministically regenerates the student datasets. Run it
 from any working directory; paths are resolved relative to the repository.
 
+`render_part_pdfs.py` regenerates the five student handouts from the part
+`README.md` source files without external PDF dependencies.
+
 ```console
 python3 instructor/lab01/generate_data.py
+python3 instructor/lab01/render_part_pdfs.py
 LAB01_IMPL=/workspace/instructor/lab01/solutions \
   python3 -m unittest discover -s labs/lab01/tests -v
 ```
@@ -34,6 +38,6 @@ Part 4 (45 minutes), discussion (15 minutes).
   resistance. Collision-dependent signatures and content identifiers are
   examples at risk.
 - Part 4: the SSID, addresses, nonces, fixed message bytes, and reference MIC
-  enable checking. The passphrase is `offline-only`. PBKDF2 raises per-guess
+  enable checking. PBKDF2 raises per-guess
   cost but cannot give a low-entropy password more entropy. Only explicitly
   authorized, supplied offline records are in scope.

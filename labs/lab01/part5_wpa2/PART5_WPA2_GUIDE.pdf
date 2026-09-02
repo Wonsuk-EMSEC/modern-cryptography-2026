@@ -1,0 +1,265 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R 5 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 7 0 R /F2 8 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 2869 >>
+stream
+BT
+54 760 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 18 Tf
+(Part 5: WPA2 offline candidate verification) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Ethical and authorized use: use only the supplied synthetic metadata or an) Tj
+0 -14 Td
+/F1 10 Tf
+(instructor-created PCAP. Do not capture traffic, deauthenticate clients, disrupt) Tj
+0 -14 Td
+/F1 10 Tf
+(networks, or test third-party credentials.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The password is not transmitted in a WPA2 four-way handshake. Nevertheless, a) Tj
+0 -14 Td
+/F1 10 Tf
+(recorded SSID, AP/STA MAC addresses, ANonce/SNonce, EAPOL bytes, and MIC let a) Tj
+0 -14 Td
+/F1 10 Tf
+(candidate be checked offline:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(candidate passphrase + SSID -> PBKDF2-HMAC-SHA1 -> PMK) Tj
+0 -14 Td
+/F2 9 Tf
+(PMK + ordered MACs/nonces -> PRF -> PTK -> KCK) Tj
+0 -14 Td
+/F2 9 Tf
+(KCK + EAPOL frame -> candidate MIC -> compare with captured MIC) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Run the explanation and single-candidate checker against) Tj
+0 -14 Td
+/F1 10 Tf
+(../data/wpa2_capture.json. Server-side rate limiting cannot observe or slow) Tj
+0 -14 Td
+/F1 10 Tf
+(local guesses after capture. WPA2-Enterprise and WPA3-SAE have different) Tj
+0 -14 Td
+/F1 10 Tf
+(authentication properties and are outside this exercise.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Inspect the synthetic handshake metadata) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(cd /workspace/labs/lab01/part5_wpa2) Tj
+0 -14 Td
+/F2 9 Tf
+(python3 explain_handshake.py ../data/wpa2_capture.json) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Expected output lists the synthetic SSID, AP and client MAC addresses, two) Tj
+0 -14 Td
+/F1 10 Tf
+(nonces, and the captured MIC, followed by the PMK -> PTK -> KCK -> MIC chain. The) Tj
+0 -14 Td
+/F1 10 Tf
+(JSON file is calculation metadata created for the course, not captured) Tj
+0 -14 Td
+/F1 10 Tf
+(third-party traffic.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Verify one candidate) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The candidate is read with getpass, so it is not displayed or stored in shell) Tj
+0 -14 Td
+/F1 10 Tf
+(history:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(python3 verify_candidate.py ../data/wpa2_capture.json) Tj
+0 -14 Td
+/F2 9 Tf
+(Candidate:) Tj
+0 -14 Td
+/F2 9 Tf
+(no match) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(A candidate consistent with the synthetic record prints match; other inputs) Tj
+0 -14 Td
+/F1 10 Tf
+(print no match. Try candidates only from the provided classroom wordlist.) Tj
+0 -14 Td
+/F1 10 Tf
+(The script performs no network or radio operation.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 7 0 R /F2 8 0 R >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 1277 >>
+stream
+BT
+54 760 Td
+/F1 10 Tf
+(If the instructor supplies ../data/wpa2/lab01-instructor.pcap, the optional) Tj
+0 -14 Td
+/F1 10 Tf
+(local-only tool demonstration is:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(aircrack-ng -w ../data/lab01-small.txt ../data/wpa2/lab01-instructor.pcap) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(This optional command works only after the instructor supplies that exact local) Tj
+0 -14 Td
+/F1 10 Tf
+(PCAP. A missing-file error is expected when only the repository placeholder is) Tj
+0 -14 Td
+/F1 10 Tf
+(present. Do not substitute an external capture.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Checkpoint questions) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(  1. Which captured values make candidate verification possible?) Tj
+0 -14 Td
+/F1 10 Tf
+(  2. Why is this classified as offline guessing?) Tj
+0 -14 Td
+/F1 10 Tf
+(  3. Where is the password used even though it never crosses the network?) Tj
+0 -14 Td
+/F1 10 Tf
+(  4. Why can server-side rate limiting not slow this computation?) Tj
+0 -14 Td
+/F1 10 Tf
+(  5. Why should these WPA2-Personal observations not be generalized directly to) Tj
+0 -14 Td
+/F1 10 Tf
+(   WPA2-Enterprise or WPA3-SAE?) Tj
+0 -14 Td
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+8 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000127 00000 n 
+0000000263 00000 n 
+0000003184 00000 n 
+0000003320 00000 n 
+0000004649 00000 n 
+0000004719 00000 n 
+trailer
+<< /Size 9 /Root 1 0 R >>
+startxref
+4787
+%%EOF

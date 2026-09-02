@@ -13,6 +13,8 @@ RUN apt-get update \
         gcc \
         gdb \
         git \
+        aircrack-ng \
+        john \
         libssl-dev \
         make \
         openssl \
@@ -24,9 +26,12 @@ RUN apt-get update \
 RUN python3 -m venv /opt/course-venv \
     && /opt/course-venv/bin/pip install --no-cache-dir \
         cryptography==45.0.6 \
+        argon2-cffi==25.1.0 \
+        bcrypt==4.3.0 \
         jupyterlab==4.4.6 \
         lark==1.2.2 \
-        pycryptodome==3.23.0
+        pycryptodome==3.23.0 \
+        pytest==8.4.1
 
 RUN if getent group "${STUDENT_GID}" >/dev/null; then \
         existing_group="$(getent group "${STUDENT_GID}" | cut -d: -f1)"; \

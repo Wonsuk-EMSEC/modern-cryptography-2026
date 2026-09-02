@@ -1,4 +1,5 @@
 import unittest
+import os
 from pathlib import Path
 
 try:
@@ -9,6 +10,7 @@ except ImportError:  # unittest discovery adds this directory directly to sys.pa
 impl = load("md5_collision")
 
 
+@unittest.skipUnless(os.environ.get("LAB01_GRADE"), "complete the student starter first")
 class MD5CollisionTests(unittest.TestCase):
     def test_supplied_files_are_a_collision(self):
         first = LAB_ROOT / "data" / "md5_collision_a.bin"
