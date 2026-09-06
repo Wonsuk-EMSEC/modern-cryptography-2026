@@ -4,13 +4,13 @@
 << /Type /Catalog /Pages 2 0 R >>
 endobj
 2 0 obj
-<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R 9 0 R] /Count 4 >>
+<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R 9 0 R 11 0 R 13 0 R] /Count 6 >>
 endobj
 3 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 11 0 R /F2 12 0 R >> >> /Contents 4 0 R >>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 4 0 R >>
 endobj
 4 0 obj
-<< /Length 2847 >>
+<< /Length 3051 >>
 stream
 BT
 54 760 Td
@@ -30,7 +30,13 @@ BT
 (accounts and local files supplied with this lab. Do not use leaked wordlists,) Tj
 0 -14 Td
 /F1 10 Tf
-(real credentials, or external services.) Tj
+(real credentials, or external services. The SSH extension may target only the) Tj
+0 -14 Td
+/F1 10 Tf
+(fixed lab01-ssh-target Compose service. It must never be modified to accept an) Tj
+0 -14 Td
+/F1 10 Tf
+(IP address, public hostname, different username, or external wordlist.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -91,6 +97,9 @@ BT
 0 -14 Td
 /F1 10 Tf
 (  - explain the protection salts provide and their limitations.) Tj
+0 -14 Td
+/F1 10 Tf
+(  - distinguish offline hash guessing from observable online login attempts.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -158,6 +167,17 @@ BT
 /F1 10 Tf
 (for an account with a different salt.) Tj
 0 -14 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 2874 >>
+stream
+BT
+54 760 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
@@ -167,17 +187,6 @@ BT
 /F2 9 Tf
 (Unsalted work: approximately number_of_words hash operations) Tj
 0 -14 Td
-ET
-endstream
-endobj
-5 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 11 0 R /F2 12 0 R >> >> /Contents 6 0 R >>
-endobj
-6 0 obj
-<< /Length 2848 >>
-stream
-BT
-54 760 Td
 /F2 9 Tf
 (Salted work:   up to number_of_accounts * number_of_words operations) Tj
 0 -14 Td
@@ -225,6 +234,12 @@ BT
 0 -14 Td
 /F1 10 Tf
 (7. Explain how the cost would scale to 1,000 accounts and a larger dictionary.) Tj
+0 -14 Td
+/F1 10 Tf
+(8. Complete the controlled SSH extension and compare its online behavior with) Tj
+0 -14 Td
+/F1 10 Tf
+(   the two offline attacks.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -316,6 +331,17 @@ BT
 /F1 10 Tf
 () Tj
 0 -14 Td
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 8 0 R >>
+endobj
+8 0 obj
+<< /Length 2600 >>
+stream
+BT
+54 760 Td
 /F1 10 Tf
 (After completing crack\(\), its output should have this shape:) Tj
 0 -14 Td
@@ -331,17 +357,6 @@ BT
 /F2 9 Tf
 () Tj
 0 -14 Td
-ET
-endstream
-endobj
-7 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 11 0 R /F2 12 0 R >> >> /Contents 8 0 R >>
-endobj
-8 0 obj
-<< /Length 2605 >>
-stream
-BT
-54 760 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
@@ -460,6 +475,387 @@ BT
 () Tj
 0 -14 Td
 /F1 14 Tf
+(Controlled online SSH dictionary exercise) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(This extension uses a deliberately vulnerable SSH server in a separate Docker) Tj
+0 -14 Td
+/F1 10 Tf
+(container. It is an online attack: every candidate opens an SSH connection,) Tj
+0 -14 Td
+/F1 10 Tf
+(and the server can see, log, delay, or reject the attempt. The target is not) Tj
+0 -14 Td
+/F1 10 Tf
+(published to the host and is connected only to an internal Compose network.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 10 0 R >>
+endobj
+10 0 obj
+<< /Length 3042 >>
+stream
+BT
+54 760 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(Security boundaries) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(  - The only permitted target is labstudent@lab01-ssh-target:22.) Tj
+0 -14 Td
+/F1 10 Tf
+(  - The only permitted input is ../data/ssh-lab-wordlist.txt \(at most 20 lines\).) Tj
+0 -14 Td
+/F1 10 Tf
+(  - Do not add target, port, username, concurrency, or external-wordlist options.) Tj
+0 -14 Td
+/F1 10 Tf
+(  - Do not publish a port from the SSH target to the host.) Tj
+0 -14 Td
+/F1 10 Tf
+(  - Stop and remove the target container after the exercise.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(Step 1 - Build and start the isolated target) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Run these commands from the repository root in a host terminal, not from) Tj
+0 -14 Td
+/F1 10 Tf
+(inside the course container:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(docker compose -f docker/compose.yml --profile lab01-ssh build) Tj
+0 -14 Td
+/F2 9 Tf
+(docker compose -f docker/compose.yml --profile lab01-ssh up -d lab01-ssh-target) Tj
+0 -14 Td
+/F2 9 Tf
+(docker compose -f docker/compose.yml --profile lab01-ssh ps) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The target should become healthy. There is deliberately no ports: mapping) Tj
+0 -14 Td
+/F1 10 Tf
+(for this service, so host and external clients cannot connect directly.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(Step 2 - Enter the course container on the lab network) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(docker compose -f docker/compose.yml --profile lab01-ssh run --rm course bash) Tj
+0 -14 Td
+/F2 9 Tf
+(cd /workspace/labs/lab01/part2_dictionary_attack) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(Step 3 - Review and complete `ssh_dictionary_attack.py`) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The constants fix the destination to the course service. Implement only) Tj
+0 -14 Td
+/F1 10 Tf
+(try_candidate\(\):) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(  1. create paramiko.SSHClient\(\);) Tj
+0 -14 Td
+/F1 10 Tf
+(  2. use AutoAddPolicy only because this target is an isolated, disposable) Tj
+0 -14 Td
+/F1 10 Tf
+(   classroom container;) Tj
+0 -14 Td
+/F1 10 Tf
+(  3. call connect\(\) with the fixed host, port, and username;) Tj
+0 -14 Td
+/F1 10 Tf
+(  4. disable agent and local-key lookup so only the candidate is tested;) Tj
+0 -14 Td
+/F1 10 Tf
+(  5. return False for paramiko.AuthenticationException;) Tj
+0 -14 Td
+/F1 10 Tf
+(6. return True after successful authentication; and) Tj
+0 -14 Td
+/F1 10 Tf
+(7. close the client in a finally block.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Do not print candidate strings. The provided attack loop is sequential, waits) Tj
+0 -14 Td
+/F1 10 Tf
+(between failures, and reports only status, attempt count, and elapsed time.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Run the starter checks:) Tj
+0 -14 Td
+ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 12 0 R >>
+endobj
+12 0 obj
+<< /Length 2360 >>
+stream
+BT
+54 760 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(pytest -q test_ssh_dictionary_attack.py) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Expected result: 2 passed. These checks confirm the target is fixed and the) Tj
+0 -14 Td
+/F1 10 Tf
+(course wordlist is bounded; they do not reveal the implementation or password.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(Step 4 - Run the bounded online attack) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(python3 ssh_dictionary_attack.py ../data/ssh-lab-wordlist.txt) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Expected output shape:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(Target: labstudent@lab01-ssh-target:22) Tj
+0 -14 Td
+/F2 9 Tf
+(Attempts: N) Tj
+0 -14 Td
+/F2 9 Tf
+(Elapsed: N.NNN seconds) Tj
+0 -14 Td
+/F2 9 Tf
+(Result: candidate found) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The program intentionally does not print the matching candidate. Record only) Tj
+0 -14 Td
+/F1 10 Tf
+(the attempt count, elapsed time, and success status in your report.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(Step 5 - Observe and remove the target) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(In a second host terminal, inspect the local container logs:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(docker compose -f docker/compose.yml --profile lab01-ssh \\) Tj
+0 -14 Td
+/F2 9 Tf
+(  logs --tail 50 lab01-ssh-target) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Compare the visible failed-login records with the offline attacks, which give) Tj
+0 -14 Td
+/F1 10 Tf
+(no server-side signal. Exit the course shell, then remove the target:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(exit) Tj
+0 -14 Td
+/F2 9 Tf
+(docker compose -f docker/compose.yml --profile lab01-ssh \\) Tj
+0 -14 Td
+/F2 9 Tf
+(  rm --stop --force lab01-ssh-target) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(Offline versus online comparison) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(| Property | Hash-file attacks | SSH container attack |) Tj
+0 -14 Td
+/F1 10 Tf
+(| --- | --- | --- |) Tj
+0 -14 Td
+ET
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 14 0 R >>
+endobj
+14 0 obj
+<< /Length 2775 >>
+stream
+BT
+54 760 Td
+/F1 10 Tf
+(| Guess reaches server | No | Yes |) Tj
+0 -14 Td
+/F1 10 Tf
+(| Server can log attempts | No | Yes |) Tj
+0 -14 Td
+/F1 10 Tf
+(| Network/handshake overhead | No | Yes |) Tj
+0 -14 Td
+/F1 10 Tf
+(| Rate limiting possible | Not at server | Yes |) Tj
+0 -14 Td
+/F1 10 Tf
+(| Target in this lab | Local CSV | Internal Compose service |) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
 (Implementation guidance without the solution) Tj
 0 -14 Td
 /F1 10 Tf
@@ -495,17 +891,6 @@ BT
 /F1 10 Tf
 () Tj
 0 -14 Td
-ET
-endstream
-endobj
-9 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 11 0 R /F2 12 0 R >> >> /Contents 10 0 R >>
-endobj
-10 0 obj
-<< /Length 1043 >>
-stream
-BT
-54 760 Td
 /F1 10 Tf
 (You have completed Part 2 when both scripts run without NotImplementedError,) Tj
 0 -14 Td
@@ -520,6 +905,15 @@ BT
 0 -14 Td
 /F1 10 Tf
 (explanation of the scaling difference. Do not publish recovered candidates.) Tj
+0 -14 Td
+/F1 10 Tf
+(For the SSH extension, also include the bounded attempt count, elapsed time,) Tj
+0 -14 Td
+/F1 10 Tf
+(redacted server log evidence, and an online/offline comparison. Do not include) Tj
+0 -14 Td
+/F1 10 Tf
+(the matching SSH password.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -548,32 +942,48 @@ BT
 /F1 10 Tf
 (   strong?) Tj
 0 -14 Td
+/F1 10 Tf
+(  5. Why can the SSH server rate-limit or log this attack, while the CSV targets) Tj
+0 -14 Td
+/F1 10 Tf
+(   cannot?) Tj
+0 -14 Td
+/F1 10 Tf
+(6. Which safety properties would be lost if the target hostname or Docker port) Tj
+0 -14 Td
+/F1 10 Tf
+(   were made configurable?) Tj
+0 -14 Td
 ET
 endstream
 endobj
-11 0 obj
+15 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
 endobj
-12 0 obj
+16 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Courier >>
 endobj
 xref
-0 13
+0 17
 0000000000 65535 f 
 0000000015 00000 n 
 0000000064 00000 n 
-0000000139 00000 n 
-0000000277 00000 n 
-0000003176 00000 n 
-0000003314 00000 n 
-0000006214 00000 n 
-0000006352 00000 n 
-0000009009 00000 n 
-0000009148 00000 n 
-0000010244 00000 n 
-0000010315 00000 n 
+0000000153 00000 n 
+0000000291 00000 n 
+0000003394 00000 n 
+0000003532 00000 n 
+0000006458 00000 n 
+0000006596 00000 n 
+0000009248 00000 n 
+0000009387 00000 n 
+0000012482 00000 n 
+0000012622 00000 n 
+0000015035 00000 n 
+0000015175 00000 n 
+0000018003 00000 n 
+0000018074 00000 n 
 trailer
-<< /Size 13 /Root 1 0 R >>
+<< /Size 17 /Root 1 0 R >>
 startxref
-10384
+18143
 %%EOF

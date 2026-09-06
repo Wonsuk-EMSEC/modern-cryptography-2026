@@ -13,5 +13,34 @@ services:
       - ..:/workspace
     ports:
       - "8888:8888"
+    networks:
+      - default
+      - lab01-ssh-internal
     stdin_open: true
     tty: true
+
+  lab01-ssh-target:
+    profiles:
+      - lab01-ssh
+    build:
+      context: ..
+      dockerfile: docker/lab01-ssh-target/Dockerfile
+    image: modern-cryptography-2026-lab01-ssh-target
+    hostname: lab01-ssh-target
+    expose:
+      - "22"
+    networks:
+      - lab01-ssh-internal
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+    healthcheck:
+      test: ["CMD-SHELL", "ssh-keyscan -T 1 localhost >/dev/null 2>&1"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+
+networks:
+  lab01-ssh-internal:
+    internal: true

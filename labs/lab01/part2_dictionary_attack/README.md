@@ -2,7 +2,9 @@
 
 **Ethical and authorized use:** run these scripts only against the fictional
 accounts and local files supplied with this lab. Do not use leaked wordlists,
-real credentials, or external services.
+real credentials, or external services. The SSH extension may target only the
+fixed `lab01-ssh-target` Compose service. It must never be modified to accept an
+IP address, public hostname, different username, or external wordlist.
 
 The CSV schemas are `account,sha256` and `account,salt_hex,sha256`. Complete
 both starters, then run `python3 compare_cost.py`. Report recovered synthetic
@@ -22,6 +24,7 @@ After completing this part, you should be able to:
 - recompute a candidate separately for each unique salt;
 - count hash operations and measure elapsed time correctly; and
 - explain the protection salts provide and their limitations.
+- distinguish offline hash guessing from observable online login attempts.
 
 ## Data model and attack logic
 
@@ -61,6 +64,8 @@ after finding its candidate. State your stopping rule when comparing results.
 5. Run both programs separately and confirm they recover fictional accounts.
 6. Run `compare_cost.py` and compare computation counts, not only wall time.
 7. Explain how the cost would scale to 1,000 accounts and a larger dictionary.
+8. Complete the controlled SSH extension and compare its online behavior with
+   the two offline attacks.
 
 ## Inspect the local inputs
 
@@ -129,6 +134,114 @@ unsalted         N        N   0.000000            N
 salted           N        N   0.000000            N
 ```
 
+## Controlled online SSH dictionary exercise
+
+This extension uses a deliberately vulnerable SSH server in a separate Docker
+container. It is an **online** attack: every candidate opens an SSH connection,
+and the server can see, log, delay, or reject the attempt. The target is not
+published to the host and is connected only to an internal Compose network.
+
+### Security boundaries
+
+- The only permitted target is `labstudent@lab01-ssh-target:22`.
+- The only permitted input is `../data/ssh-lab-wordlist.txt` (at most 20 lines).
+- Do not add target, port, username, concurrency, or external-wordlist options.
+- Do not publish a port from the SSH target to the host.
+- Stop and remove the target container after the exercise.
+
+### Step 1 — Build and start the isolated target
+
+Run these commands from the repository root in a **host terminal**, not from
+inside the course container:
+
+```console
+docker compose -f docker/compose.yml --profile lab01-ssh build
+docker compose -f docker/compose.yml --profile lab01-ssh up -d lab01-ssh-target
+docker compose -f docker/compose.yml --profile lab01-ssh ps
+```
+
+The target should become `healthy`. There is deliberately no `ports:` mapping
+for this service, so host and external clients cannot connect directly.
+
+### Step 2 — Enter the course container on the lab network
+
+```console
+docker compose -f docker/compose.yml --profile lab01-ssh run --rm course bash
+cd /workspace/labs/lab01/part2_dictionary_attack
+```
+
+### Step 3 — Review and complete `ssh_dictionary_attack.py`
+
+The constants fix the destination to the course service. Implement only
+`try_candidate()`:
+
+1. create `paramiko.SSHClient()`;
+2. use `AutoAddPolicy` only because this target is an isolated, disposable
+   classroom container;
+3. call `connect()` with the fixed host, port, and username;
+4. disable agent and local-key lookup so only the candidate is tested;
+5. return `False` for `paramiko.AuthenticationException`;
+6. return `True` after successful authentication; and
+7. close the client in a `finally` block.
+
+Do not print candidate strings. The provided attack loop is sequential, waits
+between failures, and reports only status, attempt count, and elapsed time.
+
+Run the starter checks:
+
+```console
+pytest -q test_ssh_dictionary_attack.py
+```
+
+Expected result: `2 passed`. These checks confirm the target is fixed and the
+course wordlist is bounded; they do not reveal the implementation or password.
+
+### Step 4 — Run the bounded online attack
+
+```console
+python3 ssh_dictionary_attack.py ../data/ssh-lab-wordlist.txt
+```
+
+Expected output shape:
+
+```text
+Target: labstudent@lab01-ssh-target:22
+Attempts: N
+Elapsed: N.NNN seconds
+Result: candidate found
+```
+
+The program intentionally does not print the matching candidate. Record only
+the attempt count, elapsed time, and success status in your report.
+
+### Step 5 — Observe and remove the target
+
+In a second host terminal, inspect the local container logs:
+
+```console
+docker compose -f docker/compose.yml --profile lab01-ssh \
+  logs --tail 50 lab01-ssh-target
+```
+
+Compare the visible failed-login records with the offline attacks, which give
+no server-side signal. Exit the course shell, then remove the target:
+
+```console
+exit
+docker compose -f docker/compose.yml --profile lab01-ssh \
+  rm --stop --force lab01-ssh-target
+```
+
+### Offline versus online comparison
+
+| Property | Hash-file attacks | SSH container attack |
+| --- | --- | --- |
+| Guess reaches server | No | Yes |
+| Server can log attempts | No | Yes |
+| Network/handshake overhead | No | Yes |
+| Rate limiting possible | Not at server | Yes |
+| Target in this lab | Local CSV | Internal Compose service |
+
 ## Implementation guidance without the solution
 
 - Use `csv.DictReader` so columns are addressed by their documented names.
@@ -145,6 +258,9 @@ return the required tuple, and `compare_cost.py` prints two rows without a
 division-by-zero error. Your report must include recovered fictional account
 names, both computation counts, elapsed time, guesses per second, and a written
 explanation of the scaling difference. Do not publish recovered candidates.
+For the SSH extension, also include the bounded attempt count, elapsed time,
+redacted server log evidence, and an online/offline comparison. Do not include
+the matching SSH password.
 
 ## Checkpoint questions
 
@@ -153,3 +269,7 @@ explanation of the scaling difference. Do not publish recovered candidates.
 3. Which computation count grows faster as the number of accounts increases?
 4. Why does salt prevent shared precomputation without making a weak password
    strong?
+5. Why can the SSH server rate-limit or log this attack, while the CSV targets
+   cannot?
+6. Which safety properties would be lost if the target hostname or Docker port
+   were made configurable?

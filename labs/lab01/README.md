@@ -19,6 +19,15 @@ After the lab you should be able to distinguish hashing from encryption,
 explain salt and offline guessing, compare major password KDFs, interpret a
 synthetic Linux password record, and explain offline WPA2 candidate checking.
 
+## Theory slides
+
+Review `LAB01_PASSWORD_AUTHENTICATION_THEORY.pptx` before starting the hands-on
+parts. The 22-slide deck explains the common theory used throughout the lab:
+password verification, hashing and salt, offline dictionary attacks,
+time–memory tradeoffs, password KDFs, Linux verifier formats, and WPA2-Personal
+key derivation and candidate verification. It contains no recovered passwords
+or instructor-only answers.
+
 ## Setup and tests
 
 ```console
@@ -37,11 +46,13 @@ demonstrations are runnable immediately.
    `part1_hashing/PART1_HASHING_GUIDE.pdf`; run both
    scripts. Expected: a stable digest, then changing salt/digest pairs.
    Checkpoint: distinguish hashing from encryption and explain unique salts.
-2. **Dictionary attacks (35 minutes).** Read
+2. **Dictionary attacks (50 minutes).** Read
    `part2_dictionary_attack/PART2_DICTIONARY_ATTACK_GUIDE.pdf`, complete both
    TODO implementations, and run `compare_cost.py`. Expected: fictional
-   accounts and a table of counts, seconds, and guesses/second. Checkpoint: why
-   does shared precomputation work only for unsalted targets?
+   accounts and a table of counts, seconds, and guesses/second. Then start the
+   opt-in Compose SSH target and complete the bounded online extension.
+   Checkpoint: why does shared precomputation work only for unsalted targets,
+   and why can the SSH server observe online guesses?
 3. **Password KDFs (35 minutes).** Read
    `part3_password_kdfs/PART3_PASSWORD_KDFS_GUIDE.pdf`, then run the benchmark and local
    register/verify demo. Expected: median timings and authentication without
