@@ -35,3 +35,10 @@ def test_wpa2_fixture_has_one_dictionary_match():
     row = json.loads((ROOT / "data/wpa2_capture.json").read_text())
     words = (ROOT / "data/lab01-small.txt").read_text().splitlines()
     assert sum(verifier.verify(word, row) for word in words) == 1
+
+
+def test_supplied_pcap_has_complete_four_way_handshake():
+    inspector = load(ROOT / "part5_wpa2/inspect_capture.py")
+    summary = inspector.summarize(ROOT / "data/wpa2/lab01-handshake.pcap")
+    assert summary["networks"]["00:0c:41:82:b2:55"] == "Coherer"
+    assert [message["message"] for message in summary["messages"]] == ["M1", "M2", "M3", "M4"]

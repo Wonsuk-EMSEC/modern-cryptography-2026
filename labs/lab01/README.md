@@ -52,16 +52,17 @@ demonstrations are runnable immediately.
    optionally run John only on it. Expected: identifier, salt, and verifier
    fields. Checkpoint: classify the activity as online or offline.
 5. **WPA2 verification (30 minutes).** Read
-   `part5_wpa2/PART5_WPA2_GUIDE.pdf`, inspect the synthetic metadata, and test
-   candidates. Expected: captured fields and one matching synthetic candidate.
+   `part5_wpa2/PART5_WPA2_GUIDE.pdf`, inspect the supplied course PCAP and
+   synthetic metadata, then run the local dictionary check. Expected: a complete
+   M1–M4 sequence and one matching candidate from the course-only wordlist.
    Checkpoint: explain PMK → PTK → KCK → MIC and offline rate limiting.
 6. **Report (20 minutes).** Complete `report/LAB_REPORT_TEMPLATE.md` without
    including any real password.
 
-No real credential or PCAP is included. The instructor may optionally add an
-intentionally generated WPA2 PCAP and a deliberately vulnerable Ubuntu VM on
-an isolated host-only network; neither is required for the core lab. Complete
-reference attacks remain under `/workspace/instructor/lab01`.
+No real credential is included. The supplied PCAP is restricted to this
+authorized offline exercise. The instructor may optionally provide a deliberately
+vulnerable Ubuntu VM on an isolated host-only network; it is not required for
+the core lab. Complete reference attacks remain under `/workspace/instructor/lab01`.
 
 The part PDFs are the student handouts. Their `README.md` files are retained as
 editable source documents so course staff can regenerate the PDFs consistently.

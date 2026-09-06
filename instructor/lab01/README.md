@@ -22,6 +22,19 @@ The WPA2 record is deliberately synthetic and uses an EAPOL-like fixed byte
 string. It teaches the password-verification computation without packet parsing
 or interaction with a network.
 
+## WPA2 derivation test vector
+
+`test_vectors/wpa2_pmk_ptk_kck.json` contains an instructor-only known-answer
+vector for the PBKDF2 PMK and pairwise PRF PTK/KCK derivation. It contains the
+test passphrase, so do not copy it into student distributions. Verify it with:
+
+```console
+python3 -m unittest instructor/lab01/test_wpa2_vectors.py -v
+```
+
+This vector stops at KCK because no EAPOL frame or captured MIC was provided.
+The separate synthetic record exercises MIC verification.
+
 Suggested pacing: Part 1 (35 minutes), Part 2 (45 minutes), Part 3 (20 minutes),
 Part 4 (45 minutes), discussion (15 minutes).
 

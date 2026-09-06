@@ -4,13 +4,13 @@
 << /Type /Catalog /Pages 2 0 R >>
 endobj
 2 0 obj
-<< /Type /Pages /Kids [3 0 R 5 0 R] /Count 2 >>
+<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R 9 0 R] /Count 4 >>
 endobj
 3 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 7 0 R /F2 8 0 R >> >> /Contents 4 0 R >>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 11 0 R /F2 12 0 R >> >> /Contents 4 0 R >>
 endobj
 4 0 obj
-<< /Length 2812 >>
+<< /Length 2847 >>
 stream
 BT
 54 760 Td
@@ -43,6 +43,188 @@ BT
 0 -14 Td
 /F1 10 Tf
 (accounts, computation counts, elapsed time, and guesses per second.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Purpose and learning objectives) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(This part changes perspective from verifier construction to offline guessing.) Tj
+0 -14 Td
+/F1 10 Tf
+(Assume an authorized tester has already received a small hash file. Because no) Tj
+0 -14 Td
+/F1 10 Tf
+(server is contacted, every candidate can be checked locally and server-side) Tj
+0 -14 Td
+/F1 10 Tf
+(lockout or rate limiting does not apply.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(After completing this part, you should be able to:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(  - implement a transparent dictionary attack using hashlib and csv;) Tj
+0 -14 Td
+/F1 10 Tf
+(  - reuse one candidate hash across all unsalted accounts;) Tj
+0 -14 Td
+/F1 10 Tf
+(  - recompute a candidate separately for each unique salt;) Tj
+0 -14 Td
+/F1 10 Tf
+(  - count hash operations and measure elapsed time correctly; and) Tj
+0 -14 Td
+/F1 10 Tf
+(  - explain the protection salts provide and their limitations.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Data model and attack logic) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(unsalted_hashes.csv uses this schema:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(account,sha256) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(For each word, compute SHA256\(UTF8\(word\)\) once and use the digest as a lookup) Tj
+0 -14 Td
+/F1 10 Tf
+(against all target rows.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(salted_hashes.csv uses this schema:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(account,salt_hex,sha256) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(For each account and word, decode the salt and compute) Tj
+0 -14 Td
+/F1 10 Tf
+(SHA256\(salt || UTF8\(word\)\). A digest computed for one account cannot be reused) Tj
+0 -14 Td
+/F1 10 Tf
+(for an account with a different salt.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(Unsalted work: approximately number_of_words hash operations) Tj
+0 -14 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 11 0 R /F2 12 0 R >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 2848 >>
+stream
+BT
+54 760 Td
+/F2 9 Tf
+(Salted work:   up to number_of_accounts * number_of_words operations) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The exact count may be lower if your implementation stops checking an account) Tj
+0 -14 Td
+/F1 10 Tf
+(after finding its candidate. State your stopping rule when comparing results.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Tasks) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(  1. Inspect the wordlist and both CSV schemas; do not edit their target values.) Tj
+0 -14 Td
+/F1 10 Tf
+(  2. Implement crack\(\) in crack_unsalted.py using one hash per candidate.) Tj
+0 -14 Td
+/F1 10 Tf
+(  3. Return \(recovered, computation_count, elapsed_seconds\) as documented.) Tj
+0 -14 Td
+/F1 10 Tf
+(  4. Implement crack\(\) in crack_salted.py, decoding each hexadecimal salt.) Tj
+0 -14 Td
+/F1 10 Tf
+(  5. Run both programs separately and confirm they recover fictional accounts.) Tj
+0 -14 Td
+/F1 10 Tf
+(6. Run compare_cost.py and compare computation counts, not only wall time.) Tj
+0 -14 Td
+/F1 10 Tf
+(7. Explain how the cost would scale to 1,000 accounts and a larger dictionary.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -93,16 +275,31 @@ BT
 () Tj
 0 -14 Td
 /F1 14 Tf
-(Implement and run the attacks) Tj
+(Python files and usage examples) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(Both attack files are student starters. Before implementation, the following) Tj
+(Both attack files are student starters. Before implementation, their commands) Tj
 0 -14 Td
 /F1 10 Tf
-(commands intentionally stop at NotImplementedError:) Tj
+(intentionally stop at NotImplementedError.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(`crack_unsalted.py`) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(This program accepts the unsalted target CSV followed by the wordlist:) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -114,6 +311,65 @@ BT
 (python3 crack_unsalted.py ../data/unsalted_hashes.csv ../data/lab01-small.txt) Tj
 0 -14 Td
 /F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(After completing crack\(\), its output should have this shape:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(\({'fictional_account': 'recovered_candidate'}, HASH_COUNT, ELAPSED_SECONDS\)) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 11 0 R /F2 12 0 R >> >> /Contents 8 0 R >>
+endobj
+8 0 obj
+<< /Length 2605 >>
+stream
+BT
+54 760 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Hash every candidate once and compare it with all target digests.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(`crack_salted.py`) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(This program accepts the salted target CSV followed by the same wordlist:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
 (python3 crack_salted.py ../data/salted_hashes.csv ../data/lab01-small.txt) Tj
 0 -14 Td
 /F2 9 Tf
@@ -123,7 +379,7 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(After completing crack\(\), each command should print a tuple with this shape:) Tj
+(Its output uses the same tuple format:) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -141,22 +397,25 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(Do not hard-code account names, candidates, counts, or digests. For the) Tj
+(Compute a separate digest for every candidate/account salt pair. Do not) Tj
 0 -14 Td
 /F1 10 Tf
-(unsalted attack, hash each candidate once and compare it with every target. For) Tj
-0 -14 Td
-/F1 10 Tf
-(the salted attack, compute a separate digest for each candidate/account salt) Tj
-0 -14 Td
-/F1 10 Tf
-(pair.) Tj
+(hard-code account names, candidates, counts, or digests in either program.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(Then compare the two experiments:) Tj
+() Tj
+0 -14 Td
+/F1 12 Tf
+(`compare_cost.py`) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(After both attack functions work, run them together and print a compact table:) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -167,17 +426,6 @@ BT
 /F2 9 Tf
 (python3 compare_cost.py ../data) Tj
 0 -14 Td
-ET
-endstream
-endobj
-5 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 7 0 R /F2 8 0 R >> >> /Contents 6 0 R >>
-endobj
-6 0 obj
-<< /Length 989 >>
-stream
-BT
-54 760 Td
 /F2 9 Tf
 () Tj
 0 -14 Td
@@ -212,6 +460,74 @@ BT
 () Tj
 0 -14 Td
 /F1 14 Tf
+(Implementation guidance without the solution) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(  - Use csv.DictReader so columns are addressed by their documented names.) Tj
+0 -14 Td
+/F1 10 Tf
+(  - Normalize hexadecimal digests before comparison.) Tj
+0 -14 Td
+/F1 10 Tf
+(  - Use time.perf_counter\(\) around only the attack loop.) Tj
+0 -14 Td
+/F1 10 Tf
+(  - Increment the counter exactly when SHA-256 is computed.) Tj
+0 -14 Td
+/F1 10 Tf
+(  - Keep candidates as strings for reporting and encode them only when hashing.) Tj
+0 -14 Td
+/F1 10 Tf
+(  - Return recovered values from the function; do not rely only on printed text.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Completion criteria and report evidence) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 11 0 R /F2 12 0 R >> >> /Contents 10 0 R >>
+endobj
+10 0 obj
+<< /Length 1043 >>
+stream
+BT
+54 760 Td
+/F1 10 Tf
+(You have completed Part 2 when both scripts run without NotImplementedError,) Tj
+0 -14 Td
+/F1 10 Tf
+(return the required tuple, and compare_cost.py prints two rows without a) Tj
+0 -14 Td
+/F1 10 Tf
+(division-by-zero error. Your report must include recovered fictional account) Tj
+0 -14 Td
+/F1 10 Tf
+(names, both computation counts, elapsed time, guesses per second, and a written) Tj
+0 -14 Td
+/F1 10 Tf
+(explanation of the scaling difference. Do not publish recovered candidates.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
 (Checkpoint questions) Tj
 0 -14 Td
 /F1 10 Tf
@@ -235,25 +551,29 @@ BT
 ET
 endstream
 endobj
-7 0 obj
+11 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
 endobj
-8 0 obj
+12 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Courier >>
 endobj
 xref
-0 9
+0 13
 0000000000 65535 f 
 0000000015 00000 n 
 0000000064 00000 n 
-0000000127 00000 n 
-0000000263 00000 n 
-0000003127 00000 n 
-0000003263 00000 n 
-0000004303 00000 n 
-0000004373 00000 n 
+0000000139 00000 n 
+0000000277 00000 n 
+0000003176 00000 n 
+0000003314 00000 n 
+0000006214 00000 n 
+0000006352 00000 n 
+0000009009 00000 n 
+0000009148 00000 n 
+0000010244 00000 n 
+0000010315 00000 n 
 trailer
-<< /Size 9 /Root 1 0 R >>
+<< /Size 13 /Root 1 0 R >>
 startxref
-4441
+10384
 %%EOF

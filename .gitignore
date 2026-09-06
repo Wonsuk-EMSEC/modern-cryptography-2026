@@ -22,6 +22,7 @@ Thumbs.db
 *.log
 *.pcap
 *.pcapng
+!labs/lab01/data/wpa2/lab01-handshake.pcap
 *.hccapx
 *.hc22000
 *.vdi

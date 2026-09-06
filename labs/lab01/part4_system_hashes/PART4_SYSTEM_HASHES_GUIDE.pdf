@@ -4,13 +4,13 @@
 << /Type /Catalog /Pages 2 0 R >>
 endobj
 2 0 obj
-<< /Type /Pages /Kids [3 0 R 5 0 R] /Count 2 >>
+<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R] /Count 3 >>
 endobj
 3 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 7 0 R /F2 8 0 R >> >> /Contents 4 0 R >>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 9 0 R /F2 10 0 R >> >> /Contents 4 0 R >>
 endobj
 4 0 obj
-<< /Length 2920 >>
+<< /Length 3213 >>
 stream
 BT
 54 760 Td
@@ -51,7 +51,147 @@ BT
 () Tj
 0 -14 Td
 /F1 14 Tf
-(Parse the supplied record) Tj
+(Purpose and learning objectives) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Linux does not normally store account passwords directly. A protected account) Tj
+0 -14 Td
+/F1 10 Tf
+(database stores a modular hash string containing an algorithm identifier, salt) Tj
+0 -14 Td
+/F1 10 Tf
+(or parameters, and verifier. This part uses one supplied fictional record; it) Tj
+0 -14 Td
+/F1 10 Tf
+(does not read the host or container account database.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(After completing this part, you should be able to:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(  - recognize the colon-separated shape of a shadow-style account line;) Tj
+0 -14 Td
+/F1 10 Tf
+(  - parse the $identifier$salt$verifier password field;) Tj
+0 -14 Td
+/F1 10 Tf
+(  - map identifier $6$ to SHA-512-crypt;) Tj
+0 -14 Td
+/F1 10 Tf
+(  - distinguish parsing a verifier from recovering a password; and) Tj
+0 -14 Td
+/F1 10 Tf
+(  - classify a local wordlist check as an offline attack.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Record structure) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The supplied line has the simplified shape:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(account:$id$salt$verifier:password-change fields...) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The account name is not secret. The algorithm identifier tells the verifier) Tj
+0 -14 Td
+/F1 10 Tf
+(which function to run, and the salt must be available to repeat verification.) Tj
+0 -14 Td
+/F1 10 Tf
+(The long final value is the verifier, not encrypted plaintext. Remaining colon) Tj
+0 -14 Td
+/F1 10 Tf
+(fields describe password-aging policy and are outside this parser's core task.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Tasks) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(  1. Display ../data/linux_hashes.txt and identify colon-separated fields.) Tj
+0 -14 Td
+/F1 10 Tf
+(  2. Run analyze_shadow_hash.py and map its dictionary output back to the line.) Tj
+0 -14 Td
+/F1 10 Tf
+(  3. Explain why the parser needs no password and performs no guesses.) Tj
+0 -14 Td
+/F1 10 Tf
+(  4. Optionally run John with only the supplied file and small course wordlist.) Tj
+0 -14 Td
+/F1 10 Tf
+(  5. Use john --show to review the local result.) Tj
+0 -14 Td
+/F1 10 Tf
+(6. Classify parsing and cracking separately as online or offline activities.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 9 0 R /F2 10 0 R >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 2659 >>
+stream
+BT
+54 760 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Python files and usage examples) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(`analyze_shadow_hash.py`) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -100,6 +240,27 @@ BT
 0 -14 Td
 /F1 10 Tf
 (an explicit local filename and never opens /etc/shadow automatically.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The positional argument is required. Running the help command documents it) Tj
+0 -14 Td
+/F1 10 Tf
+(without parsing a file:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(python3 analyze_shadow_hash.py --help) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -167,17 +328,47 @@ BT
 /F1 10 Tf
 () Tj
 0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
 ET
 endstream
 endobj
-5 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 7 0 R /F2 8 0 R >> >> /Contents 6 0 R >>
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 9 0 R /F2 10 0 R >> >> /Contents 8 0 R >>
 endobj
-6 0 obj
-<< /Length 483 >>
+8 0 obj
+<< /Length 1140 >>
 stream
 BT
 54 760 Td
+/F1 14 Tf
+(Completion criteria and report evidence) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(You have completed Part 4 when the parser identifies the fictional account,) Tj
+0 -14 Td
+/F1 10 Tf
+(algorithm, salt, and verifier without accessing /etc/shadow. If you perform) Tj
+0 -14 Td
+/F1 10 Tf
+(the optional John step, record its status and candidate count but do not publish) Tj
+0 -14 Td
+/F1 10 Tf
+(the recovered password. Include your online/offline classification and its) Tj
+0 -14 Td
+/F1 10 Tf
+(justification. The optional VM worksheet is required only when assigned by the) Tj
+0 -14 Td
+/F1 10 Tf
+(instructor.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
@@ -202,25 +393,27 @@ BT
 ET
 endstream
 endobj
-7 0 obj
+9 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
 endobj
-8 0 obj
+10 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Courier >>
 endobj
 xref
-0 9
+0 11
 0000000000 65535 f 
 0000000015 00000 n 
 0000000064 00000 n 
-0000000127 00000 n 
-0000000263 00000 n 
-0000003235 00000 n 
-0000003371 00000 n 
-0000003905 00000 n 
-0000003975 00000 n 
+0000000133 00000 n 
+0000000270 00000 n 
+0000003535 00000 n 
+0000003672 00000 n 
+0000006383 00000 n 
+0000006520 00000 n 
+0000007712 00000 n 
+0000007782 00000 n 
 trailer
-<< /Size 9 /Root 1 0 R >>
+<< /Size 11 /Root 1 0 R >>
 startxref
-4043
+7851
 %%EOF

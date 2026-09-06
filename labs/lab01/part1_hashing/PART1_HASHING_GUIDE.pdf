@@ -4,13 +4,13 @@
 << /Type /Catalog /Pages 2 0 R >>
 endobj
 2 0 obj
-<< /Type /Pages /Kids [3 0 R 5 0 R] /Count 2 >>
+<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R] /Count 3 >>
 endobj
 3 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 7 0 R /F2 8 0 R >> >> /Contents 4 0 R >>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 9 0 R /F2 10 0 R >> >> /Contents 4 0 R >>
 endobj
 4 0 obj
-<< /Length 2669 >>
+<< /Length 3264 >>
 stream
 BT
 54 760 Td
@@ -60,7 +60,165 @@ BT
 () Tj
 0 -14 Td
 /F1 14 Tf
-(Run the examples) Tj
+(Purpose and learning objectives) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(This part introduces the value a server can compare during login without) Tj
+0 -14 Td
+/F1 10 Tf
+(keeping a plaintext password. It deliberately starts with fast SHA-256 so that) Tj
+0 -14 Td
+/F1 10 Tf
+(the basic transformation is easy to observe. Part 3 later replaces this unsafe) Tj
+0 -14 Td
+/F1 10 Tf
+(baseline with dedicated password KDFs.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(After completing this part, you should be able to:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(  - describe the difference between plaintext storage, encryption, and hashing;) Tj
+0 -14 Td
+/F1 10 Tf
+(  - encode a Python string as UTF-8 before hashing it;) Tj
+0 -14 Td
+/F1 10 Tf
+(  - explain why the same unsalted input always has the same digest;) Tj
+0 -14 Td
+/F1 10 Tf
+(  - explain why a random, unique salt changes the verifier; and) Tj
+0 -14 Td
+/F1 10 Tf
+(  - state why salt plus fast SHA-256 is still not production password storage.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Background) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(During registration, a service computes a verifier from a password and stores) Tj
+0 -14 Td
+/F1 10 Tf
+(the verifier. During login, it repeats the computation with the submitted) Tj
+0 -14 Td
+/F1 10 Tf
+(password and compares the results. Hashing is one-way: unlike encryption, it) Tj
+0 -14 Td
+/F1 10 Tf
+(does not have a decryption key that recovers the original password.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(Unsalted demonstration:) Tj
+0 -14 Td
+/F2 9 Tf
+(UTF8\(password\) -> SHA-256 -> 32-byte digest -> 64 hexadecimal characters) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(Salted demonstration:) Tj
+0 -14 Td
+/F2 9 Tf
+(random 16-byte salt || UTF8\(password\) -> SHA-256 -> digest) Tj
+0 -14 Td
+/F2 9 Tf
+(store: salt + digest) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The salt is public. Its job is to make identical passwords produce different) Tj
+0 -14 Td
+/F1 10 Tf
+(stored values and to prevent one precomputed table from serving every account.) Tj
+0 -14 Td
+/F1 10 Tf
+(It does not add entropy to a weak password and does not slow down each guess.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 9 0 R /F2 10 0 R >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 2520 >>
+stream
+BT
+54 760 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Tasks) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(  1. Run hash_password.py twice with the same fictional input and save both) Tj
+0 -14 Td
+/F1 10 Tf
+(   digests.) Tj
+0 -14 Td
+/F1 10 Tf
+(  2. Run it once with a different input and compare the digest.) Tj
+0 -14 Td
+/F1 10 Tf
+(  3. Run salted_hash.py twice with the original fictional input and save both) Tj
+0 -14 Td
+/F1 10 Tf
+(   salt/digest pairs.) Tj
+0 -14 Td
+/F1 10 Tf
+(  4. Identify which values remain equal and which change.) Tj
+0 -14 Td
+/F1 10 Tf
+(  5. Run test_hashing.py and explain what each assertion demonstrates.) Tj
+0 -14 Td
+/F1 10 Tf
+(6. Record your observations and checkpoint answers in the lab report.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Python files and usage examples) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -84,7 +242,16 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(First, hash the same fictional password twice. getpass deliberately does not) Tj
+() Tj
+0 -14 Td
+/F1 12 Tf
+(`hash_password.py`) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Hash the same fictional password twice. getpass deliberately does not) Tj
 0 -14 Td
 /F1 10 Tf
 (display the password while you type it.) Tj
@@ -123,7 +290,16 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(Next, run the salted demonstration twice with the same fictional password:) Tj
+() Tj
+0 -14 Td
+/F1 12 Tf
+(`salted_hash.py`) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Run the salted demonstration twice with the same fictional password:) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -155,6 +331,17 @@ BT
 /F1 10 Tf
 (The salt and digest should normally change on every run. The salt is stored) Tj
 0 -14 Td
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 9 0 R /F2 10 0 R >> >> /Contents 8 0 R >>
+endobj
+8 0 obj
+<< /Length 2080 >>
+stream
+BT
+54 760 Td
 /F1 10 Tf
 (alongside the verifier; it is unique, not secret.) Tj
 0 -14 Td
@@ -162,22 +349,23 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(Run the focused tests:) Tj
+() Tj
+0 -14 Td
+/F1 12 Tf
+(`test_hashing.py`) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
-ET
-endstream
-endobj
-5 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 7 0 R /F2 8 0 R >> >> /Contents 6 0 R >>
-endobj
-6 0 obj
-<< /Length 655 >>
-stream
-BT
-54 760 Td
+/F1 10 Tf
+(This file checks that plain hashing is deterministic and that two fixed salts) Tj
+0 -14 Td
+/F1 10 Tf
+(produce different demonstration verifiers. Run it through pytest:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
 /F2 9 Tf
 () Tj
 0 -14 Td
@@ -192,6 +380,63 @@ BT
 0 -14 Td
 /F1 10 Tf
 (Expected result: 2 passed.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(To run just one test function while debugging, use:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(pytest -q test_hashing.py::test_salts_change_digest) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Completion criteria and report evidence) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(You have completed Part 1 when:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(  - the same password produces the same unsalted digest twice;) Tj
+0 -14 Td
+/F1 10 Tf
+(  - the same password with two generated salts produces different digests;) Tj
+0 -14 Td
+/F1 10 Tf
+(  - both tests pass; and) Tj
+0 -14 Td
+/F1 10 Tf
+(  - you can explain why the salt must be stored with the verifier.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Include the commands, redacted or fictional inputs, resulting digests, test) Tj
+0 -14 Td
+/F1 10 Tf
+(output, and a short comparison of hashing and encryption in your report.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -220,25 +465,27 @@ BT
 ET
 endstream
 endobj
-7 0 obj
+9 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
 endobj
-8 0 obj
+10 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Courier >>
 endobj
 xref
-0 9
+0 11
 0000000000 65535 f 
 0000000015 00000 n 
 0000000064 00000 n 
-0000000127 00000 n 
-0000000263 00000 n 
-0000002984 00000 n 
-0000003120 00000 n 
-0000003826 00000 n 
-0000003896 00000 n 
+0000000133 00000 n 
+0000000270 00000 n 
+0000003586 00000 n 
+0000003723 00000 n 
+0000006295 00000 n 
+0000006432 00000 n 
+0000008564 00000 n 
+0000008634 00000 n 
 trailer
-<< /Size 9 /Root 1 0 R >>
+<< /Size 11 /Root 1 0 R >>
 startxref
-3964
+8703
 %%EOF
