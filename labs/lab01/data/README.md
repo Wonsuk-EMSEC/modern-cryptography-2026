@@ -4,8 +4,8 @@ All accounts and passwords are fictional course fixtures.
 
 - `lab01-small.txt`: deliberately tiny instructor-created wordlist.
 - `ssh-lab-wordlist.txt`: bounded candidates for the Compose-only SSH target.
-- `unsalted_hashes.csv`: `account,sha256`.
-- `salted_hashes.csv`: `account,salt_hex,sha256`, where the verifier is
+- `unsalted_hashes.csv`: Part 3 `account,sha256` targets.
+- `salted_hashes.csv`: Part 3 `account,salt_hex,sha256` targets, where the verifier is
   `SHA256(salt || UTF8(password))`.
 - `linux_hashes.txt`: synthetic shadow-style record.
 - `rainbow_lab_config.json`: bounded password-space and chain parameters.

@@ -12,8 +12,9 @@ local file or instructor-controlled isolated system.
 
 ## Learning progression
 
-Hash → Salt → Dictionary Attack → Slow Password Hashing → System Verifiers →
-Precomputation/Rainbow Tables → WPA2 Offline Cracking
+Hash → Salt → Controlled Online Guessing → Offline Hash Guessing → Slow
+Password Hashing → System Verifiers → Precomputation/Rainbow Tables → WPA2
+Offline Cracking
 
 After the lab you should be able to distinguish hashing from encryption,
 explain salt and offline guessing, compare major password KDFs, interpret a
@@ -38,18 +39,19 @@ demonstrations are runnable immediately.
    `part1_hashing/PART1_HASHING_GUIDE.pdf`; run both
    scripts. Expected: a stable digest, then changing salt/digest pairs.
    Checkpoint: distinguish hashing from encryption and explain unique salts.
-2. **Dictionary attacks (35 minutes, plus optional SSH extension).** Read
-   `part2_dictionary_attack/PART2_DICTIONARY_ATTACK_GUIDE.pdf`, complete both
-   TODO implementations, and run `compare_cost.py`. Expected: fictional
-   accounts and a table of counts, seconds, and guesses/second. If assigned,
-   start the opt-in Compose SSH target and complete the bounded online extension.
-   Checkpoint: why does shared precomputation work only for unsalted targets,
-   and why can the SSH server observe online guesses?
-3. **Password KDFs (25 minutes).** Read
-   `part3_password_kdfs/PART3_PASSWORD_KDFS_GUIDE.pdf`, then run the benchmark and local
-   register/verify demo. Expected: median timings and authentication without
-   stored plaintext. Checkpoint: compare SHA-256, PBKDF2, bcrypt, scrypt, and
-   Argon2id.
+2. **Controlled online dictionary attack (25 minutes).** Read
+   `part2_dictionary_attack/PART2_DICTIONARY_ATTACK_GUIDE.pdf`. If assigned,
+   start the isolated Compose SSH target, complete the bounded client, observe
+   the local logs, and remove the target. Expected: redacted status, attempt
+   count, and server-visible failures. Checkpoint: why can the SSH service
+   observe and rate-limit these guesses?
+3. **Offline cracking and password KDFs (40 minutes).** Read
+   `part3_password_kdfs/PART3_PASSWORD_KDFS_GUIDE.pdf`, implement the unsalted
+   and salted cracking starters, run `compare_cost.py`, then benchmark the KDFs
+   and use the local register/verify demo. Expected: hash-count comparison,
+   median KDF timings, and authentication without stored plaintext. Checkpoint:
+   explain salt reuse prevention and compare SHA-256, PBKDF2, bcrypt, scrypt,
+   and Argon2id.
 4. **System hashes and table attacks (35 minutes).** Read
    `part4_system_hashes/PART4_SYSTEM_HASHES_GUIDE.pdf`, parse the supplied
    shadow-style file, then implement full precomputation and rainbow tables for

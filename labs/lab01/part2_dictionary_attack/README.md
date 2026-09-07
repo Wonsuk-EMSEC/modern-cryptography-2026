@@ -1,155 +1,57 @@
-# Part 2: Dictionary attacks
+# Part 2: Controlled online SSH dictionary attack
 
-**Ethical and authorized use:** run these scripts only against the fictional
-accounts and local files supplied with this lab. Do not use leaked wordlists,
-real credentials, or external services. The SSH extension may target only the
-fixed `lab01-ssh-target` Compose service. It must never be modified to accept an
-IP address, public hostname, different username, or external wordlist.
+**Estimated time:** 25 minutes. **Environment:** Docker Compose course network.
 
-The CSV schemas are `account,sha256` and `account,salt_hex,sha256`. Complete
-both starters, then run `python3 compare_cost.py`. Report recovered synthetic
-accounts, computation counts, elapsed time, and guesses per second.
+**Ethical and authorized use:** this exercise may target only the fixed
+`lab01-ssh-target` service supplied with the course. Do not modify the client to
+accept an IP address, public hostname, different username, arbitrary port, or
+external wordlist. Do not apply this procedure to any other SSH service.
 
-## Purpose and learning objectives
+Part 2 demonstrates an **online** dictionary attack. Every candidate causes an
+authentication request to a deliberately vulnerable SSH server in an isolated
+Docker network. Unlike offline hash guessing, the server can observe, log,
+delay, rate-limit, or block these requests. Part 3 performs the corresponding
+offline hash-file experiments.
 
-This part changes perspective from verifier construction to offline guessing.
-Assume an authorized tester has already received a small hash file. Because no
-server is contacted, every candidate can be checked locally and server-side
-lockout or rate limiting does not apply.
+## Learning objectives
 
 After completing this part, you should be able to:
 
-- implement a transparent dictionary attack using `hashlib` and `csv`;
-- reuse one candidate hash across all unsalted accounts;
-- recompute a candidate separately for each unique salt;
-- count hash operations and measure elapsed time correctly; and
-- explain the protection salts provide and their limitations.
-- distinguish offline hash guessing from observable online login attempts.
+- distinguish an online login attempt from an offline verifier check;
+- use a fixed and bounded instructor-controlled target safely;
+- implement one password-only SSH authentication attempt;
+- ensure network resources are closed after success or failure;
+- observe why server-side monitoring applies to online attacks; and
+- explain why the target and input restrictions are security boundaries.
 
-## Data model and attack logic
+## Controlled environment
 
-`unsalted_hashes.csv` uses this schema:
-
-```text
-account,sha256
-```
-
-For each word, compute `SHA256(UTF8(word))` once and use the digest as a lookup
-against all target rows.
-
-`salted_hashes.csv` uses this schema:
+The Compose profile creates two services on the internal
+`lab01-ssh-internal` network:
 
 ```text
-account,salt_hex,sha256
+course container  --->  labstudent@lab01-ssh-target:22
 ```
 
-For each account and word, decode the salt and compute
-`SHA256(salt || UTF8(word))`. A digest computed for one account cannot be reused
-for an account with a different salt.
-
-```text
-Unsalted work: approximately number_of_words hash operations
-Salted work:   up to number_of_accounts * number_of_words operations
-```
-
-The exact count may be lower if your implementation stops checking an account
-after finding its candidate. State your stopping rule when comparing results.
+The SSH service has no host `ports:` mapping, uses a fictional non-root account,
+and receives candidates sequentially from a course wordlist containing at most
+20 entries. The starter intentionally does not provide target-selection or
+concurrency options.
 
 ## Tasks
 
-1. Inspect the wordlist and both CSV schemas; do not edit their target values.
-2. Implement `crack()` in `crack_unsalted.py` using one hash per candidate.
-3. Return `(recovered, computation_count, elapsed_seconds)` as documented.
-4. Implement `crack()` in `crack_salted.py`, decoding each hexadecimal salt.
-5. Run both programs separately and confirm they recover fictional accounts.
-6. Run `compare_cost.py` and compare computation counts, not only wall time.
-7. Explain how the cost would scale to 1,000 accounts and a larger dictionary.
-8. Complete the controlled SSH extension and compare its online behavior with
-   the two offline attacks.
+1. Build and start the instructor-provided SSH target.
+2. Enter the course container on the same Compose network.
+3. Inspect the fixed constants and bounded wordlist.
+4. Implement only `try_candidate()` in `ssh_dictionary_attack.py`.
+5. Run the public safety checks.
+6. Execute the bounded exercise and record status, attempt count, and time.
+7. Inspect the target's local logs and explain what the server can observe.
+8. Exit and remove the temporary target container.
 
-## Inspect the local inputs
+Do not print or include the matching candidate in your report.
 
-```console
-cd /workspace/labs/lab01/part2_dictionary_attack
-head ../data/lab01-small.txt
-sed -n '1,5p' ../data/unsalted_hashes.csv
-sed -n '1,5p' ../data/salted_hashes.csv
-```
-
-The wordlist contains only fictional classroom candidates. In the salted CSV,
-decode `salt_hex` with `bytes.fromhex(...)` before concatenating it with the
-UTF-8 candidate bytes.
-
-## Python files and usage examples
-
-Both attack files are student starters. Before implementation, their commands
-intentionally stop at `NotImplementedError`.
-
-### `crack_unsalted.py`
-
-This program accepts the unsalted target CSV followed by the wordlist:
-
-```console
-python3 crack_unsalted.py ../data/unsalted_hashes.csv ../data/lab01-small.txt
-```
-
-After completing `crack()`, its output should have this shape:
-
-```text
-({'fictional_account': 'recovered_candidate'}, HASH_COUNT, ELAPSED_SECONDS)
-```
-
-Hash every candidate once and compare it with all target digests.
-
-### `crack_salted.py`
-
-This program accepts the salted target CSV followed by the same wordlist:
-
-```console
-python3 crack_salted.py ../data/salted_hashes.csv ../data/lab01-small.txt
-```
-
-Its output uses the same tuple format:
-
-```text
-({'fictional_account': 'recovered_candidate'}, HASH_COUNT, ELAPSED_SECONDS)
-```
-
-Compute a separate digest for every candidate/account salt pair. Do not
-hard-code account names, candidates, counts, or digests in either program.
-
-### `compare_cost.py`
-
-After both attack functions work, run them together and print a compact table:
-
-```console
-python3 compare_cost.py ../data
-```
-
-Expected output format (numbers depend on your implementation and machine):
-
-```text
-experiment   found   hashes    seconds     hashes/s
-unsalted         N        N   0.000000            N
-salted           N        N   0.000000            N
-```
-
-## Controlled online SSH dictionary exercise
-
-This extension uses a deliberately vulnerable SSH server in a separate Docker
-container. It is an **online** attack: every candidate opens an SSH connection,
-and the server can see, log, delay, or reject the attempt. The target is not
-published to the host and is connected only to an internal Compose network.
-
-### Security boundaries
-
-- The only permitted target is `labstudent@lab01-ssh-target:22`.
-- The only permitted input is `../data/ssh-lab-wordlist.txt` (at most 20 lines).
-- Do not add target, port, username, concurrency, or external-wordlist options.
-- Do not publish a port from the SSH target to the host.
-- Stop and remove the target container after the exercise.
-
-### Step 1 — Build and start the isolated target
+## Step 1: build and start the isolated target
 
 Run these commands from the repository root in a **host terminal**, not from
 inside the course container:
@@ -160,43 +62,34 @@ docker compose -f docker/compose.yml --profile lab01-ssh up -d lab01-ssh-target
 docker compose -f docker/compose.yml --profile lab01-ssh ps
 ```
 
-The target should become `healthy`. There is deliberately no `ports:` mapping
-for this service, so host and external clients cannot connect directly.
+Wait until the target is reported as `healthy`. Because the service uses only
+`expose: 22` and has no published port, host and external clients cannot connect
+directly.
 
-### Step 2 — Enter the course container on the lab network
+## Step 2: enter the course container
 
 ```console
 docker compose -f docker/compose.yml --profile lab01-ssh run --rm course bash
 cd /workspace/labs/lab01/part2_dictionary_attack
 ```
 
-### Step 3 — Review and complete `ssh_dictionary_attack.py`
+## Python files and usage examples
 
-The constants fix the destination to the course service. Implement only
-`try_candidate()`:
+### `ssh_dictionary_attack.py`
 
-1. create `paramiko.SSHClient()`;
-2. use `AutoAddPolicy` only because this target is an isolated, disposable
-   classroom container;
-3. call `connect()` with the fixed host, port, and username;
-4. disable agent and local-key lookup so only the candidate is tested;
-5. return `False` for `paramiko.AuthenticationException`;
-6. return `True` after successful authentication; and
-7. close the client in a `finally` block.
+The destination and maximum input size are fixed in the supplied code. Implement
+`try_candidate()` as follows:
 
-Do not print candidate strings. The provided attack loop is sequential, waits
-between failures, and reports only status, attempt count, and elapsed time.
+1. Create `paramiko.SSHClient()`.
+2. Use `AutoAddPolicy` only because this target is an isolated, disposable
+   classroom container.
+3. Call `connect()` using the fixed host, port, username, and supplied candidate.
+4. Disable SSH agent and local-key lookup so only that candidate is tested.
+5. Return `False` for `paramiko.AuthenticationException`.
+6. Return `True` after successful authentication.
+7. Close the client in a `finally` block.
 
-Run the starter checks:
-
-```console
-pytest -q test_ssh_dictionary_attack.py
-```
-
-Expected result: `2 passed`. These checks confirm the target is fixed and the
-course wordlist is bounded; they do not reveal the implementation or password.
-
-### Step 4 — Run the bounded online attack
+Run the bounded exercise only after the checks below pass:
 
 ```console
 python3 ssh_dictionary_attack.py ../data/ssh-lab-wordlist.txt
@@ -211,20 +104,29 @@ Elapsed: N.NNN seconds
 Result: candidate found
 ```
 
-The program intentionally does not print the matching candidate. Record only
-the attempt count, elapsed time, and success status in your report.
+The program deliberately reports success without printing the candidate.
 
-### Step 5 — Observe and remove the target
+### `test_ssh_dictionary_attack.py`
 
-In a second host terminal, inspect the local container logs:
+```console
+python3 -m unittest test_ssh_dictionary_attack.py -v
+```
+
+Expected result: two tests pass. They confirm that the target is the fixed
+Compose service and the supplied wordlist remains within the 20-candidate
+limit. They do not test a real network or reveal the solution.
+
+## Step 3: observe and remove the target
+
+In a second host terminal, inspect only this container's recent logs:
 
 ```console
 docker compose -f docker/compose.yml --profile lab01-ssh \
   logs --tail 50 lab01-ssh-target
 ```
 
-Compare the visible failed-login records with the offline attacks, which give
-no server-side signal. Exit the course shell, then remove the target:
+Compare the failed-login records with Part 3's offline CSV attacks, which
+produce no server-side signal. Exit the course shell and remove the target:
 
 ```console
 exit
@@ -232,44 +134,32 @@ docker compose -f docker/compose.yml --profile lab01-ssh \
   rm --stop --force lab01-ssh-target
 ```
 
-### Offline versus online comparison
+## Online versus offline comparison
 
-| Property | Hash-file attacks | SSH container attack |
+| Property | Part 2 SSH attack | Part 3 hash-file attacks |
 | --- | --- | --- |
-| Guess reaches server | No | Yes |
-| Server can log attempts | No | Yes |
-| Network/handshake overhead | No | Yes |
-| Rate limiting possible | Not at server | Yes |
-| Target in this lab | Local CSV | Internal Compose service |
+| Guess reaches a service | Yes | No |
+| Service can log attempts | Yes | No |
+| Network protocol overhead | Yes | No |
+| Server-side rate limiting | Possible | Not applicable |
+| Lab target | Internal Compose service | Local synthetic CSV |
 
-## Implementation guidance without the solution
+## Completion criteria
 
-- Use `csv.DictReader` so columns are addressed by their documented names.
-- Normalize hexadecimal digests before comparison.
-- Use `time.perf_counter()` around only the attack loop.
-- Increment the counter exactly when SHA-256 is computed.
-- Keep candidates as strings for reporting and encode them only when hashing.
-- Return recovered values from the function; do not rely only on printed text.
-
-## Completion criteria and report evidence
-
-You have completed Part 2 when both scripts run without `NotImplementedError`,
-return the required tuple, and `compare_cost.py` prints two rows without a
-division-by-zero error. Your report must include recovered fictional account
-names, both computation counts, elapsed time, guesses per second, and a written
-explanation of the scaling difference. Do not publish recovered candidates.
-For the SSH extension, also include the bounded attempt count, elapsed time,
-redacted server log evidence, and an online/offline comparison. Do not include
-the matching SSH password.
+You have completed Part 2 when the target remains isolated, both safety tests
+pass, the bounded script reports a successful status without printing the
+candidate, and the target container is removed. Include only the attempt count,
+elapsed time, redacted log observations, and online/offline explanation in your
+report.
 
 ## Checkpoint questions
 
-1. Why can one unsalted candidate digest serve all accounts?
-2. Why must salted records be checked separately?
-3. Which computation count grows faster as the number of accounts increases?
-4. Why does salt prevent shared precomputation without making a weak password
-   strong?
-5. Why can the SSH server rate-limit or log this attack, while the CSV targets
-   cannot?
-6. Which safety properties would be lost if the target hostname or Docker port
-   were made configurable?
+1. What makes this activity online rather than offline?
+2. Which evidence shows that the SSH server can observe the guesses?
+3. Why are candidates attempted sequentially with a delay?
+4. Why are hostname, port, username, and wordlist restrictions part of the
+   exercise's safety boundary?
+5. Why is `AutoAddPolicy` acceptable only for this disposable classroom target
+   and inappropriate as a general SSH-client default?
+6. Which defensive controls could a production SSH service apply to these
+   requests?

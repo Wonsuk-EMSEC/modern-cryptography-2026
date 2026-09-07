@@ -4,13 +4,13 @@
 << /Type /Catalog /Pages 2 0 R >>
 endobj
 2 0 obj
-<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R 9 0 R 11 0 R 13 0 R] /Count 6 >>
+<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R 9 0 R] /Count 4 >>
 endobj
 3 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 4 0 R >>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 11 0 R /F2 12 0 R >> >> /Contents 4 0 R >>
 endobj
 4 0 obj
-<< /Length 3051 >>
+<< /Length 3186 >>
 stream
 BT
 54 760 Td
@@ -18,37 +18,46 @@ BT
 () Tj
 0 -14 Td
 /F1 18 Tf
-(Part 2: Dictionary attacks) Tj
+(Part 2: Controlled online SSH dictionary attack) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(Ethical and authorized use: run these scripts only against the fictional) Tj
-0 -14 Td
-/F1 10 Tf
-(accounts and local files supplied with this lab. Do not use leaked wordlists,) Tj
-0 -14 Td
-/F1 10 Tf
-(real credentials, or external services. The SSH extension may target only the) Tj
-0 -14 Td
-/F1 10 Tf
-(fixed lab01-ssh-target Compose service. It must never be modified to accept an) Tj
-0 -14 Td
-/F1 10 Tf
-(IP address, public hostname, different username, or external wordlist.) Tj
+(Estimated time: 25 minutes. Environment: Docker Compose course network.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(The CSV schemas are account,sha256 and account,salt_hex,sha256. Complete) Tj
+(Ethical and authorized use: this exercise may target only the fixed) Tj
 0 -14 Td
 /F1 10 Tf
-(both starters, then run python3 compare_cost.py. Report recovered synthetic) Tj
+(lab01-ssh-target service supplied with the course. Do not modify the client to) Tj
 0 -14 Td
 /F1 10 Tf
-(accounts, computation counts, elapsed time, and guesses per second.) Tj
+(accept an IP address, public hostname, different username, arbitrary port, or) Tj
+0 -14 Td
+/F1 10 Tf
+(external wordlist. Do not apply this procedure to any other SSH service.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Part 2 demonstrates an online dictionary attack. Every candidate causes an) Tj
+0 -14 Td
+/F1 10 Tf
+(authentication request to a deliberately vulnerable SSH server in an isolated) Tj
+0 -14 Td
+/F1 10 Tf
+(Docker network. Unlike offline hash guessing, the server can observe, log,) Tj
+0 -14 Td
+/F1 10 Tf
+(delay, rate-limit, or block these requests. Part 3 performs the corresponding) Tj
+0 -14 Td
+/F1 10 Tf
+(offline hash-file experiments.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -57,22 +66,7 @@ BT
 () Tj
 0 -14 Td
 /F1 14 Tf
-(Purpose and learning objectives) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(This part changes perspective from verifier construction to offline guessing.) Tj
-0 -14 Td
-/F1 10 Tf
-(Assume an authorized tester has already received a small hash file. Because no) Tj
-0 -14 Td
-/F1 10 Tf
-(server is contacted, every candidate can be checked locally and server-side) Tj
-0 -14 Td
-/F1 10 Tf
-(lockout or rate limiting does not apply.) Tj
+(Learning objectives) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -84,22 +78,22 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(  - implement a transparent dictionary attack using hashlib and csv;) Tj
+(  - distinguish an online login attempt from an offline verifier check;) Tj
 0 -14 Td
 /F1 10 Tf
-(  - reuse one candidate hash across all unsalted accounts;) Tj
+(  - use a fixed and bounded instructor-controlled target safely;) Tj
 0 -14 Td
 /F1 10 Tf
-(  - recompute a candidate separately for each unique salt;) Tj
+(  - implement one password-only SSH authentication attempt;) Tj
 0 -14 Td
 /F1 10 Tf
-(  - count hash operations and measure elapsed time correctly; and) Tj
+(  - ensure network resources are closed after success or failure;) Tj
 0 -14 Td
 /F1 10 Tf
-(  - explain the protection salts provide and their limitations.) Tj
+(  - observe why server-side monitoring applies to online attacks; and) Tj
 0 -14 Td
 /F1 10 Tf
-(  - distinguish offline hash guessing from observable online login attempts.) Tj
+(  - explain why the target and input restrictions are security boundaries.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -108,40 +102,16 @@ BT
 () Tj
 0 -14 Td
 /F1 14 Tf
-(Data model and attack logic) Tj
+(Controlled environment) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(unsalted_hashes.csv uses this schema:) Tj
+(The Compose profile creates two services on the internal) Tj
 0 -14 Td
 /F1 10 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-(account,sha256) Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(For each word, compute SHA256\(UTF8\(word\)\) once and use the digest as a lookup) Tj
-0 -14 Td
-/F1 10 Tf
-(against all target rows.) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(salted_hashes.csv uses this schema:) Tj
+(lab01-ssh-internal network:) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -150,7 +120,7 @@ BT
 () Tj
 0 -14 Td
 /F2 9 Tf
-(account,salt_hex,sha256) Tj
+(course container  --->  labstudent@lab01-ssh-target:22) Tj
 0 -14 Td
 /F2 9 Tf
 () Tj
@@ -159,48 +129,16 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(For each account and word, decode the salt and compute) Tj
+(The SSH service has no host ports: mapping, uses a fictional non-root account,) Tj
 0 -14 Td
 /F1 10 Tf
-(SHA256\(salt || UTF8\(word\)\). A digest computed for one account cannot be reused) Tj
+(and receives candidates sequentially from a course wordlist containing at most) Tj
 0 -14 Td
 /F1 10 Tf
-(for an account with a different salt.) Tj
-0 -14 Td
-ET
-endstream
-endobj
-5 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 6 0 R >>
-endobj
-6 0 obj
-<< /Length 2874 >>
-stream
-BT
-54 760 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-(Unsalted work: approximately number_of_words hash operations) Tj
-0 -14 Td
-/F2 9 Tf
-(Salted work:   up to number_of_accounts * number_of_words operations) Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
+(20 entries. The starter intentionally does not provide target-selection or) Tj
 0 -14 Td
 /F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(The exact count may be lower if your implementation stops checking an account) Tj
-0 -14 Td
-/F1 10 Tf
-(after finding its candidate. State your stopping rule when comparing results.) Tj
+(concurrency options.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -215,258 +153,45 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(  1. Inspect the wordlist and both CSV schemas; do not edit their target values.) Tj
+(  1. Build and start the instructor-provided SSH target.) Tj
 0 -14 Td
 /F1 10 Tf
-(  2. Implement crack\(\) in crack_unsalted.py using one hash per candidate.) Tj
+(  2. Enter the course container on the same Compose network.) Tj
 0 -14 Td
 /F1 10 Tf
-(  3. Return \(recovered, computation_count, elapsed_seconds\) as documented.) Tj
+(  3. Inspect the fixed constants and bounded wordlist.) Tj
 0 -14 Td
 /F1 10 Tf
-(  4. Implement crack\(\) in crack_salted.py, decoding each hexadecimal salt.) Tj
+(  4. Implement only try_candidate\(\) in ssh_dictionary_attack.py.) Tj
 0 -14 Td
 /F1 10 Tf
-(  5. Run both programs separately and confirm they recover fictional accounts.) Tj
-0 -14 Td
-/F1 10 Tf
-(6. Run compare_cost.py and compare computation counts, not only wall time.) Tj
-0 -14 Td
-/F1 10 Tf
-(7. Explain how the cost would scale to 1,000 accounts and a larger dictionary.) Tj
-0 -14 Td
-/F1 10 Tf
-(8. Complete the controlled SSH extension and compare its online behavior with) Tj
-0 -14 Td
-/F1 10 Tf
-(   the two offline attacks.) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 14 Tf
-(Inspect the local inputs) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-(cd /workspace/labs/lab01/part2_dictionary_attack) Tj
-0 -14 Td
-/F2 9 Tf
-(head ../data/lab01-small.txt) Tj
-0 -14 Td
-/F2 9 Tf
-(sed -n '1,5p' ../data/unsalted_hashes.csv) Tj
-0 -14 Td
-/F2 9 Tf
-(sed -n '1,5p' ../data/salted_hashes.csv) Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(The wordlist contains only fictional classroom candidates. In the salted CSV,) Tj
-0 -14 Td
-/F1 10 Tf
-(decode salt_hex with bytes.fromhex\(...\) before concatenating it with the) Tj
-0 -14 Td
-/F1 10 Tf
-(UTF-8 candidate bytes.) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 14 Tf
-(Python files and usage examples) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(Both attack files are student starters. Before implementation, their commands) Tj
-0 -14 Td
-/F1 10 Tf
-(intentionally stop at NotImplementedError.) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 12 Tf
-(`crack_unsalted.py`) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(This program accepts the unsalted target CSV followed by the wordlist:) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-(python3 crack_unsalted.py ../data/unsalted_hashes.csv ../data/lab01-small.txt) Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
+(  5. Run the public safety checks.) Tj
 0 -14 Td
 ET
 endstream
 endobj
-7 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 8 0 R >>
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 11 0 R /F2 12 0 R >> >> /Contents 6 0 R >>
 endobj
-8 0 obj
-<< /Length 2600 >>
+6 0 obj
+<< /Length 2863 >>
 stream
 BT
 54 760 Td
 /F1 10 Tf
-(After completing crack\(\), its output should have this shape:) Tj
+(6. Execute the bounded exercise and record status, attempt count, and time.) Tj
 0 -14 Td
 /F1 10 Tf
-() Tj
+(7. Inspect the target's local logs and explain what the server can observe.) Tj
 0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-(\({'fictional_account': 'recovered_candidate'}, HASH_COUNT, ELAPSED_SECONDS\)) Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
+/F1 10 Tf
+(8. Exit and remove the temporary target container.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(Hash every candidate once and compare it with all target digests.) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 12 Tf
-(`crack_salted.py`) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(This program accepts the salted target CSV followed by the same wordlist:) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-(python3 crack_salted.py ../data/salted_hashes.csv ../data/lab01-small.txt) Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(Its output uses the same tuple format:) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-(\({'fictional_account': 'recovered_candidate'}, HASH_COUNT, ELAPSED_SECONDS\)) Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(Compute a separate digest for every candidate/account salt pair. Do not) Tj
-0 -14 Td
-/F1 10 Tf
-(hard-code account names, candidates, counts, or digests in either program.) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 12 Tf
-(`compare_cost.py`) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(After both attack functions work, run them together and print a compact table:) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-(python3 compare_cost.py ../data) Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(Expected output format \(numbers depend on your implementation and machine\):) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-(experiment   found   hashes    seconds     hashes/s) Tj
-0 -14 Td
-/F2 9 Tf
-(unsalted         N        N   0.000000            N) Tj
-0 -14 Td
-/F2 9 Tf
-(salted           N        N   0.000000            N) Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
+(Do not print or include the matching candidate in your report.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -475,69 +200,7 @@ BT
 () Tj
 0 -14 Td
 /F1 14 Tf
-(Controlled online SSH dictionary exercise) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(This extension uses a deliberately vulnerable SSH server in a separate Docker) Tj
-0 -14 Td
-/F1 10 Tf
-(container. It is an online attack: every candidate opens an SSH connection,) Tj
-0 -14 Td
-/F1 10 Tf
-(and the server can see, log, delay, or reject the attempt. The target is not) Tj
-0 -14 Td
-/F1 10 Tf
-(published to the host and is connected only to an internal Compose network.) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-ET
-endstream
-endobj
-9 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 10 0 R >>
-endobj
-10 0 obj
-<< /Length 3042 >>
-stream
-BT
-54 760 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 12 Tf
-(Security boundaries) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(  - The only permitted target is labstudent@lab01-ssh-target:22.) Tj
-0 -14 Td
-/F1 10 Tf
-(  - The only permitted input is ../data/ssh-lab-wordlist.txt \(at most 20 lines\).) Tj
-0 -14 Td
-/F1 10 Tf
-(  - Do not add target, port, username, concurrency, or external-wordlist options.) Tj
-0 -14 Td
-/F1 10 Tf
-(  - Do not publish a port from the SSH target to the host.) Tj
-0 -14 Td
-/F1 10 Tf
-(  - Stop and remove the target container after the exercise.) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 12 Tf
-(Step 1 - Build and start the isolated target) Tj
+(Step 1: build and start the isolated target) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -570,10 +233,13 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(The target should become healthy. There is deliberately no ports: mapping) Tj
+(Wait until the target is reported as healthy. Because the service uses only) Tj
 0 -14 Td
 /F1 10 Tf
-(for this service, so host and external clients cannot connect directly.) Tj
+(expose: 22 and has no published port, host and external clients cannot connect) Tj
+0 -14 Td
+/F1 10 Tf
+(directly.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -581,8 +247,8 @@ BT
 /F1 10 Tf
 () Tj
 0 -14 Td
-/F1 12 Tf
-(Step 2 - Enter the course container on the lab network) Tj
+/F1 14 Tf
+(Step 2: enter the course container) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -605,107 +271,77 @@ BT
 /F1 10 Tf
 () Tj
 0 -14 Td
+/F1 14 Tf
+(Python files and usage examples) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
 /F1 12 Tf
-(Step 3 - Review and complete `ssh_dictionary_attack.py`) Tj
+(`ssh_dictionary_attack.py`) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(The constants fix the destination to the course service. Implement only) Tj
+(The destination and maximum input size are fixed in the supplied code. Implement) Tj
 0 -14 Td
 /F1 10 Tf
-(try_candidate\(\):) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(  1. create paramiko.SSHClient\(\);) Tj
-0 -14 Td
-/F1 10 Tf
-(  2. use AutoAddPolicy only because this target is an isolated, disposable) Tj
-0 -14 Td
-/F1 10 Tf
-(   classroom container;) Tj
-0 -14 Td
-/F1 10 Tf
-(  3. call connect\(\) with the fixed host, port, and username;) Tj
-0 -14 Td
-/F1 10 Tf
-(  4. disable agent and local-key lookup so only the candidate is tested;) Tj
-0 -14 Td
-/F1 10 Tf
-(  5. return False for paramiko.AuthenticationException;) Tj
-0 -14 Td
-/F1 10 Tf
-(6. return True after successful authentication; and) Tj
-0 -14 Td
-/F1 10 Tf
-(7. close the client in a finally block.) Tj
+(try_candidate\(\) as follows:) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(Do not print candidate strings. The provided attack loop is sequential, waits) Tj
+(  1. Create paramiko.SSHClient\(\).) Tj
 0 -14 Td
 /F1 10 Tf
-(between failures, and reports only status, attempt count, and elapsed time.) Tj
+(  2. Use AutoAddPolicy only because this target is an isolated, disposable) Tj
+0 -14 Td
+/F1 10 Tf
+(   classroom container.) Tj
+0 -14 Td
+/F1 10 Tf
+(  3. Call connect\(\) using the fixed host, port, username, and supplied candidate.) Tj
+0 -14 Td
+/F1 10 Tf
+(  4. Disable SSH agent and local-key lookup so only that candidate is tested.) Tj
+0 -14 Td
+/F1 10 Tf
+(  5. Return False for paramiko.AuthenticationException.) Tj
+0 -14 Td
+/F1 10 Tf
+(6. Return True after successful authentication.) Tj
+0 -14 Td
+/F1 10 Tf
+(7. Close the client in a finally block.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(Run the starter checks:) Tj
+(Run the bounded exercise only after the checks below pass:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
 0 -14 Td
 ET
 endstream
 endobj
-11 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 12 0 R >>
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 11 0 R /F2 12 0 R >> >> /Contents 8 0 R >>
 endobj
-12 0 obj
-<< /Length 2360 >>
+8 0 obj
+<< /Length 2443 >>
 stream
 BT
 54 760 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-(pytest -q test_ssh_dictionary_attack.py) Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(Expected result: 2 passed. These checks confirm the target is fixed and the) Tj
-0 -14 Td
-/F1 10 Tf
-(course wordlist is bounded; they do not reveal the implementation or password.) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 12 Tf
-(Step 4 - Run the bounded online attack) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
 /F2 9 Tf
 (python3 ssh_dictionary_attack.py ../data/ssh-lab-wordlist.txt) Tj
 0 -14 Td
@@ -743,10 +379,7 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(The program intentionally does not print the matching candidate. Record only) Tj
-0 -14 Td
-/F1 10 Tf
-(the attempt count, elapsed time, and success status in your report.) Tj
+(The program deliberately reports success without printing the candidate.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -755,13 +388,46 @@ BT
 () Tj
 0 -14 Td
 /F1 12 Tf
-(Step 5 - Observe and remove the target) Tj
+(`test_ssh_dictionary_attack.py`) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(python3 -m unittest test_ssh_dictionary_attack.py -v) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(In a second host terminal, inspect the local container logs:) Tj
+(Expected result: two tests pass. They confirm that the target is the fixed) Tj
+0 -14 Td
+/F1 10 Tf
+(Compose service and the supplied wordlist remains within the 20-candidate) Tj
+0 -14 Td
+/F1 10 Tf
+(limit. They do not test a real network or reveal the solution.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Step 3: observe and remove the target) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(In a second host terminal, inspect only this container's recent logs:) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -782,10 +448,10 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(Compare the visible failed-login records with the offline attacks, which give) Tj
+(Compare the failed-login records with Part 3's offline CSV attacks, which) Tj
 0 -14 Td
 /F1 10 Tf
-(no server-side signal. Exit the course shell, then remove the target:) Tj
+(produce no server-side signal. Exit the course shell and remove the target:) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -811,43 +477,43 @@ BT
 /F1 10 Tf
 () Tj
 0 -14 Td
-/F1 12 Tf
-(Offline versus online comparison) Tj
+/F1 14 Tf
+(Online versus offline comparison) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(| Property | Hash-file attacks | SSH container attack |) Tj
+(| Property | Part 2 SSH attack | Part 3 hash-file attacks |) Tj
 0 -14 Td
 /F1 10 Tf
 (| --- | --- | --- |) Tj
 0 -14 Td
+/F1 10 Tf
+(| Guess reaches a service | Yes | No |) Tj
+0 -14 Td
+/F1 10 Tf
+(| Service can log attempts | Yes | No |) Tj
+0 -14 Td
 ET
 endstream
 endobj
-13 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 14 0 R >>
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 11 0 R /F2 12 0 R >> >> /Contents 10 0 R >>
 endobj
-14 0 obj
-<< /Length 2775 >>
+10 0 obj
+<< /Length 1663 >>
 stream
 BT
 54 760 Td
 /F1 10 Tf
-(| Guess reaches server | No | Yes |) Tj
+(| Network protocol overhead | Yes | No |) Tj
 0 -14 Td
 /F1 10 Tf
-(| Server can log attempts | No | Yes |) Tj
+(| Server-side rate limiting | Possible | Not applicable |) Tj
 0 -14 Td
 /F1 10 Tf
-(| Network/handshake overhead | No | Yes |) Tj
-0 -14 Td
-/F1 10 Tf
-(| Rate limiting possible | Not at server | Yes |) Tj
-0 -14 Td
-/F1 10 Tf
-(| Target in this lab | Local CSV | Internal Compose service |) Tj
+(| Lab target | Internal Compose service | Local synthetic CSV |) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -856,64 +522,25 @@ BT
 () Tj
 0 -14 Td
 /F1 14 Tf
-(Implementation guidance without the solution) Tj
+(Completion criteria) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(  - Use csv.DictReader so columns are addressed by their documented names.) Tj
+(You have completed Part 2 when the target remains isolated, both safety tests) Tj
 0 -14 Td
 /F1 10 Tf
-(  - Normalize hexadecimal digests before comparison.) Tj
+(pass, the bounded script reports a successful status without printing the) Tj
 0 -14 Td
 /F1 10 Tf
-(  - Use time.perf_counter\(\) around only the attack loop.) Tj
+(candidate, and the target container is removed. Include only the attempt count,) Tj
 0 -14 Td
 /F1 10 Tf
-(  - Increment the counter exactly when SHA-256 is computed.) Tj
+(elapsed time, redacted log observations, and online/offline explanation in your) Tj
 0 -14 Td
 /F1 10 Tf
-(  - Keep candidates as strings for reporting and encode them only when hashing.) Tj
-0 -14 Td
-/F1 10 Tf
-(  - Return recovered values from the function; do not rely only on printed text.) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 14 Tf
-(Completion criteria and report evidence) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(You have completed Part 2 when both scripts run without NotImplementedError,) Tj
-0 -14 Td
-/F1 10 Tf
-(return the required tuple, and compare_cost.py prints two rows without a) Tj
-0 -14 Td
-/F1 10 Tf
-(division-by-zero error. Your report must include recovered fictional account) Tj
-0 -14 Td
-/F1 10 Tf
-(names, both computation counts, elapsed time, guesses per second, and a written) Tj
-0 -14 Td
-/F1 10 Tf
-(explanation of the scaling difference. Do not publish recovered candidates.) Tj
-0 -14 Td
-/F1 10 Tf
-(For the SSH extension, also include the bounded attempt count, elapsed time,) Tj
-0 -14 Td
-/F1 10 Tf
-(redacted server log evidence, and an online/offline comparison. Do not include) Tj
-0 -14 Td
-/F1 10 Tf
-(the matching SSH password.) Tj
+(report.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -928,62 +555,58 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(  1. Why can one unsalted candidate digest serve all accounts?) Tj
+(  1. What makes this activity online rather than offline?) Tj
 0 -14 Td
 /F1 10 Tf
-(  2. Why must salted records be checked separately?) Tj
+(  2. Which evidence shows that the SSH server can observe the guesses?) Tj
 0 -14 Td
 /F1 10 Tf
-(  3. Which computation count grows faster as the number of accounts increases?) Tj
+(  3. Why are candidates attempted sequentially with a delay?) Tj
 0 -14 Td
 /F1 10 Tf
-(  4. Why does salt prevent shared precomputation without making a weak password) Tj
+(  4. Why are hostname, port, username, and wordlist restrictions part of the) Tj
 0 -14 Td
 /F1 10 Tf
-(   strong?) Tj
+(   exercise's safety boundary?) Tj
 0 -14 Td
 /F1 10 Tf
-(  5. Why can the SSH server rate-limit or log this attack, while the CSV targets) Tj
+(  5. Why is AutoAddPolicy acceptable only for this disposable classroom target) Tj
 0 -14 Td
 /F1 10 Tf
-(   cannot?) Tj
+(   and inappropriate as a general SSH-client default?) Tj
 0 -14 Td
 /F1 10 Tf
-(6. Which safety properties would be lost if the target hostname or Docker port) Tj
+(6. Which defensive controls could a production SSH service apply to these) Tj
 0 -14 Td
 /F1 10 Tf
-(   were made configurable?) Tj
+(   requests?) Tj
 0 -14 Td
 ET
 endstream
 endobj
-15 0 obj
+11 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
 endobj
-16 0 obj
+12 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Courier >>
 endobj
 xref
-0 17
+0 13
 0000000000 65535 f 
 0000000015 00000 n 
 0000000064 00000 n 
-0000000153 00000 n 
-0000000291 00000 n 
-0000003394 00000 n 
-0000003532 00000 n 
-0000006458 00000 n 
-0000006596 00000 n 
-0000009248 00000 n 
-0000009387 00000 n 
-0000012482 00000 n 
-0000012622 00000 n 
-0000015035 00000 n 
-0000015175 00000 n 
-0000018003 00000 n 
-0000018074 00000 n 
+0000000139 00000 n 
+0000000277 00000 n 
+0000003515 00000 n 
+0000003653 00000 n 
+0000006568 00000 n 
+0000006706 00000 n 
+0000009201 00000 n 
+0000009340 00000 n 
+0000011056 00000 n 
+0000011127 00000 n 
 trailer
-<< /Size 17 /Root 1 0 R >>
+<< /Size 13 /Root 1 0 R >>
 startxref
-18143
+11196
 %%EOF

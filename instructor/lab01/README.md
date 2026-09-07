@@ -18,6 +18,9 @@ python3 instructor/lab01/generate_lab_data.py
 python3 instructor/lab01/render_part_pdfs.py
 LAB01_GRADE=1 LAB01_IMPL=/workspace/instructor/lab01/solutions \
   python3 -m unittest discover -s labs/lab01/tests -v
+LAB01_GRADE=1 LAB01_COST_IMPL=/workspace/instructor/lab01/solutions \
+  python3 -m unittest discover -s labs/lab01/part3_password_kdfs \
+  -p test_dictionary_cost.py -v
 python3 -m unittest instructor/lab01/test_table_attacks.py -v
 ```
 
@@ -49,7 +52,7 @@ rainbow table recovers four. Plaintexts remain only in
 `solutions/table_attacks.py` is the complete functional reference. Validate it
 with `test_table_attacks.py`; do not copy either file into student materials.
 
-Suggested core pacing: Part 1 (20 minutes), Part 2 (35 minutes), Part 3 (25
+Suggested core pacing: Part 1 (20 minutes), Part 2 (25 minutes), Part 3 (40
 minutes), Part 4 (35 minutes), Part 5 (25 minutes), report/discussion (15
 minutes). The controlled SSH extension and John command are optional.
 
@@ -76,11 +79,12 @@ docker compose -f docker/compose.yml --profile lab01-ssh \
 
 - Part 1: SHA-256 is deterministic and fast. A fresh public salt makes equal
   passwords produce different stored digests, but it does not slow a guess.
-- Part 2: an unsalted candidate hash can be compared with every target, while
-  salted targets require per-account computation. The opt-in SSH extension is
-  online because each attempt reaches the isolated authentication service.
-- Part 3: password KDF work factors raise each guess's cost; memory-hard designs
-  also resist cheap parallelism. Cost cannot create password entropy.
+- Part 2: the bounded SSH activity is online because every attempt reaches the
+  isolated authentication service, which can log, delay, and reject it.
+- Part 3: an unsalted candidate hash can be compared with every target, while
+  distinct salts require per-account computation. Password KDF work factors
+  raise each guess's cost; memory-hard designs also resist cheap parallelism.
+  Neither salt nor cost can create password entropy.
 - Part 4: a full table stores every digest/password pair and needs no lookup
   hashes. A rainbow table stores starts/endpoints and rebuilds chain material,
   saving storage at the cost of lookup work and incomplete coverage. Chains
