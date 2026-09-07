@@ -30,6 +30,7 @@ Thumbs.db
 *.ova
 auth_db.json
 benchmark-results.*
+labs/lab01/part4_system_hashes/generated/
 
 # Secrets
 .env

@@ -5,22 +5,20 @@ generation. Do not copy it into student distributions.
 
 ## Preparation and validation
 
-`generate_data.py` deterministically regenerates the student datasets. Run it
-from any working directory; paths are resolved relative to the repository.
+`generate_lab_data.py` deterministically regenerates all student datasets,
+including the bounded Part 4 password database. It invokes the earlier
+`generate_data.py` fixture generator. Run it from any working directory; paths
+are resolved relative to the repository.
 
 `render_part_pdfs.py` regenerates the five student handouts from the part
 `README.md` source files without external PDF dependencies.
 
-`generate_theory_slides.py` regenerates the student-facing 16:9 PowerPoint
-theory deck using only Python's standard library. The deck is intentionally
-answer-free and may be distributed with the lab.
-
 ```console
-python3 instructor/lab01/generate_data.py
+python3 instructor/lab01/generate_lab_data.py
 python3 instructor/lab01/render_part_pdfs.py
-python3 instructor/lab01/generate_theory_slides.py
-LAB01_IMPL=/workspace/instructor/lab01/solutions \
+LAB01_GRADE=1 LAB01_IMPL=/workspace/instructor/lab01/solutions \
   python3 -m unittest discover -s labs/lab01/tests -v
+python3 -m unittest instructor/lab01/test_table_attacks.py -v
 ```
 
 The WPA2 record is deliberately synthetic and uses an EAPOL-like fixed byte
@@ -40,8 +38,20 @@ python3 -m unittest instructor/lab01/test_wpa2_vectors.py -v
 This vector stops at KCK because no EAPOL frame or captured MIC was provided.
 The separate synthetic record exercises MIC verification.
 
-Suggested pacing: Part 1 (35 minutes), Part 2 (45 minutes), Part 3 (20 minutes),
-Part 4 (45 minutes), discussion (15 minutes).
+### Part 4 table comparison
+
+The Part 4 configuration has 1,296 candidates, 96 deterministic starts, and 12
+columns. The reference implementation stores 71 distinct endpoints after chain
+merges. The full table recovers all five database rows; the intentionally small
+rainbow table recovers four. Plaintexts remain only in
+`generate_lab_data.py`, while the student database contains digests only.
+
+`solutions/table_attacks.py` is the complete functional reference. Validate it
+with `test_table_attacks.py`; do not copy either file into student materials.
+
+Suggested core pacing: Part 1 (20 minutes), Part 2 (35 minutes), Part 3 (25
+minutes), Part 4 (35 minutes), Part 5 (25 minutes), report/discussion (15
+minutes). The controlled SSH extension and John command are optional.
 
 ### Controlled SSH extension
 
@@ -64,17 +74,17 @@ docker compose -f docker/compose.yml --profile lab01-ssh \
 
 ## Conceptual answer guide
 
-- Part 1: with candidate hashes reused, at most `D` hash computations plus
-  target-set lookups; salts prevent cross-account reuse; unique salts and a
-  deliberately expensive, memory-hard password hash are expected.
-- Part 2: only chain endpoints and starts are stored, while lookup rebuilds
-  possible suffixes/chains. Chains merge because hash/reduction mapping is
-  many-to-one. Salts are public uniqueness values; a separate precomputation is
-  needed per salt.
-- Part 3: the pair violates collision resistance, not arbitrary preimage
-  resistance. Collision-dependent signatures and content identifiers are
-  examples at risk.
-- Part 4: the SSID, addresses, nonces, fixed message bytes, and reference MIC
-  enable checking. PBKDF2 raises per-guess
-  cost but cannot give a low-entropy password more entropy. Only explicitly
-  authorized, supplied offline records are in scope.
+- Part 1: SHA-256 is deterministic and fast. A fresh public salt makes equal
+  passwords produce different stored digests, but it does not slow a guess.
+- Part 2: an unsalted candidate hash can be compared with every target, while
+  salted targets require per-account computation. The opt-in SSH extension is
+  online because each attempt reaches the isolated authentication service.
+- Part 3: password KDF work factors raise each guess's cost; memory-hard designs
+  also resist cheap parallelism. Cost cannot create password entropy.
+- Part 4: a full table stores every digest/password pair and needs no lookup
+  hashes. A rainbow table stores starts/endpoints and rebuilds chain material,
+  saving storage at the cost of lookup work and incomplete coverage. Chains
+  merge because reduction is many-to-one. A separate table is needed per salt.
+- Part 5: the SSID, addresses, nonces, EAPOL bytes, and reference MIC enable
+  offline checking. PBKDF2 raises per-guess cost but cannot give a low-entropy
+  passphrase more entropy. Only authorized supplied records are in scope.

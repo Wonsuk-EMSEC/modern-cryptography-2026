@@ -4,13 +4,13 @@
 << /Type /Catalog /Pages 2 0 R >>
 endobj
 2 0 obj
-<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R] /Count 3 >>
+<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R 9 0 R 11 0 R 13 0 R] /Count 6 >>
 endobj
 3 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 9 0 R /F2 10 0 R >> >> /Contents 4 0 R >>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 4 0 R >>
 endobj
 4 0 obj
-<< /Length 3213 >>
+<< /Length 3349 >>
 stream
 BT
 54 760 Td
@@ -18,31 +18,43 @@ BT
 () Tj
 0 -14 Td
 /F1 18 Tf
-(Part 4: System password hashes) Tj
+(Part 4: System hashes and table attacks) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(Ethical and authorized use: use only ../data/linux_hashes.txt. The parser) Tj
-0 -14 Td
-/F1 10 Tf
-(does not access /etc/shadow. Never obtain or test another person's hashes.) Tj
+(Estimated time: 35 minutes. Environment: course Docker container.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(Run python3 analyze_shadow_hash.py ../data/linux_hashes.txt. A shadow-style) Tj
+(Ethical and authorized use: use only the fictional records in ../data.) Tj
 0 -14 Td
 /F1 10 Tf
-(value uses $identifier$salt-or-parameters$verifier; the identifier selects the) Tj
+(The exercises never read /etc/shadow and never contact an authentication) Tj
 0 -14 Td
 /F1 10 Tf
-(password-hashing scheme. Classify this exercise as online or offline and) Tj
+(service. Do not obtain or test another person's password database.) Tj
 0 -14 Td
 /F1 10 Tf
-(justify your answer.) Tj
+() Tj
+0 -14 Td
+/F1 10 Tf
+(This part first examines a Linux shadow-style verifier. It then uses a separate,) Tj
+0 -14 Td
+/F1 10 Tf
+(tiny SHA-256 password database to compare a full precomputation table with a) Tj
+0 -14 Td
+/F1 10 Tf
+(rainbow-table-like endpoint structure. The password space is deliberately only) Tj
+0 -14 Td
+/F1 10 Tf
+(6^4 = 1,296 candidates so that every step can be inspected in class. These) Tj
+0 -14 Td
+/F1 10 Tf
+(parameters are for learning and provide no real security.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -51,22 +63,7 @@ BT
 () Tj
 0 -14 Td
 /F1 14 Tf
-(Purpose and learning objectives) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(Linux does not normally store account passwords directly. A protected account) Tj
-0 -14 Td
-/F1 10 Tf
-(database stores a modular hash string containing an algorithm identifier, salt) Tj
-0 -14 Td
-/F1 10 Tf
-(or parameters, and verifier. This part uses one supplied fictional record; it) Tj
-0 -14 Td
-/F1 10 Tf
-(does not read the host or container account database.) Tj
+(Learning objectives) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -78,61 +75,34 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(  - recognize the colon-separated shape of a shadow-style account line;) Tj
+(  - parse the algorithm, salt, and verifier fields in a shadow-style record;) Tj
 0 -14 Td
 /F1 10 Tf
-(  - parse the $identifier$salt$verifier password field;) Tj
+(  - distinguish parsing a verifier from guessing its password;) Tj
 0 -14 Td
 /F1 10 Tf
-(  - map identifier $6$ to SHA-512-crypt;) Tj
+(  - explain how work performed before a target is known can accelerate later) Tj
 0 -14 Td
 /F1 10 Tf
-(  - distinguish parsing a verifier from recovering a password; and) Tj
+(  offline guessing;) Tj
 0 -14 Td
 /F1 10 Tf
-(  - classify a local wordlist check as an offline attack.) Tj
+(  - implement a full digest-to-password precomputation table;) Tj
 0 -14 Td
 /F1 10 Tf
-() Tj
+(  - implement column-specific reduction and hash/reduction chains;) Tj
 0 -14 Td
 /F1 10 Tf
-() Tj
-0 -14 Td
-/F1 14 Tf
-(Record structure) Tj
+(  - reconstruct chains to look up targets using only stored starts and endpoints;) Tj
 0 -14 Td
 /F1 10 Tf
-() Tj
+(  - compare build work, stored entries, file size, lookup work, and coverage; and) Tj
 0 -14 Td
 /F1 10 Tf
-(The supplied line has the simplified shape:) Tj
+(  - explain why a unique salt prevents one unsalted table from being reused for) Tj
 0 -14 Td
 /F1 10 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-(account:$id$salt$verifier:password-change fields...) Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(The account name is not secret. The algorithm identifier tells the verifier) Tj
-0 -14 Td
-/F1 10 Tf
-(which function to run, and the salt must be available to repeat verification.) Tj
-0 -14 Td
-/F1 10 Tf
-(The long final value is the verifier, not encrypted plaintext. Remaining colon) Tj
-0 -14 Td
-/F1 10 Tf
-(fields describe password-aging policy and are outside this parser's core task.) Tj
+(  many accounts.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -141,48 +111,40 @@ BT
 () Tj
 0 -14 Td
 /F1 14 Tf
-(Tasks) Tj
+(Exercise A: inspect a system password record) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(  1. Display ../data/linux_hashes.txt and identify colon-separated fields.) Tj
-0 -14 Td
-/F1 10 Tf
-(  2. Run analyze_shadow_hash.py and map its dictionary output back to the line.) Tj
-0 -14 Td
-/F1 10 Tf
-(  3. Explain why the parser needs no password and performs no guesses.) Tj
-0 -14 Td
-/F1 10 Tf
-(  4. Optionally run John with only the supplied file and small course wordlist.) Tj
-0 -14 Td
-/F1 10 Tf
-(  5. Use john --show to review the local result.) Tj
-0 -14 Td
-/F1 10 Tf
-(6. Classify parsing and cracking separately as online or offline activities.) Tj
+(A simplified shadow-style line has this shape:) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
-ET
-endstream
-endobj
-5 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 9 0 R /F2 10 0 R >> >> /Contents 6 0 R >>
-endobj
-6 0 obj
-<< /Length 2659 >>
-stream
-BT
-54 760 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(account:$id$salt-or-parameters$verifier:password-change fields...) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
-/F1 14 Tf
-(Python files and usage examples) Tj
+/F1 10 Tf
+(The account name is not secret. The identifier selects the password-hashing) Tj
+0 -14 Td
+/F1 10 Tf
+(scheme, and the salt and parameters must be stored so that a legitimate login) Tj
+0 -14 Td
+/F1 10 Tf
+(can recompute the verifier. The verifier is a derived value, not encrypted) Tj
+0 -14 Td
+/F1 10 Tf
+(plaintext. The remaining colon-separated fields describe password-aging policy.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -191,7 +153,48 @@ BT
 () Tj
 0 -14 Td
 /F1 12 Tf
-(`analyze_shadow_hash.py`) Tj
+(Tasks) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(  1. Display ../data/linux_hashes.txt and identify its colon-separated fields.) Tj
+0 -14 Td
+/F1 10 Tf
+(  2. Run analyze_shadow_hash.py and map its dictionary output back to the line.) Tj
+0 -14 Td
+/F1 10 Tf
+(  3. Explain why parsing needs no candidate password and performs no guesses.) Tj
+0 -14 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 2981 >>
+stream
+BT
+54 760 Td
+/F1 10 Tf
+(  4. Classify a local wordlist check against a copied verifier as online or) Tj
+0 -14 Td
+/F1 10 Tf
+(   offline. The optional John command below may be used only on the supplied) Tj
+0 -14 Td
+/F1 10 Tf
+(   synthetic file.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(`analyze_shadow_hash.py` usage) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -233,22 +236,10 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(The $6$ identifier selects SHA-512-crypt. The salt and verifier are stored) Tj
+(The $6$ identifier selects SHA-512-crypt. The script accepts an explicit local) Tj
 0 -14 Td
 /F1 10 Tf
-(data; neither field is the plaintext password. Notice that the script accepts) Tj
-0 -14 Td
-/F1 10 Tf
-(an explicit local filename and never opens /etc/shadow automatically.) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(The positional argument is required. Running the help command documents it) Tj
-0 -14 Td
-/F1 10 Tf
-(without parsing a file:) Tj
+(filename and never opens /etc/shadow automatically.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -260,37 +251,7 @@ BT
 (python3 analyze_shadow_hash.py --help) Tj
 0 -14 Td
 /F2 9 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(Optional local cracking command:) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
 (john --wordlist=../data/lab01-small.txt ../data/linux_hashes.txt) Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(To display John the Ripper's result for this supplied file, run:) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
 0 -14 Td
 /F2 9 Tf
 (john --show ../data/linux_hashes.txt) Tj
@@ -302,30 +263,233 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(Runtime and exact status messages can vary. The important observation is that) Tj
+(Runtime and exact John status messages can vary. The key observation is that) Tj
 0 -14 Td
 /F1 10 Tf
-(all guesses are checked locally, without sending login attempts to a service.) Tj
+(all guesses are checked locally, so a login service cannot rate-limit them.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(Use only the supplied synthetic file. If an instructor separately provides a) Tj
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Exercise B: compare precomputation and rainbow tables) Tj
 0 -14 Td
 /F1 10 Tf
-(Victim Ubuntu VM, it must be deliberately vulnerable and connected only to an) Tj
+() Tj
 0 -14 Td
 /F1 10 Tf
-(isolated host-only network. Worksheet \(manual observation only\): list the VM's) Tj
+(The supplied rainbow_password_database.csv contains fictional accounts and) Tj
 0 -14 Td
 /F1 10 Tf
-(instructor-provided address, visible services, evidence of isolation, and which) Tj
+(unsalted SHA-256 digests. A full precomputation table stores one) Tj
 0 -14 Td
 /F1 10 Tf
-(service would authenticate users. Do not scan arbitrary addresses.) Tj
+(digest -> password entry for every candidate in the toy space. It uses more) Tj
 0 -14 Td
 /F1 10 Tf
+(memory, but a target lookup is a dictionary operation and needs no new hashes.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(A rainbow table walks chains of alternating operations:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(password --H--> digest --R_0--> password --H--> digest --R_1--> ...) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(H is SHA-256. A reduction function R_i maps a large digest back into the) Tj
+0 -14 Td
+/F1 10 Tf
+(small password space; it does not invert SHA-256. The column number makes each) Tj
+0 -14 Td
+/F1 10 Tf
+(reduction different. The table stores only each chain's start and endpoint.) Tj
+0 -14 Td
+/F1 10 Tf
+(During lookup, the omitted middle of a possible chain must be recomputed.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(This exchanges memory for target-time lookup work. It also loses coverage when) Tj
+0 -14 Td
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 8 0 R >>
+endobj
+8 0 obj
+<< /Length 3418 >>
+stream
+BT
+54 760 Td
+/F1 10 Tf
+(chains merge or when a password is not visited by any chain. Therefore a small) Tj
+0 -14 Td
+/F1 10 Tf
+(rainbow table is not expected to recover every database row.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(Supplied configuration and data) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(../data/rainbow_lab_config.json defines:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(| Parameter | Classroom value | Meaning |) Tj
+0 -14 Td
+/F1 10 Tf
+(| --- | ---: | --- |) Tj
+0 -14 Td
+/F1 10 Tf
+(| Algorithm | SHA-256 | Fast hash used only for the toy experiment |) Tj
+0 -14 Td
+/F1 10 Tf
+(| Alphabet | abc123 | Six allowed characters |) Tj
+0 -14 Td
+/F1 10 Tf
+(| Password length | 4 | Exactly four characters |) Tj
+0 -14 Td
+/F1 10 Tf
+(| Password space | 1,296 | 6^4 possible passwords |) Tj
+0 -14 Td
+/F1 10 Tf
+(| Chain length | 12 | Hash/reduction steps per chain |) Tj
+0 -14 Td
+/F1 10 Tf
+(| Chain starts | 96 | Deterministically selected using seed 2026 |) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Keep these bounded parameters unchanged for the required experiment. Generated) Tj
+0 -14 Td
+/F1 10 Tf
+(tables belong in generated/, which Git ignores.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(Implementation tasks) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(  1. In build_precomputation_table.py, implement build_table\(\) by enumerating) Tj
+0 -14 Td
+/F1 10 Tf
+(   password_space\(\) and hashing every candidate exactly once.) Tj
+0 -14 Td
+/F1 10 Tf
+(  2. In build_rainbow_table.py, implement reduce_digest\(\),) Tj
+0 -14 Td
+/F1 10 Tf
+(   chain_endpoint\(\), and build_table\(\). Store all starts that share an) Tj
+0 -14 Td
+/F1 10 Tf
+(   endpoint so that chain merges are visible rather than overwritten.) Tj
+0 -14 Td
+/F1 10 Tf
+(  3. In compare_table_attacks.py, implement lookup_precomputation\(\) and) Tj
+0 -14 Td
+/F1 10 Tf
+(   lookup_rainbow\(\). Rainbow lookup must try possible target columns,) Tj
+0 -14 Td
+/F1 10 Tf
+(   calculate a possible endpoint, replay matching chains from their starts, and) Tj
+0 -14 Td
+/F1 10 Tf
+(   verify the original target digest before returning a candidate.) Tj
+0 -14 Td
+/F1 10 Tf
+(  4. Generate both tables, attack the same supplied database with each, and) Tj
+0 -14 Td
+/F1 10 Tf
+(   record the comparison metrics.) Tj
+0 -14 Td
+/F1 10 Tf
+(  5. Complete the salt-reuse observation and answer the checkpoint questions.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Do not add the target hashes or their recovered passwords as special cases.) Tj
+0 -14 Td
+/F1 10 Tf
+(Your implementation must work from the configuration, table, and database.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(`table_common.py` usage) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(This is a support module rather than a command-line program. The following) Tj
+0 -14 Td
+/F1 10 Tf
+(example checks the configured space without revealing a database password:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(python3 -c "from pathlib import Path; from table_common import load_config, password_space;) Tj
+0 -14 Td
+/F2 9 Tf
+(c=load_config\(Path\('../data/rainbow_lab_config.json'\)\); print\(sum\(1 for _ in) Tj
+0 -14 Td
+/F2 9 Tf
+(password_space\(str\(c['alphabet']\), int\(c['password_length']\)\)\)\)") Tj
+0 -14 Td
+/F2 9 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
@@ -334,37 +498,398 @@ BT
 ET
 endstream
 endobj
-7 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 9 0 R /F2 10 0 R >> >> /Contents 8 0 R >>
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 10 0 R >>
 endobj
-8 0 obj
-<< /Length 1140 >>
+10 0 obj
+<< /Length 2359 >>
 stream
 BT
 54 760 Td
-/F1 14 Tf
-(Completion criteria and report evidence) Tj
+/F1 10 Tf
+(Expected result:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(1296) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(You have completed Part 4 when the parser identifies the fictional account,) Tj
+() Tj
+0 -14 Td
+/F1 12 Tf
+(`build_precomputation_table.py` usage) Tj
 0 -14 Td
 /F1 10 Tf
-(algorithm, salt, and verifier without accessing /etc/shadow. If you perform) Tj
+() Tj
 0 -14 Td
 /F1 10 Tf
-(the optional John step, record its status and candidate count but do not publish) Tj
+(After implementing its TODO:) Tj
 0 -14 Td
 /F1 10 Tf
-(the recovered password. Include your online/offline classification and its) Tj
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(mkdir -p generated) Tj
+0 -14 Td
+/F2 9 Tf
+(python3 build_precomputation_table.py \\) Tj
+0 -14 Td
+/F2 9 Tf
+(  ../data/rainbow_lab_config.json generated/precomputation.json) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
 0 -14 Td
 /F1 10 Tf
-(justification. The optional VM worksheet is required only when assigned by the) Tj
+() Tj
 0 -14 Td
 /F1 10 Tf
-(instructor.) Tj
+(The script reports 1,296 entries and build hashes, plus build time and JSON file) Tj
+0 -14 Td
+/F1 10 Tf
+(size. Inspect a few keys and values, but do not paste recovered passwords into) Tj
+0 -14 Td
+/F1 10 Tf
+(a public report.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(`build_rainbow_table.py` usage) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(After implementing its TODOs:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(python3 build_rainbow_table.py \\) Tj
+0 -14 Td
+/F2 9 Tf
+(  ../data/rainbow_lab_config.json generated/rainbow.json) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The script reports 96 starts, 1,152 build hashes, and no more than 96 distinct) Tj
+0 -14 Td
+/F1 10 Tf
+(endpoints. Fewer endpoints than starts demonstrates that at least two chains) Tj
+0 -14 Td
+/F1 10 Tf
+(merged.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(`compare_table_attacks.py` usage) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(After both tables and lookup functions are complete:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(python3 compare_table_attacks.py \\) Tj
+0 -14 Td
+/F2 9 Tf
+(  ../data/rainbow_password_database.csv \\) Tj
+0 -14 Td
+/F2 9 Tf
+(  generated/precomputation.json generated/rainbow.json) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The output contains one summary row per method:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(method      recovered build hashes  build sec  records  endpoints ...) Tj
+0 -14 Td
+/F2 9 Tf
+(full             ...          1296        ...     1296          - ...) Tj
+0 -14 Td
+ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 12 0 R >>
+endobj
+12 0 obj
+<< /Length 2788 >>
+stream
+BT
+54 760 Td
+/F2 9 Tf
+(rainbow          ...          1152        ...       96        ... ...) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The full table should recover every supplied target. The smaller rainbow table) Tj
+0 -14 Td
+/F1 10 Tf
+(should demonstrate partial coverage and additional lookup hashes. Exact times) Tj
+0 -14 Td
+/F1 10 Tf
+(and serialized file sizes depend on the environment.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(`test_table_attacks.py` usage) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Before implementing the TODOs, the basic fixture tests run and implementation) Tj
+0 -14 Td
+/F1 10 Tf
+(tests are skipped:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(python3 -m unittest test_table_attacks.py -v) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(After completing all TODOs, enable the implementation checks:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(LAB01_GRADE=1 python3 -m unittest test_table_attacks.py -v) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(Salt-reuse observation) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Use a non-target classroom example to see that changing the input changes the) Tj
+0 -14 Td
+/F1 10 Tf
+(lookup key:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(python3 -c "import hashlib,json;) Tj
+0 -14 Td
+/F2 9 Tf
+(t=json.load\(open\('generated/precomputation.json'\)\)['entries']; p=b'abc1';) Tj
+0 -14 Td
+/F2 9 Tf
+(print\(hashlib.sha256\(p\).hexdigest\(\) in t, hashlib.sha256\(b'public-salt:'+p\).hexdigest\(\) in) Tj
+0 -14 Td
+/F2 9 Tf
+(t\)") Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The unsalted digest is present and the salted digest is absent. A real password) Tj
+0 -14 Td
+/F1 10 Tf
+(database stores each salt openly and hashes with a password KDF, but an attacker) Tj
+0 -14 Td
+/F1 10 Tf
+(must then perform work for each distinct salt. One shared unsalted) Tj
+0 -14 Td
+/F1 10 Tf
+(precomputation or rainbow table is no longer directly reusable across accounts.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Comparison table for your report) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Fill this in from your own run:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(| Method | Build hashes | Stored records | Distinct endpoints | JSON bytes | Targets) Tj
+0 -14 Td
+/F1 10 Tf
+(recovered | Lookup hashes | Lookup seconds |) Tj
+0 -14 Td
+/F1 10 Tf
+(| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |) Tj
+0 -14 Td
+/F1 10 Tf
+(| Full precomputation | | | N/A | | | | |) Tj
+0 -14 Td
+/F1 10 Tf
+(| Rainbow endpoints | | | | | | | |) Tj
+0 -14 Td
+ET
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 14 0 R >>
+endobj
+14 0 obj
+<< /Length 2334 >>
+stream
+BT
+54 760 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(For build hashes, use the construction performed by your code: one per toy) Tj
+0 -14 Td
+/F1 10 Tf
+(candidate for the full table, and chain starts x chain length for the rainbow) Tj
+0 -14 Td
+/F1 10 Tf
+(table. Discuss both the measured JSON size and the conceptual number of stored) Tj
+0 -14 Td
+/F1 10 Tf
+(password/digest or start/endpoint values; JSON metadata adds overhead.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Completion criteria) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(You have completed Part 4 when:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(  - the system-hash parser identifies the fictional account, algorithm, salt, and) Tj
+0 -14 Td
+/F1 10 Tf
+(  verifier without reading /etc/shadow;) Tj
+0 -14 Td
+/F1 10 Tf
+(  - both generated JSON tables have the documented type and configuration;) Tj
+0 -14 Td
+/F1 10 Tf
+(  - all enabled tests pass;) Tj
+0 -14 Td
+/F1 10 Tf
+(  - both methods run against the same supplied database;) Tj
+0 -14 Td
+/F1 10 Tf
+(  - your report compares storage, build work, lookup work, and coverage without) Tj
+0 -14 Td
+/F1 10 Tf
+(  publishing recovered passwords; and) Tj
+0 -14 Td
+/F1 10 Tf
+(  - you explain why salts prevent reuse of these unsalted tables.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -379,41 +904,68 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(  1. Does the hash format reveal the plaintext?) Tj
+(  1. Which fields in the shadow-style record are required to verify a login, and) Tj
 0 -14 Td
 /F1 10 Tf
-(  2. Which fields must be stored so legitimate verification remains possible?) Tj
+(   why is the verifier not encrypted plaintext?) Tj
 0 -14 Td
 /F1 10 Tf
-(  3. Is this an online or offline activity? What evidence supports your answer?) Tj
+(  2. Which steps in this part are parsing, precomputation, and offline guessing?) Tj
 0 -14 Td
 /F1 10 Tf
-(  4. Why must an optional Victim VM use an isolated host-only network?) Tj
+(  3. What is the reduction function's purpose, and why is it not an inverse hash?) Tj
+0 -14 Td
+/F1 10 Tf
+(  4. Why does a rainbow lookup perform new hashes while a full-table lookup does) Tj
+0 -14 Td
+/F1 10 Tf
+(   not?) Tj
+0 -14 Td
+/F1 10 Tf
+(  5. Why can two starts produce the same endpoint, and how does that affect) Tj
+0 -14 Td
+/F1 10 Tf
+(   coverage?) Tj
+0 -14 Td
+/F1 10 Tf
+(6. Which measured resource did the rainbow table save, and what costs or) Tj
+0 -14 Td
+/F1 10 Tf
+(   limitations did it introduce?) Tj
+0 -14 Td
+/F1 10 Tf
+(7. Why would a unique salt require separate precomputation for each account?) Tj
 0 -14 Td
 ET
 endstream
 endobj
-9 0 obj
+15 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
 endobj
-10 0 obj
+16 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Courier >>
 endobj
 xref
-0 11
+0 17
 0000000000 65535 f 
 0000000015 00000 n 
 0000000064 00000 n 
-0000000133 00000 n 
-0000000270 00000 n 
-0000003535 00000 n 
-0000003672 00000 n 
-0000006383 00000 n 
-0000006520 00000 n 
-0000007712 00000 n 
-0000007782 00000 n 
+0000000153 00000 n 
+0000000291 00000 n 
+0000003692 00000 n 
+0000003830 00000 n 
+0000006863 00000 n 
+0000007001 00000 n 
+0000010471 00000 n 
+0000010610 00000 n 
+0000013022 00000 n 
+0000013162 00000 n 
+0000016003 00000 n 
+0000016143 00000 n 
+0000018530 00000 n 
+0000018601 00000 n 
 trailer
-<< /Size 11 /Root 1 0 R >>
+<< /Size 17 /Root 1 0 R >>
 startxref
-7851
+18670
 %%EOF

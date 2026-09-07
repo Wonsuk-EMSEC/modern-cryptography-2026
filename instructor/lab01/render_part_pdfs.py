@@ -29,6 +29,7 @@ UNICODE_FALLBACKS = str.maketrans(
         "…": "...",
         "≤": "<=",
         "≥": ">=",
+        "×": "x",
     }
 )
 

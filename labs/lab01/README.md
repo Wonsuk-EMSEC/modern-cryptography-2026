@@ -12,21 +12,13 @@ local file or instructor-controlled isolated system.
 
 ## Learning progression
 
-Hash → Salt → Dictionary Attack → Slow Password Hashing → System Password
-Cracking → WPA2 Offline Cracking
+Hash → Salt → Dictionary Attack → Slow Password Hashing → System Verifiers →
+Precomputation/Rainbow Tables → WPA2 Offline Cracking
 
 After the lab you should be able to distinguish hashing from encryption,
 explain salt and offline guessing, compare major password KDFs, interpret a
-synthetic Linux password record, and explain offline WPA2 candidate checking.
-
-## Theory slides
-
-Review `LAB01_PASSWORD_AUTHENTICATION_THEORY.pptx` before starting the hands-on
-parts. The 22-slide deck explains the common theory used throughout the lab:
-password verification, hashing and salt, offline dictionary attacks,
-time–memory tradeoffs, password KDFs, Linux verifier formats, and WPA2-Personal
-key derivation and candidate verification. It contains no recovered passwords
-or instructor-only answers.
+synthetic Linux password record, evaluate a time-memory tradeoff, and explain
+offline WPA2 candidate checking.
 
 ## Setup and tests
 
@@ -42,32 +34,34 @@ demonstrations are runnable immediately.
 
 ## Numbered workflow
 
-1. **Hash and salt (25 minutes).** Read
+1. **Hash and salt (20 minutes).** Read
    `part1_hashing/PART1_HASHING_GUIDE.pdf`; run both
    scripts. Expected: a stable digest, then changing salt/digest pairs.
    Checkpoint: distinguish hashing from encryption and explain unique salts.
-2. **Dictionary attacks (50 minutes).** Read
+2. **Dictionary attacks (35 minutes, plus optional SSH extension).** Read
    `part2_dictionary_attack/PART2_DICTIONARY_ATTACK_GUIDE.pdf`, complete both
    TODO implementations, and run `compare_cost.py`. Expected: fictional
-   accounts and a table of counts, seconds, and guesses/second. Then start the
-   opt-in Compose SSH target and complete the bounded online extension.
+   accounts and a table of counts, seconds, and guesses/second. If assigned,
+   start the opt-in Compose SSH target and complete the bounded online extension.
    Checkpoint: why does shared precomputation work only for unsalted targets,
    and why can the SSH server observe online guesses?
-3. **Password KDFs (35 minutes).** Read
+3. **Password KDFs (25 minutes).** Read
    `part3_password_kdfs/PART3_PASSWORD_KDFS_GUIDE.pdf`, then run the benchmark and local
    register/verify demo. Expected: median timings and authentication without
    stored plaintext. Checkpoint: compare SHA-256, PBKDF2, bcrypt, scrypt, and
    Argon2id.
-4. **System hashes (25 minutes).** Read
-   `part4_system_hashes/PART4_SYSTEM_HASHES_GUIDE.pdf`, parse the supplied shadow-style file, and
-   optionally run John only on it. Expected: identifier, salt, and verifier
-   fields. Checkpoint: classify the activity as online or offline.
-5. **WPA2 verification (30 minutes).** Read
+4. **System hashes and table attacks (35 minutes).** Read
+   `part4_system_hashes/PART4_SYSTEM_HASHES_GUIDE.pdf`, parse the supplied
+   shadow-style file, then implement full precomputation and rainbow tables for
+   the bounded toy password database. Expected: parsed verifier fields and a
+   comparison of build work, storage, lookup work, and coverage. Checkpoint:
+   explain the time-memory tradeoff and why salts prevent shared table reuse.
+5. **WPA2 verification (25 minutes).** Read
    `part5_wpa2/PART5_WPA2_GUIDE.pdf`, inspect the supplied course PCAP and
    synthetic metadata, then run the local dictionary check. Expected: a complete
    M1–M4 sequence and one matching candidate from the course-only wordlist.
    Checkpoint: explain PMK → PTK → KCK → MIC and offline rate limiting.
-6. **Report (20 minutes).** Complete `report/LAB_REPORT_TEMPLATE.md` without
+6. **Report (15 minutes).** Complete `report/LAB_REPORT_TEMPLATE.md` without
    including any real password.
 
 No real credential is included. The supplied PCAP is restricted to this
