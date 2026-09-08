@@ -70,6 +70,3 @@ No real credential is included. The supplied PCAP is restricted to this
 authorized offline exercise. The instructor may optionally provide a deliberately
 vulnerable Ubuntu VM on an isolated host-only network; it is not required for
 the core lab. Complete reference attacks remain under `/workspace/instructor/lab01`.
-
-The part PDFs are the student handouts. Their `README.md` files are retained as
-editable source documents so course staff can regenerate the PDFs consistently.

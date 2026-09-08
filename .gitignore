@@ -38,4 +38,7 @@ labs/lab01/part4_system_hashes/generated/
 *.pem
 
 # Instructor private material, if desired
-# instructor/
+instructor/
+
+#AGENTS.md
+AGENTS.md
