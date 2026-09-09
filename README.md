@@ -1,6 +1,6 @@
 # Modern Cryptography Applications 2026
 
-Course repository for hands-on exercises and assignments.
+Course repository for hands-on cryptography exercises.
 
 ## Ethical and Authorized Use
 
@@ -13,7 +13,6 @@ or third-party networks. Lab-specific restrictions appear in each lab README.
 
 - `docker/`: Docker-based course environment
 - `labs/`: Hands-on laboratory exercises
-- `assignments/`: Assignments
 - `common/`: Shared scripts and datasets
 - `instructor/`: Instructor materials
 

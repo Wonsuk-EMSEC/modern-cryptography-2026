@@ -40,5 +40,8 @@ labs/lab01/part4_system_hashes/generated/
 # Instructor private material, if desired
 instructor/
 
+# Unused course directories
+/assignments/
+
 # Local agent instructions
 /AGENTS.md
