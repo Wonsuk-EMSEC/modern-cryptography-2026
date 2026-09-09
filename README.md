@@ -13,7 +13,6 @@ or third-party networks. Lab-specific restrictions appear in each lab README.
 
 - `docker/`: Docker-based course environment
 - `labs/`: Hands-on laboratory exercises
-- `common/`: Shared scripts and datasets
 - `instructor/`: Instructor materials
 
 ## Environment
