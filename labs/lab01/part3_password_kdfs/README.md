@@ -12,6 +12,44 @@ benchmark deliberately slower password KDFs and use a local verifier-only login
 database. The goal is to understand what salt changes, what it does not change,
 and why password storage also needs an adjustable work factor.
 
+## Part 3 at a glance
+
+```mermaid
+flowchart TB
+    W[Select one candidate]
+
+    subgraph U[Unsalted: reuse is possible]
+        UH[Hash the candidate once]
+        UA[Compare with account A]
+        UB[Compare with account B]
+        UC[Compare with account C]
+        UH --> UA
+        UH --> UB
+        UH --> UC
+    end
+
+    subgraph S[Salted: per-account work is required]
+        SA[Candidate + account A salt → hash]
+        SB[Candidate + account B salt → hash]
+        SC[Candidate + account C salt → hash]
+    end
+
+    W --> UH
+    W --> SA
+    W --> SB
+    W --> SC
+    SA --> K[A slow password KDF also raises<br/>the cost of each computation]
+    SB --> K
+    SC --> K
+
+    classDef source fill:#e8f1ff,stroke:#4676b8,color:#172b4d
+    classDef compute fill:#fff3cd,stroke:#c69500,color:#4d3b00
+    classDef compare fill:#e7f7ed,stroke:#3a8f5c,color:#153d26
+    class W source
+    class UH,SA,SB,SC,K compute
+    class UA,UB,UC compare
+```
+
 ## Learning objectives
 
 After completing this part, you should be able to:

@@ -12,6 +12,25 @@ script**. You must inspect the saved PCAP with Wireshark or TShark, find the
 relevant fields in the decoded protocol tree, and record your own observations.
 You will then implement the WPA2 candidate-verification calculations in Python.
 
+## Part 5 at a glance
+
+```mermaid
+flowchart LR
+    A["Exercise A<br/><b>Inspect the PCAP manually</b><br/>Locate fields and identify M1-M4"]
+    B["Exercise B<br/><b>Implement candidate verification</b><br/>PMK → PTK → KCK → MIC"]
+    C["Exercise C<br/><b>Run a bounded comparison</b><br/>Use the supplied PCAP and wordlist"]
+
+    A -->|Record evidence in the worksheet| B
+    B -->|Verify the calculation with tests| C
+
+    classDef observe fill:#e8f4ff,stroke:#337ab7,stroke-width:2px,color:#172b4d
+    classDef implement fill:#fff4d6,stroke:#d89b00,stroke-width:2px,color:#4a3400
+    classDef compare fill:#f3e8ff,stroke:#845ec2,stroke-width:2px,color:#2f1b4d
+    class A observe
+    class B implement
+    class C compare
+```
+
 ## Learning objectives
 
 After completing this part, you should be able to:
@@ -32,6 +51,7 @@ After completing this part, you should be able to:
 | `../data/wpa2/lab01-pcap-wordlist.txt` | Small candidate list for that PCAP only |
 | `CAPTURE_WORKSHEET.md` | Blank table for your manual packet observations |
 | `../data/wpa2_capture.json` | Separate synthetic Python calculation fixture |
+| `../data/lab01-small.txt` | Candidate list for the synthetic JSON fixture |
 | `explain_handshake.py` | Prints the fields in the synthetic JSON fixture |
 | `verify_candidate.py` | Starter containing the PMK-to-MIC TODO pipeline |
 | `test_wpa2_workflow.py` | Baseline and opt-in implementation tests |
@@ -47,7 +67,7 @@ The SSID and endpoint MAC addresses embedded in the distributed PCAP are
 fictional course identifiers. They are intentionally left out of this guide so
 that finding them remains part of Exercise A.
 
-## Prepare the analysis tool
+## Setup
 
 TShark, Wireshark's command-line packet analyzer, is installed in the course
 image. If your image was built before this Part 5 update, rebuild it from the
@@ -76,99 +96,116 @@ Do not write or use a Python parser for this exercise. Do not use a TShark
 `-T fields` command that prints a ready-made answer table. Read the decoded
 packet tree and enter your findings in `CAPTURE_WORKSHEET.md`.
 
-### Option 1: Wireshark GUI on the host
+1. **Choose an inspection tool**
 
-1. Choose **File > Open** and select
-   `labs/lab01/data/wpa2/lab01-handshake.pcap` from this repository.
-2. Enter the following display filter to show the authentication key exchange:
+   #### Option 1: Wireshark GUI on the host
 
-   ```text
-   eapol
+   1. Choose **File > Open** and select
+      `labs/lab01/data/wpa2/lab01-handshake.pcap` from this repository.
+   2. Enter the following display filter to show the authentication key exchange:
+
+      ```text
+      eapol
+      ```
+
+   3. Inspect the four displayed frames. In the 802.11 header, find the BSSID that
+      is common to the exchange, then distinguish the AP from the other
+      station/client address using frame direction and the Key ACK flag.
+   4. Replace `RECORDED_BSSID` below with the BSSID you just observed. This limits
+      the many beacon frames in the PCAP to the relevant access point:
+
+      ```text
+      wlan.fc.type_subtype == 0x0008 && wlan.bssid == RECORDED_BSSID
+      ```
+
+   5. Select the resulting beacon and expand **IEEE 802.11 wireless LAN management
+      frame**. Confirm the BSSID in the 802.11 header. Expand **Tagged parameters**
+      and the **SSID parameter set** to find the network name.
+   6. Return to the `eapol` filter. In each frame, record the receiver,
+      transmitter, and BSSID. Under **802.1X Authentication** and **WPA Key Data**
+      (wording can vary by Wireshark version), locate the replay counter, nonce,
+      key MIC, and Key Information flags.
+   7. Use the message-identification table below to label each frame M1-M4. Record
+      frame numbers rather than relying only on their displayed order.
+
+   #### Option 2: TShark inside the course container
+
+   First view the packet list so you understand the trace layout:
+
+   ```console
+   tshark -n -r ../data/wpa2/lab01-handshake.pcap
    ```
 
-3. Inspect the four displayed frames. In the 802.11 header, find the BSSID that
-   is common to the exchange, then distinguish the AP from the other
-   station/client address using frame direction and the Key ACK flag.
-4. Replace `RECORDED_BSSID` below with the BSSID you just observed. This limits
-   the many beacon frames in the PCAP to the relevant access point:
+   Display the full decoded protocol tree for the EAPOL-Key frames first:
 
-   ```text
-   wlan.fc.type_subtype == 0x0008 && wlan.bssid == RECORDED_BSSID
+   ```console
+   tshark \
+     -n \
+     -r ../data/wpa2/lab01-handshake.pcap \
+     -Y 'eapol' \
+     -V
    ```
 
-5. Select the resulting beacon and expand **IEEE 802.11 wireless LAN management
-   frame**. Confirm the BSSID in the 802.11 header. Expand **Tagged parameters**
-   and the **SSID parameter set** to find the network name.
-6. Return to the `eapol` filter. In each frame, record the receiver,
-   transmitter, and BSSID. Under **802.1X Authentication** and **WPA Key Data**
-   (wording can vary by Wireshark version), locate the replay counter, nonce,
-   key MIC, and Key Information flags.
-7. Use the message-identification table below to label each frame M1-M4. Record
-   frame numbers rather than relying only on their displayed order.
+   Read the receiver, transmitter, BSSID, replay counter, nonce, key MIC, and Key
+   Information flags. Identify the BSSID shared by the four frames. Enter that
+   value when prompted, then inspect only the relevant beacon:
 
-### Option 2: TShark inside the course container
+   ```console
+   read -r -p "Enter the BSSID from your worksheet: " AP_BSSID
+   tshark \
+     -n \
+     -r ../data/wpa2/lab01-handshake.pcap \
+     -Y "wlan.fc.type_subtype == 0x0008 && wlan.bssid == ${AP_BSSID}" \
+     -V
+   ```
 
-First view the packet list so you understand the trace layout:
+   Read the 802.11 header and tagged parameters to locate the SSID. The verbose
+   output is long by design: locating fields in a protocol tree is part of the
+   exercise.
 
-```console
-tshark -r ../data/wpa2/lab01-handshake.pcap
-```
+2. **Identify M1-M4**
 
-Display the full decoded protocol tree for the EAPOL-Key frames first:
+   Use the AP/STA direction and these EAPOL-Key flags. A set bit is shown as `1`.
 
-```console
-tshark \
-  -r ../data/wpa2/lab01-handshake.pcap \
-  -Y 'eapol' \
-  -V
-```
+   ```mermaid
+   sequenceDiagram
+       participant AP as Access point
+       participant STA as Station
+       AP->>STA: M1 · ANonce · ACK=1 · MIC=0 · Secure=0
+       STA->>AP: M2 · SNonce · ACK=0 · MIC=1 · Secure=0
+       AP->>STA: M3 · Install keys · ACK=1 · MIC=1 · Secure=1
+       STA->>AP: M4 · Acknowledge · ACK=0 · MIC=1 · Secure=1
+   ```
 
-Read the receiver, transmitter, BSSID, replay counter, nonce, key MIC, and Key
-Information flags. Identify the BSSID shared by the four frames. Then replace
-`RECORDED_BSSID` below with that value to inspect only the relevant beacon:
+   | Message | Direction | Key ACK | Key MIC | Secure | Main observation |
+   | --- | --- | ---: | ---: | ---: | --- |
+   | M1 | AP -> STA | 1 | 0 | 0 | AP supplies ANonce |
+   | M2 | STA -> AP | 0 | 1 | 0 | STA supplies SNonce and MIC |
+   | M3 | AP -> STA | 1 | 1 | 1 | AP authenticates key installation |
+   | M4 | STA -> AP | 0 | 1 | 1 | STA acknowledges installation |
 
-```console
-tshark \
-  -r ../data/wpa2/lab01-handshake.pcap \
-  -Y 'wlan.fc.type_subtype == 0x0008 && wlan.bssid == RECORDED_BSSID' \
-  -V
-```
+   Wireshark may display additional Key Information bits. Use only the direction,
+   three bits above, replay counter, and nonce behavior for this simplified
+   classification. If your four rows do not form a coherent exchange, recheck the
+   addresses and frame numbers before continuing.
 
-Read the 802.11 header and tagged parameters to locate the SSID. The verbose
-output is long by design: locating fields in a protocol tree is part of the
-exercise.
+3. **Complete the capture worksheet**
 
-### Identify M1-M4
+   Complete the worksheet without consulting an automated parser:
 
-Use the AP/STA direction and these EAPOL-Key flags. A set bit is shown as `1`.
+   1. Which beacon-frame field contains the SSID? Which header field contains the
+      BSSID?
+   2. Which address belongs to the AP, and which belongs to the station?
+   3. Which frames are M1, M2, M3, and M4? Give evidence from direction and flags.
+   4. In which messages do ANonce and SNonce first appear?
+   5. How do the replay counters group the request/response pairs?
+   6. Which messages contain a nonzero MIC, and why does M1 differ?
 
-| Message | Direction | Key ACK | Key MIC | Secure | Main observation |
-| --- | --- | ---: | ---: | ---: | --- |
-| M1 | AP -> STA | 1 | 0 | 0 | AP supplies ANonce |
-| M2 | STA -> AP | 0 | 1 | 0 | STA supplies SNonce and MIC |
-| M3 | AP -> STA | 1 | 1 | 1 | AP authenticates key installation |
-| M4 | STA -> AP | 0 | 1 | 1 | STA acknowledges installation |
+   Do not put the recovered passphrase in the worksheet, report, or screenshots.
 
-Wireshark may display additional Key Information bits. Use only the direction,
-three bits above, replay counter, and nonce behavior for this simplified
-classification. If your four rows do not form a coherent exchange, recheck the
-addresses and frame numbers before continuing.
+## Exercise B: implement candidate verification
 
-### Manual observation questions
-
-Complete the worksheet without consulting an automated parser:
-
-1. Which beacon-frame field contains the SSID? Which header field contains the
-   BSSID?
-2. Which address belongs to the AP, and which belongs to the station?
-3. Which frames are M1, M2, M3, and M4? Give evidence from direction and flags.
-4. In which messages do ANonce and SNonce first appear?
-5. How do the replay counters group the request/response pairs?
-6. Which messages contain a nonzero MIC, and why does M1 differ?
-
-Do not put the recovered passphrase in the worksheet, report, or screenshots.
-
-## Background: PMK, PTK, KCK, and MIC
+### Background: PMK, PTK, KCK, and MIC
 
 The password is not transmitted in the four-way handshake. For WPA2-Personal,
 a candidate and SSID produce the **Pairwise Master Key (PMK)**:
@@ -215,11 +252,24 @@ PMK + ordered addresses/nonces -> PTK -> first 16 bytes -> KCK
 KCK + normalized EAPOL -> candidate MIC -> constant-time comparison
 ```
 
+```mermaid
+flowchart LR
+    A[Candidate + SSID] -->|PBKDF2| B[32-byte PMK]
+    B -->|Ordered MACs and nonces| C[64-byte PTK]
+    C -->|First 16 bytes| D[KCK]
+    E[Captured EAPOL] -->|Zero bytes 81:97| F[Normalized EAPOL]
+    D --> G[HMAC-SHA1]
+    F --> G
+    G -->|First 16 bytes| H[Candidate MIC]
+    I[Captured MIC] --> J{Constant-time match?}
+    H --> J
+```
+
 A matching MIC is evidence that the candidate generated the same key material.
 All inputs needed to test another candidate are already local, so no guess is
 sent to the access point and server-side rate limiting cannot observe it.
 
-## Exercise B: implement candidate verification
+### Implementation tasks
 
 Complete these TODOs in `verify_candidate.py` in order:
 
@@ -240,79 +290,95 @@ Complete these TODOs in `verify_candidate.py` in order:
 The constants, command-line interface, and local JSON loading are supplied.
 The starter raises `NotImplementedError` until you complete each TODO.
 
-### Understand the synthetic input
+### Commands and tests
 
-After completing the manual PCAP work, inspect the separate calculation fixture:
+1. **Understand the synthetic input**
 
-```console
-python3 explain_handshake.py ../data/wpa2_capture.json
-```
+   After completing the manual PCAP work, inspect the separate calculation fixture:
 
-This program reads JSON; it does not parse the PCAP or answer Exercise A. Match
-the printed field names to the fields you located manually in Wireshark/TShark.
+   ```console
+   python3 explain_handshake.py ../data/wpa2_capture.json
+   ```
 
-To view its argument syntax:
+   This program reads JSON; it does not parse the PCAP or answer Exercise A. Match
+   the printed field names to the fields you located manually in Wireshark/TShark.
 
-```console
-python3 explain_handshake.py --help
-```
+   To view its argument syntax:
 
-### Run the tests
+   ```console
+   python3 explain_handshake.py --help
+   ```
 
-Before implementing the TODOs, run the baseline data checks. Completion tests
-will be skipped intentionally:
+2. **Run the baseline tests**
 
-```console
-python3 -m unittest test_wpa2_workflow.py -v
-```
+   Before implementing the TODOs, run the baseline data checks. Completion tests
+   will be skipped intentionally:
 
-After implementing every TODO, enable all implementation checks:
+   ```console
+   python3 -m unittest test_wpa2_workflow.py -v
+   ```
 
-```console
-LAB01_GRADE=1 python3 -m unittest test_wpa2_workflow.py -v
-```
+3. **Run the implementation tests**
 
-The tests check output lengths, address/nonce ordering, sensitivity to changed
-inputs, truncated EAPOL rejection, MIC normalization, and one match in the
-bounded list. They do not print the matching candidate or reference digests.
+   After implementing every TODO, enable all implementation checks:
 
-### Check one candidate
+   ```console
+   LAB01_GRADE=1 python3 -m unittest test_wpa2_workflow.py -v
+   ```
 
-The candidate is read with `getpass`, so it is not displayed or stored in shell
-history:
+   The tests check output lengths, address/nonce ordering, sensitivity to changed
+   inputs, truncated EAPOL rejection, MIC normalization, and exactly one match in
+   `../data/lab01-small.txt`. They do not print the matching candidate or
+   reference digests.
 
-```console
-python3 verify_candidate.py ../data/wpa2_capture.json
-Candidate:
-no match
-```
+4. **Check one candidate**
 
-A consistent candidate prints `match`; another input prints `no match`. The
-script accepts only a local metadata file and performs no network operation.
+   The candidate is read with `getpass`, so it is not displayed or stored in shell
+   history. Choose one candidate from `../data/lab01-small.txt`. This step checks
+   the command-line interface, so `no match` is a valid result; you do not need
+   to discover the matching candidate manually. The implementation tests above
+   confirm that the supplied list contains exactly one match without printing it.
 
-```console
-python3 verify_candidate.py --help
-```
+   ```console
+   python3 verify_candidate.py ../data/wpa2_capture.json
+   Candidate:
+   no match
+   ```
+
+   A consistent candidate prints `match`; another input prints `no match`. The
+   script accepts only a local metadata file and performs no network operation.
+
+   ```console
+   python3 verify_candidate.py --help
+   ```
 
 ## Exercise C: bounded dictionary comparison
 
-Use the BSSID you recorded manually in `CAPTURE_WORKSHEET.md`. Replace
-`AP_BSSID_FROM_WORKSHEET` in this command before running it:
+1. **Run the bounded comparison**
 
-```console
-aircrack-ng \
-  -w ../data/wpa2/lab01-pcap-wordlist.txt \
-  -b AP_BSSID_FROM_WORKSHEET \
-  ../data/wpa2/lab01-handshake.pcap
-```
+   Move to the directory containing the supplied PCAP and wordlist:
 
-Use only the two supplied course files. Record the tested-key count and elapsed
-time, but do not publish the recovered key. Do not substitute a downloaded
-wordlist or another capture.
+   ```console
+   cd /workspace/labs/lab01/data/wpa2
+   ```
 
-Compare the tool's offline process with your Python pipeline. In both cases, a
-candidate is used to derive key material and reproduce captured authentication
-data; it is not submitted to an access point.
+   Enter the BSSID you recorded manually in `CAPTURE_WORKSHEET.md`, then run
+   the bounded comparison:
+
+   ```console
+   read -r -p "Enter the BSSID from your worksheet: " AP_BSSID
+   aircrack-ng -w lab01-pcap-wordlist.txt -b "${AP_BSSID}" lab01-handshake.pcap
+   ```
+
+   Use only the two supplied course files. Record the tested-key count and elapsed
+   time, but do not publish the recovered key. Do not substitute a downloaded
+   wordlist or another capture.
+
+2. **Compare the offline processes**
+
+   Compare the tool's offline process with your Python pipeline. In both cases, a
+   candidate is used to derive key material and reproduce captured authentication
+   data; it is not submitted to an access point.
 
 ## Completion criteria
 

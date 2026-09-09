@@ -13,6 +13,23 @@ Docker network. Unlike offline hash guessing, the server can observe, log,
 delay, rate-limit, or block these requests. Part 3 performs the corresponding
 offline hash-file experiments.
 
+## Part 2 at a glance
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant P as course container<br/>Python program
+    participant S as SSH target<br/>Authentication server
+    participant L as Host terminal<br/>Server logs
+
+    loop Check each candidate in the wordlist
+        P->>S: SSH authentication request
+        S-->>P: Success or failure
+        S-->>L: Authentication-attempt log
+    end
+    P->>P: Review the attempt count and elapsed time
+```
+
 ## Learning objectives
 
 After completing this part, you should be able to:
@@ -91,7 +108,20 @@ The destination and maximum input size are fixed in the supplied code. Implement
 6. Return `True` after successful authentication.
 7. Close the client in a `finally` block.
 
-Run the bounded exercise only after the checks below pass:
+### Run the safety checks
+
+```console
+python3 -m unittest test_ssh_dictionary_attack.py -v
+```
+
+Expected result: two tests pass. They confirm that the target is the fixed
+Compose service, the supplied wordlist contains 107 unique classroom
+candidates, and it remains within the 120-candidate limit. They do not contact
+the SSH target, exercise `try_candidate()`, or reveal the solution.
+
+### Run the bounded exercise
+
+After implementing `try_candidate()` and passing the safety checks:
 
 ```console
 python3 ssh_dictionary_attack.py ../data/ssh-lab-wordlist.txt
@@ -108,17 +138,6 @@ Result: candidate found
 
 The program deliberately reports success without printing the candidate.
 
-### `test_ssh_dictionary_attack.py`
-
-```console
-python3 -m unittest test_ssh_dictionary_attack.py -v
-```
-
-Expected result: two tests pass. They confirm that the target is the fixed
-Compose service, the supplied wordlist contains 107 unique classroom
-candidates, and it remains within the 120-candidate limit. They do not test a
-real network or reveal the solution.
-
 ## Step 3: observe and remove the target
 
 In a second host terminal, inspect only this container's recent logs:
@@ -129,10 +148,17 @@ docker compose -f docker/compose.yml --profile lab01-ssh \
 ```
 
 Compare the failed-login records with Part 3's offline CSV attacks, which
-produce no server-side signal. Exit the course shell and remove the target:
+produce no server-side signal.
+
+In the course-container terminal, exit the course shell:
 
 ```console
 exit
+```
+
+Back in a host terminal at the repository root, remove the target:
+
+```console
 docker compose -f docker/compose.yml --profile lab01-ssh \
   rm --stop --force lab01-ssh-target
 ```

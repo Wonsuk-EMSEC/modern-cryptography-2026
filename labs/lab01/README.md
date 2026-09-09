@@ -40,11 +40,11 @@ demonstrations are runnable immediately.
    scripts. Expected: a stable digest, then changing salt/digest pairs.
    Checkpoint: distinguish hashing from encryption and explain unique salts.
 2. **Controlled online dictionary attack (25 minutes).** Read
-   `part2_dictionary_attack/PART2_DICTIONARY_ATTACK_GUIDE.pdf`. If assigned,
-   start the isolated Compose SSH target, complete the bounded client, observe
-   the local logs, and remove the target. Expected: redacted status, attempt
-   count, and server-visible failures. Checkpoint: why can the SSH service
-   observe and rate-limit these guesses?
+   `part2_dictionary_attack/PART2_DICTIONARY_ATTACK_GUIDE.pdf`. Start the
+   isolated Compose SSH target, complete the bounded client, observe the local
+   logs, and remove the target. Expected: redacted status, attempt count, and
+   server-visible failures. Checkpoint: why can the SSH service observe and
+   rate-limit these guesses?
 3. **Offline cracking and password KDFs (40 minutes).** Read
    `part3_password_kdfs/PART3_PASSWORD_KDFS_GUIDE.pdf`, implement the unsalted
    and salted cracking starters, run `compare_cost.py`, then benchmark the KDFs
@@ -71,4 +71,4 @@ demonstrations are runnable immediately.
 No real credential is included. The supplied PCAP is restricted to this
 authorized offline exercise. The instructor may optionally provide a deliberately
 vulnerable Ubuntu VM on an isolated host-only network; it is not required for
-the core lab. Complete reference attacks remain under `/workspace/instructor/lab01`.
+the core lab.

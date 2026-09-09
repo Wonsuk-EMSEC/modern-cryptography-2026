@@ -14,8 +14,9 @@ Date:
    not include recovered passwords.
 6. Explain the observed time-memory/coverage tradeoff and why a unique salt
    prevents reuse of the supplied unsalted tables.
-7. Classify the Part 2 SSH, Part 3 hash-file, system-hash, and WPA2 exercises as
-   online or offline.
+7. Classify the guessing activities in Parts 2–5 as online or offline. Explain
+   why parsing the Part 4 shadow-style record is neither a login attempt nor a
+   password guess.
 8. Draw or describe your WPA2 candidate-verification implementation from
    passphrase to MIC. Include PMK/PTK/KCK/context lengths, EAPOL MIC-field
    normalization, and your Wireshark/TShark evidence for identifying M1–M4,

@@ -12,6 +12,39 @@ rainbow-table-like endpoint structure. The password space is deliberately only
 `6^4 = 1,296` candidates so that every step can be inspected in class. These
 parameters are for learning and provide no real security.
 
+## Part 4 at a glance
+
+```mermaid
+flowchart TB
+    C[Same candidate set]
+
+    subgraph F[Full precomputation table]
+        F1[Hash every candidate]
+        F2[Store every digest and candidate]
+        F3[Look up a digest directly]
+        F1 --> F2 --> F3
+    end
+
+    subgraph R[Rainbow table]
+        R1[Repeat hash → reduction]
+        R2[Store only chain starts and ends]
+        R3[Recompute chains during lookup]
+        R1 --> R2 --> R3
+    end
+
+    C --> F1
+    C --> R1
+    F3 --> FT[More storage<br/>Less lookup computation]
+    R3 --> RT[Less storage<br/>More lookup work and possible misses]
+
+    classDef source fill:#e8f1ff,stroke:#4676b8,color:#172b4d
+    classDef full fill:#e7f7ed,stroke:#3a8f5c,color:#153d26
+    classDef rainbow fill:#f2e9ff,stroke:#7952b3,color:#352050
+    class C source
+    class F1,F2,F3,FT full
+    class R1,R2,R3,RT rainbow
+```
+
 ## Learning objectives
 
 After completing this part, you should be able to:
@@ -28,6 +61,8 @@ After completing this part, you should be able to:
   many accounts.
 
 ## Exercise A: inspect a system password record
+
+### Background
 
 A simplified shadow-style line has this shape:
 
@@ -49,33 +84,39 @@ plaintext. The remaining colon-separated fields describe password-aging policy.
    offline. The optional John command below may be used only on the supplied
    synthetic file.
 
-### `analyze_shadow_hash.py` usage
+### Commands and expected results
 
-```console
-cd /workspace/labs/lab01/part4_system_hashes
-python3 analyze_shadow_hash.py ../data/linux_hashes.txt
-```
+1. **Parse the supplied record**
 
-Expected output has this structure:
+   ```console
+   cd /workspace/labs/lab01/part4_system_hashes
+   python3 analyze_shadow_hash.py ../data/linux_hashes.txt
+   ```
 
-```text
-{'account': 'student_...', 'id': '6', 'algorithm': 'SHA-512-crypt',
- 'salt_or_parameters': '...', 'verifier': '...'}
-```
+   Expected output has this structure:
 
-The `$6$` identifier selects SHA-512-crypt. The script accepts an explicit local
-filename and never opens `/etc/shadow` automatically.
+   ```text
+   {'account': 'student_...', 'id': '6', 'algorithm': 'SHA-512-crypt',
+    'salt_or_parameters': '...', 'verifier': '...'}
+   ```
 
-```console
-python3 analyze_shadow_hash.py --help
-john --wordlist=../data/lab01-small.txt ../data/linux_hashes.txt
-john --show ../data/linux_hashes.txt
-```
+   The `$6$` identifier selects SHA-512-crypt. The script accepts an explicit local
+   filename and never opens `/etc/shadow` automatically.
 
-Runtime and exact John status messages can vary. The key observation is that
-all guesses are checked locally, so a login service cannot rate-limit them.
+2. **Inspect the interface and optional John output**
+
+   ```console
+   python3 analyze_shadow_hash.py --help
+   john --wordlist=../data/lab01-small.txt ../data/linux_hashes.txt
+   john --show ../data/linux_hashes.txt
+   ```
+
+   Runtime and exact John status messages can vary. The key observation is that
+   all guesses are checked locally, so a login service cannot rate-limit them.
 
 ## Exercise B: compare precomputation and rainbow tables
+
+### Background
 
 The supplied `rainbow_password_database.csv` contains fictional accounts and
 unsalted SHA-256 digests. A **full precomputation table** stores one
@@ -131,100 +172,104 @@ tables belong in `generated/`, which Git ignores.
 Do not add the target hashes or their recovered passwords as special cases.
 Your implementation must work from the configuration, table, and database.
 
-### `table_common.py` usage
+### Commands and expected results
 
-This is a support module rather than a command-line program. The following
-example checks the configured space without revealing a database password:
+1. **Inspect the configured password space with `table_common.py`**
 
-```console
-python3 -c "from pathlib import Path; from table_common import load_config, password_space; c=load_config(Path('../data/rainbow_lab_config.json')); print(sum(1 for _ in password_space(str(c['alphabet']), int(c['password_length']))))"
-```
+   This is a support module rather than a command-line program. The following
+   example checks the configured space without revealing a database password:
 
-Expected result:
+   ```console
+   python3 -c "from pathlib import Path; from table_common import load_config, password_space; c=load_config(Path('../data/rainbow_lab_config.json')); print(sum(1 for _ in password_space(str(c['alphabet']), int(c['password_length']))))"
+   ```
 
-```text
-1296
-```
+   Expected result:
 
-### `build_precomputation_table.py` usage
+   ```text
+   1296
+   ```
 
-After implementing its TODO:
+2. **Run the baseline tests**
 
-```console
-mkdir -p generated
-python3 build_precomputation_table.py \
-  ../data/rainbow_lab_config.json generated/precomputation.json
-```
+   Before implementing the TODOs, run the basic fixture tests. Implementation
+   tests are skipped:
 
-The script reports 1,296 entries and build hashes, plus build time and JSON file
-size. Inspect a few keys and values, but do not paste recovered passwords into
-a public report.
+   ```console
+   python3 -m unittest test_table_attacks.py -v
+   ```
 
-### `build_rainbow_table.py` usage
+3. **Build the full table with `build_precomputation_table.py`**
 
-After implementing its TODOs:
+   After implementing its TODO:
 
-```console
-python3 build_rainbow_table.py \
-  ../data/rainbow_lab_config.json generated/rainbow.json
-```
+   ```console
+   mkdir -p generated
+   python3 build_precomputation_table.py \
+     ../data/rainbow_lab_config.json generated/precomputation.json
+   ```
 
-The script reports 96 starts, 1,152 build hashes, and no more than 96 distinct
-endpoints. Fewer endpoints than starts demonstrates that at least two chains
-merged.
+   The script reports 1,296 entries and build hashes, plus build time and JSON file
+   size. Inspect a few keys and values, but do not paste recovered passwords into
+   a public report.
 
-### `compare_table_attacks.py` usage
+4. **Build the rainbow table with `build_rainbow_table.py`**
 
-After both tables and lookup functions are complete:
+   After implementing its TODOs:
 
-```console
-python3 compare_table_attacks.py \
-  ../data/rainbow_password_database.csv \
-  generated/precomputation.json generated/rainbow.json
-```
+   ```console
+   python3 build_rainbow_table.py \
+     ../data/rainbow_lab_config.json generated/rainbow.json
+   ```
 
-The output contains one summary row per method:
+   The script reports 96 starts, 1,152 build hashes, and no more than 96 distinct
+   endpoints. Fewer endpoints than starts demonstrates that at least two chains
+   merged.
 
-```text
-method      recovered build hashes  build sec  records  endpoints ...
-full             ...          1296        ...     1296          - ...
-rainbow          ...          1152        ...       96        ... ...
-```
+5. **Compare both methods with `compare_table_attacks.py`**
 
-The full table should recover every supplied target. The smaller rainbow table
-should demonstrate partial coverage and additional lookup hashes. Exact times
-and serialized file sizes depend on the environment.
+   After both tables and lookup functions are complete:
 
-### `test_table_attacks.py` usage
+   ```console
+   python3 compare_table_attacks.py \
+     ../data/rainbow_password_database.csv \
+     generated/precomputation.json generated/rainbow.json
+   ```
 
-Before implementing the TODOs, the basic fixture tests run and implementation
-tests are skipped:
+   The output contains one summary row per method:
 
-```console
-python3 -m unittest test_table_attacks.py -v
-```
+   ```text
+   method      recovered build hashes  build sec  records  endpoints ...
+   full             ...          1296        ...     1296          - ...
+   rainbow          ...          1152        ...       96        ... ...
+   ```
 
-After completing all TODOs, enable the implementation checks:
+   The full table should recover every supplied target. The smaller rainbow table
+   should demonstrate partial coverage and additional lookup hashes. Exact times
+   and serialized file sizes depend on the environment.
 
-```console
-LAB01_GRADE=1 python3 -m unittest test_table_attacks.py -v
-```
+6. **Run the implementation tests**
 
-### Salt-reuse observation
+   After completing all TODOs, enable the implementation checks:
 
-Use a non-target classroom example to see that changing the input changes the
-lookup key:
+   ```console
+   LAB01_GRADE=1 python3 -m unittest test_table_attacks.py -v
+   ```
 
-```console
-python3 -c "import hashlib,json; t=json.load(open('generated/precomputation.json'))['entries']; p=b'abc1'; print(hashlib.sha256(p).hexdigest() in t, hashlib.sha256(b'public-salt:'+p).hexdigest() in t)"
-```
+7. **Observe salt reuse**
 
-The unsalted digest is present and the salted digest is absent. A real password
-database stores each salt openly and hashes with a password KDF, but an attacker
-must then perform work for each distinct salt. One shared unsalted
-precomputation or rainbow table is no longer directly reusable across accounts.
+   Use a non-target classroom example to see that changing the input changes the
+   lookup key:
 
-## Comparison table for your report
+   ```console
+   python3 -c "import hashlib,json; t=json.load(open('generated/precomputation.json'))['entries']; p=b'abc1'; print(hashlib.sha256(p).hexdigest() in t, hashlib.sha256(b'public-salt:'+p).hexdigest() in t)"
+   ```
+
+   The unsalted digest is present and the salted digest is absent. A real password
+   database stores each salt openly and hashes with a password KDF, but an attacker
+   must then perform work for each distinct salt. One shared unsalted
+   precomputation or rainbow table is no longer directly reusable across accounts.
+
+### Comparison table for your report
 
 Fill this in from your own run:
 

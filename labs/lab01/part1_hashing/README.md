@@ -11,6 +11,28 @@ salts change the demonstration verifier.
 These constructions teach mechanics only. Neither raw SHA-256 nor
 `SHA256(salt || password)` is appropriate production password storage.
 
+## Part 1 at a glance
+
+```mermaid
+flowchart LR
+    P1[Same password] --> H1[SHA-256]
+    P1 --> H2[SHA-256]
+    H1 --> D1[Same digest]
+    H2 --> D1
+
+    P2[Same password] --> S1[Combine with random salt A]
+    P2 --> S2[Combine with random salt B]
+    S1 --> V1[Different verifier A]
+    S2 --> V2[Different verifier B]
+
+    classDef input fill:#e8f1ff,stroke:#4676b8,color:#172b4d
+    classDef process fill:#fff3cd,stroke:#c69500,color:#4d3b00
+    classDef result fill:#e7f7ed,stroke:#3a8f5c,color:#153d26
+    class P1,P2 input
+    class H1,H2,S1,S2 process
+    class D1,V1,V2 result
+```
+
 ## Purpose and learning objectives
 
 This part introduces the value a server can compare during login without
