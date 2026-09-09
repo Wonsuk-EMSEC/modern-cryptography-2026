@@ -43,6 +43,10 @@ aircrack-ng comparison. The JSON fixture gives your Python functions a compact,
 reproducible input after you have learned where those values appear in a real
 packet trace.
 
+The SSID and endpoint MAC addresses embedded in the distributed PCAP are
+fictional course identifiers. They are intentionally left out of this guide so
+that finding them remains part of Exercise A.
+
 ## Prepare the analysis tool
 
 TShark, Wireshark's command-line packet analyzer, is installed in the course

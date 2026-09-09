@@ -14,7 +14,8 @@ All accounts and passwords are fictional course fixtures.
 - `wpa2_capture.json`: synthetic WPA2 calculation metadata, not a PCAP and not
   the metadata for the separate course capture below.
 - `wpa2/lab01-handshake.pcap`: instructor-approved 802.11/EAPOL course capture
-  for manual Wireshark/TShark inspection.
+  for manual Wireshark/TShark inspection. Its network identifiers are
+  course-specific fictional values.
 - `wpa2/lab01-pcap-wordlist.txt`: tiny candidate list for that capture only.
 
 `rainbow_config.json`, `rainbow_targets.txt`, and `salted_targets.json` support

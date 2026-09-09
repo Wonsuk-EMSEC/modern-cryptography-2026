@@ -10,7 +10,7 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 17 0 R /F2 18 0 R >> >> /Contents 4 0 R >>
 endobj
 4 0 obj
-<< /Length 3472 >>
+<< /Length 3642 >>
 stream
 BT
 54 760 Td
@@ -159,13 +159,13 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-() Tj
-0 -14 Td
-/F1 14 Tf
-(Prepare the analysis tool) Tj
+(The SSID and endpoint MAC addresses embedded in the distributed PCAP are) Tj
 0 -14 Td
 /F1 10 Tf
-() Tj
+(fictional course identifiers. They are intentionally left out of this guide so) Tj
+0 -14 Td
+/F1 10 Tf
+(that finding them remains part of Exercise A.) Tj
 0 -14 Td
 ET
 endstream
@@ -174,10 +174,22 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 17 0 R /F2 18 0 R >> >> /Contents 6 0 R >>
 endobj
 6 0 obj
-<< /Length 2988 >>
+<< /Length 2860 >>
 stream
 BT
 54 760 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Prepare the analysis tool) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
 /F1 10 Tf
 (TShark, Wireshark's command-line packet analyzer, is installed in the course) Tj
 0 -14 Td
@@ -319,6 +331,17 @@ BT
 /F1 10 Tf
 (   wlan.fc.type_subtype == 0x0008 && wlan.bssid == RECORDED_BSSID) Tj
 0 -14 Td
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 17 0 R /F2 18 0 R >> >> /Contents 8 0 R >>
+endobj
+8 0 obj
+<< /Length 2846 >>
+stream
+BT
+54 760 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
@@ -331,17 +354,6 @@ BT
 /F1 10 Tf
 (   frame. Confirm the BSSID in the 802.11 header. Expand Tagged parameters) Tj
 0 -14 Td
-ET
-endstream
-endobj
-7 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 17 0 R /F2 18 0 R >> >> /Contents 8 0 R >>
-endobj
-8 0 obj
-<< /Length 2910 >>
-stream
-BT
-54 760 Td
 /F1 10 Tf
 (   and the SSID parameter set to find the network name.) Tj
 0 -14 Td
@@ -483,6 +495,17 @@ BT
 /F1 10 Tf
 (| Message | Direction | Key ACK | Key MIC | Secure | Main observation |) Tj
 0 -14 Td
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 17 0 R /F2 18 0 R >> >> /Contents 10 0 R >>
+endobj
+10 0 obj
+<< /Length 3074 >>
+stream
+BT
+54 760 Td
 /F1 10 Tf
 (| --- | --- | ---: | ---: | ---: | --- |) Tj
 0 -14 Td
@@ -495,17 +518,6 @@ BT
 /F1 10 Tf
 (| M3 | AP -> STA | 1 | 1 | 1 | AP authenticates key installation |) Tj
 0 -14 Td
-ET
-endstream
-endobj
-9 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 17 0 R /F2 18 0 R >> >> /Contents 10 0 R >>
-endobj
-10 0 obj
-<< /Length 2956 >>
-stream
-BT
-54 760 Td
 /F1 10 Tf
 (| M4 | STA -> AP | 0 | 1 | 1 | STA acknowledges installation |) Tj
 0 -14 Td
@@ -647,6 +659,17 @@ BT
 /F1 10 Tf
 () Tj
 0 -14 Td
+ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 17 0 R /F2 18 0 R >> >> /Contents 12 0 R >>
+endobj
+12 0 obj
+<< /Length 3308 >>
+stream
+BT
+54 760 Td
 /F2 9 Tf
 () Tj
 0 -14 Td
@@ -659,17 +682,6 @@ BT
 /F2 9 Tf
 (    data = "Pairwise key expansion" || 0x00 || context || BYTE\(i\)) Tj
 0 -14 Td
-ET
-endstream
-endobj
-11 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 17 0 R /F2 18 0 R >> >> /Contents 12 0 R >>
-endobj
-12 0 obj
-<< /Length 3288 >>
-stream
-BT
-54 760 Td
 /F2 9 Tf
 (\)) Tj
 0 -14 Td
@@ -811,6 +823,17 @@ BT
 /F1 12 Tf
 (Understand the synthetic input) Tj
 0 -14 Td
+ET
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 17 0 R /F2 18 0 R >> >> /Contents 14 0 R >>
+endobj
+14 0 obj
+<< /Length 2464 >>
+stream
+BT
+54 760 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
@@ -823,17 +846,6 @@ BT
 /F2 9 Tf
 () Tj
 0 -14 Td
-ET
-endstream
-endobj
-13 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 17 0 R /F2 18 0 R >> >> /Contents 14 0 R >>
-endobj
-14 0 obj
-<< /Length 2416 >>
-stream
-BT
-54 760 Td
 /F2 9 Tf
 (python3 explain_handshake.py ../data/wpa2_capture.json) Tj
 0 -14 Td
@@ -975,6 +987,17 @@ BT
 /F1 10 Tf
 () Tj
 0 -14 Td
+ET
+endstream
+endobj
+15 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 17 0 R /F2 18 0 R >> >> /Contents 16 0 R >>
+endobj
+16 0 obj
+<< /Length 2954 >>
+stream
+BT
+54 760 Td
 /F2 9 Tf
 () Tj
 0 -14 Td
@@ -987,17 +1010,6 @@ BT
 /F1 10 Tf
 () Tj
 0 -14 Td
-ET
-endstream
-endobj
-15 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 17 0 R /F2 18 0 R >> >> /Contents 16 0 R >>
-endobj
-16 0 obj
-<< /Length 2823 >>
-stream
-BT
-54 760 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
@@ -1152,22 +1164,22 @@ xref
 0000000064 00000 n 
 0000000160 00000 n 
 0000000298 00000 n 
-0000003822 00000 n 
-0000003960 00000 n 
-0000007000 00000 n 
-0000007138 00000 n 
-0000010100 00000 n 
-0000010239 00000 n 
-0000013248 00000 n 
-0000013388 00000 n 
-0000016729 00000 n 
-0000016869 00000 n 
-0000019338 00000 n 
-0000019478 00000 n 
-0000022354 00000 n 
-0000022425 00000 n 
+0000003992 00000 n 
+0000004130 00000 n 
+0000007042 00000 n 
+0000007180 00000 n 
+0000010078 00000 n 
+0000010217 00000 n 
+0000013344 00000 n 
+0000013484 00000 n 
+0000016845 00000 n 
+0000016985 00000 n 
+0000019502 00000 n 
+0000019642 00000 n 
+0000022649 00000 n 
+0000022720 00000 n 
 trailer
 << /Size 19 /Root 1 0 R >>
 startxref
-22494
+22789
 %%EOF
