@@ -1,8 +1,12 @@
 import importlib.util
 import json
+import os
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).parents[1]
+PART5_IMPL = Path(os.environ.get("LAB01_PART5_IMPL", ROOT / "part5_wpa2"))
 
 
 def load(path):
@@ -30,15 +34,9 @@ def test_shadow_parser():
     assert row["id"] == "6" and row["account"].startswith("student_")
 
 
+@pytest.mark.skipif(not os.environ.get("LAB01_GRADE"), reason="complete Part 5 TODOs first")
 def test_wpa2_fixture_has_one_dictionary_match():
-    verifier = load(ROOT / "part5_wpa2/verify_candidate.py")
+    verifier = load(PART5_IMPL / "verify_candidate.py")
     row = json.loads((ROOT / "data/wpa2_capture.json").read_text())
     words = (ROOT / "data/lab01-small.txt").read_text().splitlines()
     assert sum(verifier.verify(word, row) for word in words) == 1
-
-
-def test_supplied_pcap_has_complete_four_way_handshake():
-    inspector = load(ROOT / "part5_wpa2/inspect_capture.py")
-    summary = inspector.summarize(ROOT / "data/wpa2/lab01-handshake.pcap")
-    assert summary["networks"]["00:0c:41:82:b2:55"] == "Coherer"
-    assert [message["message"] for message in summary["messages"]] == ["M1", "M2", "M3", "M4"]

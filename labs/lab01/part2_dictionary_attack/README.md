@@ -34,9 +34,11 @@ course container  --->  labstudent@lab01-ssh-target:22
 ```
 
 The SSH service has no host `ports:` mapping, uses a fictional non-root account,
-and receives candidates sequentially from a course wordlist containing at most
-20 entries. The starter intentionally does not provide target-selection or
-concurrency options.
+and receives candidates sequentially from a 107-entry course wordlist. The
+client enforces a 120-candidate upper bound and intentionally provides no
+target-selection or concurrency options. With a 0.25-second delay after failed
+attempts plus SSH handshake overhead, the exercise should take tens of seconds
+rather than finishing immediately; exact time depends on the Docker host.
 
 ## Tasks
 
@@ -113,8 +115,9 @@ python3 -m unittest test_ssh_dictionary_attack.py -v
 ```
 
 Expected result: two tests pass. They confirm that the target is the fixed
-Compose service and the supplied wordlist remains within the 20-candidate
-limit. They do not test a real network or reveal the solution.
+Compose service, the supplied wordlist contains 107 unique classroom
+candidates, and it remains within the 120-candidate limit. They do not test a
+real network or reveal the solution.
 
 ## Step 3: observe and remove the target
 

@@ -1,203 +1,278 @@
 # Part 5: WPA2 offline candidate verification
 
+**Estimated time:** 40 minutes.
+
 **Ethical and authorized use:** use only the supplied course PCAP and synthetic
 metadata. Do not capture traffic, deauthenticate clients, disrupt networks, use
 a wireless interface, or test third-party credentials. This exercise begins
 after an authorized capture has already been provided.
 
-The password is not transmitted in a WPA2 four-way handshake. Nevertheless, a
-recorded SSID, AP/STA MAC addresses, ANonce/SNonce, EAPOL bytes, and MIC let a
-candidate be checked offline:
+In this part, packet observations are deliberately **not extracted by a Python
+script**. You must inspect the saved PCAP with Wireshark or TShark, find the
+relevant fields in the decoded protocol tree, and record your own observations.
+You will then implement the WPA2 candidate-verification calculations in Python.
 
-```text
-candidate passphrase + SSID -> PBKDF2-HMAC-SHA1 -> PMK
-PMK + ordered MACs/nonces -> PRF -> PTK -> KCK
-KCK + EAPOL frame -> candidate MIC -> compare with captured MIC
-```
-
-Run the explanation and single-candidate checker against
-`../data/wpa2_capture.json`. Server-side rate limiting cannot observe or slow
-local guesses after capture. WPA2-Enterprise and WPA3-SAE have different
-authentication properties and are outside this exercise.
-
-## Purpose and learning objectives
-
-This part connects password guessing to an authentication protocol. You are
-given both a previously captured course PCAP and a small synthetic metadata
-fixture. You will not capture packets. First identify the four-way handshake,
-then study the derivation calculation, and finally run a bounded dictionary
-check against the supplied capture.
+## Learning objectives
 
 After completing this part, you should be able to:
 
-- identify AP, STA, SSID, nonces, replay counters, and EAPOL-Key messages;
-- explain how WPA2-Personal derives PMK, PTK, and KCK;
-- describe what M1, M2, M3, and M4 accomplish;
-- explain how a MIC confirms a candidate without transmitting the password;
-- classify the dictionary check as offline; and
+- locate the SSID and BSSID in an 802.11 management frame;
+- identify the AP and station addresses in EAPOL-Key frames;
+- distinguish M1, M2, M3, and M4 using direction, flags, and replay counters;
+- locate nonces and a MIC in the Wireshark protocol tree;
+- implement WPA2-Personal PMK, PTK, KCK, and MIC calculations;
+- explain why a recorded handshake permits offline candidate verification; and
 - state the authorization boundary for wireless-security experiments.
 
 ## Files used
 
 | File | Purpose |
 | --- | --- |
-| `../data/wpa2/lab01-handshake.pcap` | Supplied course packet capture |
+| `../data/wpa2/lab01-handshake.pcap` | Instructor-provided classroom capture |
 | `../data/wpa2/lab01-pcap-wordlist.txt` | Small candidate list for that PCAP only |
-| `../data/wpa2_capture.json` | Synthetic values for transparent Python calculations |
-| `inspect_capture.py` | Summarizes networks and EAPOL-Key frames |
-| `explain_handshake.py` | Labels the synthetic captured values and derivation chain |
-| `verify_candidate.py` | Checks one hidden-input candidate against synthetic metadata |
+| `CAPTURE_WORKSHEET.md` | Blank table for your manual packet observations |
+| `../data/wpa2_capture.json` | Separate synthetic Python calculation fixture |
+| `explain_handshake.py` | Prints the fields in the synthetic JSON fixture |
+| `verify_candidate.py` | Starter containing the PMK-to-MIC TODO pipeline |
+| `test_wpa2_workflow.py` | Baseline and opt-in implementation tests |
 
-## Tasks
+The PCAP and `wpa2_capture.json` are two separate, intentionally created
+classroom datasets. Do not expect their SSIDs, addresses, nonces, or MICs to be
+the same. The PCAP is for manual protocol inspection and the bounded
+aircrack-ng comparison. The JSON fixture gives your Python functions a compact,
+reproducible input after you have learned where those values appear in a real
+packet trace.
 
-1. Run `inspect_capture.py` and confirm the target BSSID, SSID, and M1–M4 order.
-2. For every message, record the sender, receiver, and replay counter.
-3. Read the key-derivation explanation below and label PMK, PTK, KCK, KEK, TK,
-   ANonce, SNonce, and MIC in your own diagram.
-4. Run `explain_handshake.py` on the synthetic JSON and connect each printed
-   field to the derivation formula.
-5. Run `verify_candidate.py` with one nonmatching candidate from the course
-   list; explain why `no match` is useful evidence.
-6. Use aircrack-ng with exactly the provided PCAP, wordlist, and BSSID.
-7. Record that a key was found, tested-key statistics, and timing, but do not
-   publish the recovered key.
-8. Explain why no server, AP, or wireless interface receives the guesses.
+## Prepare the analysis tool
 
-## How the WPA2 four-way handshake establishes keys
+TShark, Wireshark's command-line packet analyzer, is installed in the course
+image. If your image was built before this Part 5 update, rebuild it from the
+repository root:
 
-Despite its common name, the four-way handshake does not transmit the Wi-Fi
-passphrase or directly exchange the final encryption key. Before the handshake,
-both sides must already be able to obtain the same **Pairwise Master Key (PMK)**.
-For WPA2-Personal, the passphrase and SSID produce the PMK:
+```console
+docker compose -f docker/compose.yml build
+docker compose -f docker/compose.yml run --rm course bash
+```
+
+Inside the container, verify the tool and move to Part 5:
+
+```console
+tshark --version
+cd /workspace/labs/lab01/part5_wpa2
+```
+
+The Compose configuration does not forward a graphical desktop from the
+container. You may optionally open the same repository PCAP with a Wireshark
+GUI installed on the host. TShark is the supported container-only path, so a
+host Wireshark installation is not required.
+
+## Exercise A: inspect the PCAP manually
+
+Do not write or use a Python parser for this exercise. Do not use a TShark
+`-T fields` command that prints a ready-made answer table. Read the decoded
+packet tree and enter your findings in `CAPTURE_WORKSHEET.md`.
+
+### Option 1: Wireshark GUI on the host
+
+1. Choose **File > Open** and select
+   `labs/lab01/data/wpa2/lab01-handshake.pcap` from this repository.
+2. Enter the following display filter to show the authentication key exchange:
+
+   ```text
+   eapol
+   ```
+
+3. Inspect the four displayed frames. In the 802.11 header, find the BSSID that
+   is common to the exchange, then distinguish the AP from the other
+   station/client address using frame direction and the Key ACK flag.
+4. Replace `RECORDED_BSSID` below with the BSSID you just observed. This limits
+   the many beacon frames in the PCAP to the relevant access point:
+
+   ```text
+   wlan.fc.type_subtype == 0x0008 && wlan.bssid == RECORDED_BSSID
+   ```
+
+5. Select the resulting beacon and expand **IEEE 802.11 wireless LAN management
+   frame**. Confirm the BSSID in the 802.11 header. Expand **Tagged parameters**
+   and the **SSID parameter set** to find the network name.
+6. Return to the `eapol` filter. In each frame, record the receiver,
+   transmitter, and BSSID. Under **802.1X Authentication** and **WPA Key Data**
+   (wording can vary by Wireshark version), locate the replay counter, nonce,
+   key MIC, and Key Information flags.
+7. Use the message-identification table below to label each frame M1-M4. Record
+   frame numbers rather than relying only on their displayed order.
+
+### Option 2: TShark inside the course container
+
+First view the packet list so you understand the trace layout:
+
+```console
+tshark -r ../data/wpa2/lab01-handshake.pcap
+```
+
+Display the full decoded protocol tree for the EAPOL-Key frames first:
+
+```console
+tshark \
+  -r ../data/wpa2/lab01-handshake.pcap \
+  -Y 'eapol' \
+  -V
+```
+
+Read the receiver, transmitter, BSSID, replay counter, nonce, key MIC, and Key
+Information flags. Identify the BSSID shared by the four frames. Then replace
+`RECORDED_BSSID` below with that value to inspect only the relevant beacon:
+
+```console
+tshark \
+  -r ../data/wpa2/lab01-handshake.pcap \
+  -Y 'wlan.fc.type_subtype == 0x0008 && wlan.bssid == RECORDED_BSSID' \
+  -V
+```
+
+Read the 802.11 header and tagged parameters to locate the SSID. The verbose
+output is long by design: locating fields in a protocol tree is part of the
+exercise.
+
+### Identify M1-M4
+
+Use the AP/STA direction and these EAPOL-Key flags. A set bit is shown as `1`.
+
+| Message | Direction | Key ACK | Key MIC | Secure | Main observation |
+| --- | --- | ---: | ---: | ---: | --- |
+| M1 | AP -> STA | 1 | 0 | 0 | AP supplies ANonce |
+| M2 | STA -> AP | 0 | 1 | 0 | STA supplies SNonce and MIC |
+| M3 | AP -> STA | 1 | 1 | 1 | AP authenticates key installation |
+| M4 | STA -> AP | 0 | 1 | 1 | STA acknowledges installation |
+
+Wireshark may display additional Key Information bits. Use only the direction,
+three bits above, replay counter, and nonce behavior for this simplified
+classification. If your four rows do not form a coherent exchange, recheck the
+addresses and frame numbers before continuing.
+
+### Manual observation questions
+
+Complete the worksheet without consulting an automated parser:
+
+1. Which beacon-frame field contains the SSID? Which header field contains the
+   BSSID?
+2. Which address belongs to the AP, and which belongs to the station?
+3. Which frames are M1, M2, M3, and M4? Give evidence from direction and flags.
+4. In which messages do ANonce and SNonce first appear?
+5. How do the replay counters group the request/response pairs?
+6. Which messages contain a nonzero MIC, and why does M1 differ?
+
+Do not put the recovered passphrase in the worksheet, report, or screenshots.
+
+## Background: PMK, PTK, KCK, and MIC
+
+The password is not transmitted in the four-way handshake. For WPA2-Personal,
+a candidate and SSID produce the **Pairwise Master Key (PMK)**:
 
 ```text
 PMK = PBKDF2-HMAC-SHA1(
-    passphrase,
-    SSID,
+    password = UTF-8(passphrase),
+    salt = UTF-8(SSID),
     iterations = 4096,
     output length = 32 bytes
 )
 ```
 
-The access point (AP) and station/client (STA) then contribute fresh nonces.
-Both sides combine the PMK with the ordered MAC addresses and nonces to derive
-the same session-specific **Pairwise Transient Key (PTK)**:
+The two peers order their raw address and nonce byte strings identically:
 
 ```text
 context = min(AP_MAC, STA_MAC) || max(AP_MAC, STA_MAC)
         || min(ANonce, SNonce) || max(ANonce, SNonce)
-
-PTK = PRF-512(PMK, "Pairwise key expansion", context)
 ```
 
-The `min`/`max` notation means lexicographic byte ordering. It ensures that the
-AP and STA build exactly the same context even though each views itself as the
-local endpoint.
-
-The PTK is divided into keys with separate purposes:
-
-- **KCK (Key Confirmation Key):** authenticates handshake messages by computing
-  their MICs;
-- **KEK (Key Encryption Key):** protects key material transported in EAPOL-Key
-  messages; and
-- **TK (Temporal Key):** protects later unicast data traffic.
-
-The four EAPOL-Key messages have the following simplified roles:
+Two 6-byte MAC addresses and two 32-byte nonces produce a 76-byte context. The
+PMK and context are expanded into a 64-byte **Pairwise Transient Key (PTK)**:
 
 ```text
-AP                                                    STA
- |                                                     |
- |  M1: ANonce, replay counter                         |
- |---------------------------------------------------->|
- |                         STA generates SNonce        |
- |                         STA derives PTK              |
- |                                                     |
- |  M2: SNonce, MIC computed with KCK                  |
- |<----------------------------------------------------|
- |  AP derives PTK and verifies the M2 MIC             |
- |                                                     |
- |  M3: key-install information, GTK data, KCK MIC     |
- |---------------------------------------------------->|
- |                         STA verifies MIC/installs keys|
- |                                                     |
- |  M4: acknowledgement, KCK MIC                       |
- |<----------------------------------------------------|
- |              protected data can follow             |
+block[i] = HMAC-SHA1(
+    key = PMK,
+    data = "Pairwise key expansion" || 0x00 || context || BYTE(i)
+)
+
+PTK = first 64 bytes of (block[0] || block[1] || ...)
 ```
 
-- **M1** gives the STA the AP-generated ANonce. It normally has no MIC because
-  the STA does not yet have all PTK inputs.
-- **M2** returns the STA-generated SNonce and proves that the STA derived a KCK
-  consistent with the shared PMK.
-- **M3** proves the AP derived the same keys and tells the STA to install them;
-  it can also carry group-key information protected with the KEK.
-- **M4** acknowledges successful installation and completes the exchange.
+Start the one-byte counter at zero. The first 16 PTK bytes are the **Key
+Confirmation Key (KCK)** used to authenticate EAPOL-Key data with a MIC. Other
+PTK sections include the KEK and TK, which are not calculated separately here.
 
-Replay counters help reject reused handshake messages. Nonces make the PTK
-specific to this session, even when the same network passphrase is reused.
-
-### Why the capture permits an offline guess
-
-The capture exposes the SSID, AP/STA MAC addresses, ANonce, SNonce, an EAPOL
-message, and its MIC. For each dictionary candidate, an offline program can:
-
-1. derive a candidate PMK from the candidate and captured SSID;
-2. derive a candidate PTK from the captured addresses and nonces;
-3. take the KCK from the candidate PTK;
-4. zero the MIC field in the captured EAPOL bytes and recompute the MIC; and
-5. compare the candidate MIC with the captured MIC.
-
-A match is evidence that the candidate generated the same key material. No
-guess is sent to the AP, so the AP cannot apply server-side rate limiting. The
-handshake still does not reveal a general shortcut: the attacker must test
-candidates, which is why passphrase strength matters.
-
-## Python files and usage examples
-
-### `inspect_capture.py`
-
-Inspect the supplied packet capture without connecting to any network:
-
-```console
-cd /workspace/labs/lab01/part5_wpa2
-python3 inspect_capture.py ../data/wpa2/lab01-handshake.pcap
-```
-
-Expected summary:
+For candidate verification, the captured MIC field in the EAPOL bytes is first
+replaced with zeros. A candidate MIC is then computed with HMAC-SHA1 and
+truncated to 16 bytes:
 
 ```text
-Packets: <count>
-Network: SSID=Coherer BSSID=00:0c:41:82:b2:55
-EAPOL-Key frames: 4
-M1: <sender> -> <receiver> (replay=0)
-M2: <sender> -> <receiver> (replay=0)
-M3: <sender> -> <receiver> (replay=1)
-M4: <sender> -> <receiver> (replay=1)
+candidate + SSID -> PMK
+PMK + ordered addresses/nonces -> PTK -> first 16 bytes -> KCK
+KCK + normalized EAPOL -> candidate MIC -> constant-time comparison
 ```
 
-The M1–M4 sequence is evidence that the file contains the values needed for an
-offline WPA/WPA2-Personal candidate check. This parser summarizes only the
-course PCAP; it does not implement password cracking.
+A matching MIC is evidence that the candidate generated the same key material.
+All inputs needed to test another candidate are already local, so no guess is
+sent to the access point and server-side rate limiting cannot observe it.
 
-### `explain_handshake.py`
+## Exercise B: implement candidate verification
+
+Complete these TODOs in `verify_candidate.py` in order:
+
+1. `derive_pmk()` - encode the candidate and SSID as UTF-8, then use the PMK
+   parameters above. Return exactly 32 bytes.
+2. `build_context()` - decode the four hexadecimal JSON fields, sort the MACs
+   and nonces independently as byte strings, and return the 76-byte context.
+3. `derive_ptk()` - append HMAC-SHA1 PRF blocks for counters 0, 1, and so on,
+   then truncate the accumulated result to 64 bytes.
+4. `derive_kck()` - return the first 16 bytes of the PTK.
+5. `normalized_eapol()` - decode the EAPOL hex, reject truncated input, and
+   replace the 16-byte Python slice `81:97` with zeros.
+6. `compute_mic()` - calculate HMAC-SHA1 over normalized EAPOL and retain the
+   first 16 bytes.
+7. `verify()` - connect the functions, decode the captured MIC, compare with
+   `hmac.compare_digest`, and return only `True` or `False`.
+
+The constants, command-line interface, and local JSON loading are supplied.
+The starter raises `NotImplementedError` until you complete each TODO.
+
+### Understand the synthetic input
+
+After completing the manual PCAP work, inspect the separate calculation fixture:
 
 ```console
-cd /workspace/labs/lab01/part5_wpa2
 python3 explain_handshake.py ../data/wpa2_capture.json
 ```
 
-Expected output lists the synthetic SSID, AP and client MAC addresses, two
-nonces, and the captured MIC, followed by the PMK → PTK → KCK → MIC chain. The
-JSON file is calculation metadata created for the course, not captured
-third-party traffic.
+This program reads JSON; it does not parse the PCAP or answer Exercise A. Match
+the printed field names to the fields you located manually in Wireshark/TShark.
 
-To see its required local-file argument, run:
+To view its argument syntax:
 
 ```console
 python3 explain_handshake.py --help
 ```
 
-### `verify_candidate.py`
+### Run the tests
+
+Before implementing the TODOs, run the baseline data checks. Completion tests
+will be skipped intentionally:
+
+```console
+python3 -m unittest test_wpa2_workflow.py -v
+```
+
+After implementing every TODO, enable all implementation checks:
+
+```console
+LAB01_GRADE=1 python3 -m unittest test_wpa2_workflow.py -v
+```
+
+The tests check output lengths, address/nonce ordering, sensitivity to changed
+inputs, truncated EAPOL rejection, MIC normalization, and one match in the
+bounded list. They do not print the matching candidate or reference digests.
+
+### Check one candidate
 
 The candidate is read with `getpass`, so it is not displayed or stored in shell
 history:
@@ -208,54 +283,53 @@ Candidate:
 no match
 ```
 
-A candidate consistent with the synthetic record prints `match`; other inputs
-print `no match`. Try candidates only from the provided classroom wordlist.
-The script performs no network or radio operation.
-
-The help output confirms that the only argument is a local metadata file:
+A consistent candidate prints `match`; another input prints `no match`. The
+script accepts only a local metadata file and performs no network operation.
 
 ```console
 python3 verify_candidate.py --help
 ```
 
-## Offline dictionary check of the supplied PCAP
+## Exercise C: bounded dictionary comparison
 
-Use aircrack-ng only with the two local course files:
+Use the BSSID you recorded manually in `CAPTURE_WORKSHEET.md`. Replace
+`AP_BSSID_FROM_WORKSHEET` in this command before running it:
 
 ```console
 aircrack-ng \
   -w ../data/wpa2/lab01-pcap-wordlist.txt \
-  -b 00:0c:41:82:b2:55 \
+  -b AP_BSSID_FROM_WORKSHEET \
   ../data/wpa2/lab01-handshake.pcap
 ```
 
-The `-b` argument selects the `Coherer` access point found during inspection, so
-the command cannot accidentally choose another network in the file. The tool
-should report that it found a key from the small instructor-provided list.
-Record the number of tested keys and elapsed time in your report, but do not
-publish the recovered key. The password was not read from a packet: each
-candidate was used to derive key material and reproduce the captured MIC.
+Use only the two supplied course files. Record the tested-key count and elapsed
+time, but do not publish the recovered key. Do not substitute a downloaded
+wordlist or another capture.
 
-Do not substitute a downloaded wordlist or another capture. This is an offline
-classroom demonstration, not a procedure for acquiring wireless traffic.
+Compare the tool's offline process with your Python pipeline. In both cases, a
+candidate is used to derive key material and reproduce captured authentication
+data; it is not submitted to an access point.
 
-## Completion criteria and report evidence
+## Completion criteria
 
-You have completed Part 5 when the inspector reports the expected target and
-all four handshake messages, you can explain the derivation chain, the
-synthetic checker distinguishes a matching from a nonmatching candidate, and
-aircrack-ng reports a result for the supplied course files. Include the M1–M4
-summary, your own key-derivation diagram, commands, redacted result/timing, and
-authorization statement. Never include the recovered passphrase in a public
-report or screenshot.
+Part 5 is complete when:
+
+- `CAPTURE_WORKSHEET.md` contains your manually observed fields and M1-M4
+  evidence;
+- every TODO in `verify_candidate.py` is implemented;
+- all opt-in tests pass with `LAB01_GRADE=1`;
+- the bounded PCAP check completes without revealing its key in your report;
+- you can explain every step from passphrase to MIC; and
+- you can explain why this is an authorized offline exercise.
 
 ## Checkpoint questions
 
-1. Which captured values make candidate verification possible?
-2. Why is this classified as offline guessing?
-3. Where is the password used even though it never crosses the network?
-4. Why can server-side rate limiting not slow this computation?
-5. Why should these WPA2-Personal observations not be generalized directly to
+1. Where did you find the SSID, BSSID, station address, nonce, and MIC?
+2. What direction and flags distinguish each handshake message?
+3. Which captured values make candidate verification possible?
+4. Why does changing the SSID change the PMK?
+5. Why must both peers sort MAC addresses and nonces in the same way?
+6. Why must the captured MIC field be zeroed before MIC recomputation?
+7. Why can server-side rate limiting not slow this computation?
+8. Why should these observations not be generalized directly to
    WPA2-Enterprise or WPA3-SAE?
-6. Which four EAPOL-Key messages does `inspect_capture.py` find, and which side
-   transmits each one?

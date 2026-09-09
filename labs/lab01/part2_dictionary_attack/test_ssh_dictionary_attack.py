@@ -15,7 +15,8 @@ class SSHDictionaryAttackTests(unittest.TestCase):
     def test_course_wordlist_is_bounded(self) -> None:
         path = Path(__file__).resolve().parents[1] / "data" / "ssh-lab-wordlist.txt"
         candidates = attack.load_candidates(path)
-        self.assertGreater(len(candidates), 1)
+        self.assertEqual(len(candidates), 107)
+        self.assertEqual(len(candidates), len(set(candidates)))
         self.assertLessEqual(len(candidates), attack.MAX_CANDIDATES)
 
 

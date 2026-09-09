@@ -16,7 +16,10 @@ Date:
    prevents reuse of the supplied unsalted tables.
 7. Classify the Part 2 SSH, Part 3 hash-file, system-hash, and WPA2 exercises as
    online or offline.
-8. Draw or describe WPA2 candidate verification from passphrase to MIC.
+8. Draw or describe your WPA2 candidate-verification implementation from
+   passphrase to MIC. Include PMK/PTK/KCK/context lengths, EAPOL MIC-field
+   normalization, and your Wireshark/TShark evidence for identifying M1–M4,
+   but no secret values.
 9. Give two concrete defensive recommendations.
 10. Reflect: “Why is SHA-256 alone unsuitable for password storage?”
 

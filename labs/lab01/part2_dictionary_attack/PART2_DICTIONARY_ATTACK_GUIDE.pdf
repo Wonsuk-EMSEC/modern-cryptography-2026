@@ -10,7 +10,7 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 11 0 R /F2 12 0 R >> >> /Contents 4 0 R >>
 endobj
 4 0 obj
-<< /Length 3186 >>
+<< /Length 3290 >>
 stream
 BT
 54 760 Td
@@ -132,13 +132,19 @@ BT
 (The SSH service has no host ports: mapping, uses a fictional non-root account,) Tj
 0 -14 Td
 /F1 10 Tf
-(and receives candidates sequentially from a course wordlist containing at most) Tj
+(and receives candidates sequentially from a 107-entry course wordlist. The) Tj
 0 -14 Td
 /F1 10 Tf
-(20 entries. The starter intentionally does not provide target-selection or) Tj
+(client enforces a 120-candidate upper bound and intentionally provides no) Tj
 0 -14 Td
 /F1 10 Tf
-(concurrency options.) Tj
+(target-selection or concurrency options. With a 0.25-second delay after failed) Tj
+0 -14 Td
+/F1 10 Tf
+(attempts plus SSH handshake overhead, the exercise should take tens of seconds) Tj
+0 -14 Td
+/F1 10 Tf
+(rather than finishing immediately; exact time depends on the Docker host.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -161,12 +167,6 @@ BT
 /F1 10 Tf
 (  3. Inspect the fixed constants and bounded wordlist.) Tj
 0 -14 Td
-/F1 10 Tf
-(  4. Implement only try_candidate\(\) in ssh_dictionary_attack.py.) Tj
-0 -14 Td
-/F1 10 Tf
-(  5. Run the public safety checks.) Tj
-0 -14 Td
 ET
 endstream
 endobj
@@ -174,10 +174,16 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 11 0 R /F2 12 0 R >> >> /Contents 6 0 R >>
 endobj
 6 0 obj
-<< /Length 2863 >>
+<< /Length 2964 >>
 stream
 BT
 54 760 Td
+/F1 10 Tf
+(  4. Implement only try_candidate\(\) in ssh_dictionary_attack.py.) Tj
+0 -14 Td
+/F1 10 Tf
+(  5. Run the public safety checks.) Tj
+0 -14 Td
 /F1 10 Tf
 (6. Execute the bounded exercise and record status, attempt count, and time.) Tj
 0 -14 Td
@@ -325,12 +331,6 @@ BT
 /F1 10 Tf
 (Run the bounded exercise only after the checks below pass:) Tj
 0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
 ET
 endstream
 endobj
@@ -338,10 +338,16 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 11 0 R /F2 12 0 R >> >> /Contents 8 0 R >>
 endobj
 8 0 obj
-<< /Length 2443 >>
+<< /Length 2392 >>
 stream
 BT
 54 760 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
 /F2 9 Tf
 (python3 ssh_dictionary_attack.py ../data/ssh-lab-wordlist.txt) Tj
 0 -14 Td
@@ -409,10 +415,13 @@ BT
 (Expected result: two tests pass. They confirm that the target is the fixed) Tj
 0 -14 Td
 /F1 10 Tf
-(Compose service and the supplied wordlist remains within the 20-candidate) Tj
+(Compose service, the supplied wordlist contains 107 unique classroom) Tj
 0 -14 Td
 /F1 10 Tf
-(limit. They do not test a real network or reveal the solution.) Tj
+(candidates, and it remains within the 120-candidate limit. They do not test a) Tj
+0 -14 Td
+/F1 10 Tf
+(real network or reveal the solution.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -486,6 +495,17 @@ BT
 /F1 10 Tf
 (| Property | Part 2 SSH attack | Part 3 hash-file attacks |) Tj
 0 -14 Td
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 11 0 R /F2 12 0 R >> >> /Contents 10 0 R >>
+endobj
+10 0 obj
+<< /Length 1834 >>
+stream
+BT
+54 760 Td
 /F1 10 Tf
 (| --- | --- | --- |) Tj
 0 -14 Td
@@ -495,17 +515,6 @@ BT
 /F1 10 Tf
 (| Service can log attempts | Yes | No |) Tj
 0 -14 Td
-ET
-endstream
-endobj
-9 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 11 0 R /F2 12 0 R >> >> /Contents 10 0 R >>
-endobj
-10 0 obj
-<< /Length 1663 >>
-stream
-BT
-54 760 Td
 /F1 10 Tf
 (| Network protocol overhead | Yes | No |) Tj
 0 -14 Td
@@ -597,16 +606,16 @@ xref
 0000000064 00000 n 
 0000000139 00000 n 
 0000000277 00000 n 
-0000003515 00000 n 
-0000003653 00000 n 
-0000006568 00000 n 
-0000006706 00000 n 
-0000009201 00000 n 
-0000009340 00000 n 
-0000011056 00000 n 
-0000011127 00000 n 
+0000003619 00000 n 
+0000003757 00000 n 
+0000006773 00000 n 
+0000006911 00000 n 
+0000009355 00000 n 
+0000009494 00000 n 
+0000011381 00000 n 
+0000011452 00000 n 
 trailer
 << /Size 13 /Root 1 0 R >>
 startxref
-11196
+11521
 %%EOF

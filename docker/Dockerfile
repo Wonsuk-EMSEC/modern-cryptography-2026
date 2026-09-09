@@ -21,6 +21,7 @@ RUN apt-get update \
         python3 \
         python3-pip \
         python3-venv \
+        tshark \
     && rm -rf /var/lib/apt/lists/*
 
 RUN python3 -m venv /opt/course-venv \

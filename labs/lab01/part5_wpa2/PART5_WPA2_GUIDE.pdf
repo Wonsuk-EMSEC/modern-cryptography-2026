@@ -4,13 +4,13 @@
 << /Type /Catalog /Pages 2 0 R >>
 endobj
 2 0 obj
-<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R 9 0 R 11 0 R 13 0 R] /Count 6 >>
+<< /Type /Pages /Kids [3 0 R 5 0 R 7 0 R 9 0 R 11 0 R 13 0 R 15 0 R] /Count 7 >>
 endobj
 3 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 4 0 R >>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 17 0 R /F2 18 0 R >> >> /Contents 4 0 R >>
 endobj
 4 0 obj
-<< /Length 3438 >>
+<< /Length 3472 >>
 stream
 BT
 54 760 Td
@@ -19,6 +19,12 @@ BT
 0 -14 Td
 /F1 18 Tf
 (Part 5: WPA2 offline candidate verification) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Estimated time: 40 minutes.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -39,46 +45,16 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(The password is not transmitted in a WPA2 four-way handshake. Nevertheless, a) Tj
+(In this part, packet observations are deliberately not extracted by a Python) Tj
 0 -14 Td
 /F1 10 Tf
-(recorded SSID, AP/STA MAC addresses, ANonce/SNonce, EAPOL bytes, and MIC let a) Tj
+(script. You must inspect the saved PCAP with Wireshark or TShark, find the) Tj
 0 -14 Td
 /F1 10 Tf
-(candidate be checked offline:) Tj
+(relevant fields in the decoded protocol tree, and record your own observations.) Tj
 0 -14 Td
 /F1 10 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-(candidate passphrase + SSID -> PBKDF2-HMAC-SHA1 -> PMK) Tj
-0 -14 Td
-/F2 9 Tf
-(PMK + ordered MACs/nonces -> PRF -> PTK -> KCK) Tj
-0 -14 Td
-/F2 9 Tf
-(KCK + EAPOL frame -> candidate MIC -> compare with captured MIC) Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(Run the explanation and single-candidate checker against) Tj
-0 -14 Td
-/F1 10 Tf
-(../data/wpa2_capture.json. Server-side rate limiting cannot observe or slow) Tj
-0 -14 Td
-/F1 10 Tf
-(local guesses after capture. WPA2-Enterprise and WPA3-SAE have different) Tj
-0 -14 Td
-/F1 10 Tf
-(authentication properties and are outside this exercise.) Tj
+(You will then implement the WPA2 candidate-verification calculations in Python.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -87,25 +63,7 @@ BT
 () Tj
 0 -14 Td
 /F1 14 Tf
-(Purpose and learning objectives) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(This part connects password guessing to an authentication protocol. You are) Tj
-0 -14 Td
-/F1 10 Tf
-(given both a previously captured course PCAP and a small synthetic metadata) Tj
-0 -14 Td
-/F1 10 Tf
-(fixture. You will not capture packets. First identify the four-way handshake,) Tj
-0 -14 Td
-/F1 10 Tf
-(then study the derivation calculation, and finally run a bounded dictionary) Tj
-0 -14 Td
-/F1 10 Tf
-(check against the supplied capture.) Tj
+(Learning objectives) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -117,19 +75,22 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(  - identify AP, STA, SSID, nonces, replay counters, and EAPOL-Key messages;) Tj
+(  - locate the SSID and BSSID in an 802.11 management frame;) Tj
 0 -14 Td
 /F1 10 Tf
-(  - explain how WPA2-Personal derives PMK, PTK, and KCK;) Tj
+(  - identify the AP and station addresses in EAPOL-Key frames;) Tj
 0 -14 Td
 /F1 10 Tf
-(  - describe what M1, M2, M3, and M4 accomplish;) Tj
+(  - distinguish M1, M2, M3, and M4 using direction, flags, and replay counters;) Tj
 0 -14 Td
 /F1 10 Tf
-(  - explain how a MIC confirms a candidate without transmitting the password;) Tj
+(  - locate nonces and a MIC in the Wireshark protocol tree;) Tj
 0 -14 Td
 /F1 10 Tf
-(  - classify the dictionary check as offline; and) Tj
+(  - implement WPA2-Personal PMK, PTK, KCK, and MIC calculations;) Tj
+0 -14 Td
+/F1 10 Tf
+(  - explain why a recorded handshake permits offline candidate verification; and) Tj
 0 -14 Td
 /F1 10 Tf
 (  - state the authorization boundary for wireless-security experiments.) Tj
@@ -153,33 +114,129 @@ BT
 (| --- | --- |) Tj
 0 -14 Td
 /F1 10 Tf
-(| ../data/wpa2/lab01-handshake.pcap | Supplied course packet capture |) Tj
+(| ../data/wpa2/lab01-handshake.pcap | Instructor-provided classroom capture |) Tj
 0 -14 Td
 /F1 10 Tf
 (| ../data/wpa2/lab01-pcap-wordlist.txt | Small candidate list for that PCAP only |) Tj
 0 -14 Td
 /F1 10 Tf
-(| ../data/wpa2_capture.json | Synthetic values for transparent Python calculations |) Tj
+(| CAPTURE_WORKSHEET.md | Blank table for your manual packet observations |) Tj
 0 -14 Td
 /F1 10 Tf
-(| inspect_capture.py | Summarizes networks and EAPOL-Key frames |) Tj
+(| ../data/wpa2_capture.json | Separate synthetic Python calculation fixture |) Tj
 0 -14 Td
 /F1 10 Tf
-(| explain_handshake.py | Labels the synthetic captured values and derivation chain |) Tj
+(| explain_handshake.py | Prints the fields in the synthetic JSON fixture |) Tj
+0 -14 Td
+/F1 10 Tf
+(| verify_candidate.py | Starter containing the PMK-to-MIC TODO pipeline |) Tj
+0 -14 Td
+/F1 10 Tf
+(| test_wpa2_workflow.py | Baseline and opt-in implementation tests |) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The PCAP and wpa2_capture.json are two separate, intentionally created) Tj
+0 -14 Td
+/F1 10 Tf
+(classroom datasets. Do not expect their SSIDs, addresses, nonces, or MICs to be) Tj
+0 -14 Td
+/F1 10 Tf
+(the same. The PCAP is for manual protocol inspection and the bounded) Tj
+0 -14 Td
+/F1 10 Tf
+(aircrack-ng comparison. The JSON fixture gives your Python functions a compact,) Tj
+0 -14 Td
+/F1 10 Tf
+(reproducible input after you have learned where those values appear in a real) Tj
+0 -14 Td
+/F1 10 Tf
+(packet trace.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 14 Tf
+(Prepare the analysis tool) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
 0 -14 Td
 ET
 endstream
 endobj
 5 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 6 0 R >>
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 17 0 R /F2 18 0 R >> >> /Contents 6 0 R >>
 endobj
 6 0 obj
-<< /Length 3176 >>
+<< /Length 2988 >>
 stream
 BT
 54 760 Td
 /F1 10 Tf
-(| verify_candidate.py | Checks one hidden-input candidate against synthetic metadata |) Tj
+(TShark, Wireshark's command-line packet analyzer, is installed in the course) Tj
+0 -14 Td
+/F1 10 Tf
+(image. If your image was built before this Part 5 update, rebuild it from the) Tj
+0 -14 Td
+/F1 10 Tf
+(repository root:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(docker compose -f docker/compose.yml build) Tj
+0 -14 Td
+/F2 9 Tf
+(docker compose -f docker/compose.yml run --rm course bash) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Inside the container, verify the tool and move to Part 5:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(tshark --version) Tj
+0 -14 Td
+/F2 9 Tf
+(cd /workspace/labs/lab01/part5_wpa2) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The Compose configuration does not forward a graphical desktop from the) Tj
+0 -14 Td
+/F1 10 Tf
+(container. You may optionally open the same repository PCAP with a Wireshark) Tj
+0 -14 Td
+/F1 10 Tf
+(GUI installed on the host. TShark is the supported container-only path, so a) Tj
+0 -14 Td
+/F1 10 Tf
+(host Wireshark installation is not required.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -188,46 +245,329 @@ BT
 () Tj
 0 -14 Td
 /F1 14 Tf
-(Tasks) Tj
+(Exercise A: inspect the PCAP manually) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(  1. Run inspect_capture.py and confirm the target BSSID, SSID, and M1-M4 order.) Tj
+(Do not write or use a Python parser for this exercise. Do not use a TShark) Tj
 0 -14 Td
 /F1 10 Tf
-(  2. For every message, record the sender, receiver, and replay counter.) Tj
+(-T fields command that prints a ready-made answer table. Read the decoded) Tj
 0 -14 Td
 /F1 10 Tf
-(  3. Read the key-derivation explanation below and label PMK, PTK, KCK, KEK, TK,) Tj
+(packet tree and enter your findings in CAPTURE_WORKSHEET.md.) Tj
 0 -14 Td
 /F1 10 Tf
-(   ANonce, SNonce, and MIC in your own diagram.) Tj
+() Tj
 0 -14 Td
 /F1 10 Tf
-(  4. Run explain_handshake.py on the synthetic JSON and connect each printed) Tj
+() Tj
+0 -14 Td
+/F1 12 Tf
+(Option 1: Wireshark GUI on the host) Tj
 0 -14 Td
 /F1 10 Tf
-(   field to the derivation formula.) Tj
+() Tj
 0 -14 Td
 /F1 10 Tf
-(  5. Run verify_candidate.py with one nonmatching candidate from the course) Tj
+(  1. Choose File > Open and select) Tj
 0 -14 Td
 /F1 10 Tf
-(   list; explain why no match is useful evidence.) Tj
+(   labs/lab01/data/wpa2/lab01-handshake.pcap from this repository.) Tj
 0 -14 Td
 /F1 10 Tf
-(6. Use aircrack-ng with exactly the provided PCAP, wordlist, and BSSID.) Tj
+(  2. Enter the following display filter to show the authentication key exchange:) Tj
 0 -14 Td
 /F1 10 Tf
-(7. Record that a key was found, tested-key statistics, and timing, but do not) Tj
+() Tj
 0 -14 Td
 /F1 10 Tf
-(   publish the recovered key.) Tj
+(   text) Tj
 0 -14 Td
 /F1 10 Tf
-(8. Explain why no server, AP, or wireless interface receives the guesses.) Tj
+(   eapol) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(  3. Inspect the four displayed frames. In the 802.11 header, find the BSSID that) Tj
+0 -14 Td
+/F1 10 Tf
+(   is common to the exchange, then distinguish the AP from the other) Tj
+0 -14 Td
+/F1 10 Tf
+(   station/client address using frame direction and the Key ACK flag.) Tj
+0 -14 Td
+/F1 10 Tf
+(  4. Replace RECORDED_BSSID below with the BSSID you just observed. This limits) Tj
+0 -14 Td
+/F1 10 Tf
+(   the many beacon frames in the PCAP to the relevant access point:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(   text) Tj
+0 -14 Td
+/F1 10 Tf
+(   wlan.fc.type_subtype == 0x0008 && wlan.bssid == RECORDED_BSSID) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(  5. Select the resulting beacon and expand IEEE 802.11 wireless LAN management) Tj
+0 -14 Td
+/F1 10 Tf
+(   frame. Confirm the BSSID in the 802.11 header. Expand Tagged parameters) Tj
+0 -14 Td
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 17 0 R /F2 18 0 R >> >> /Contents 8 0 R >>
+endobj
+8 0 obj
+<< /Length 2910 >>
+stream
+BT
+54 760 Td
+/F1 10 Tf
+(   and the SSID parameter set to find the network name.) Tj
+0 -14 Td
+/F1 10 Tf
+(6. Return to the eapol filter. In each frame, record the receiver,) Tj
+0 -14 Td
+/F1 10 Tf
+(   transmitter, and BSSID. Under 802.1X Authentication and WPA Key Data) Tj
+0 -14 Td
+/F1 10 Tf
+(   \(wording can vary by Wireshark version\), locate the replay counter, nonce,) Tj
+0 -14 Td
+/F1 10 Tf
+(   key MIC, and Key Information flags.) Tj
+0 -14 Td
+/F1 10 Tf
+(7. Use the message-identification table below to label each frame M1-M4. Record) Tj
+0 -14 Td
+/F1 10 Tf
+(   frame numbers rather than relying only on their displayed order.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(Option 2: TShark inside the course container) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(First view the packet list so you understand the trace layout:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(tshark -r ../data/wpa2/lab01-handshake.pcap) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Display the full decoded protocol tree for the EAPOL-Key frames first:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(tshark \\) Tj
+0 -14 Td
+/F2 9 Tf
+(  -r ../data/wpa2/lab01-handshake.pcap \\) Tj
+0 -14 Td
+/F2 9 Tf
+(  -Y 'eapol' \\) Tj
+0 -14 Td
+/F2 9 Tf
+(  -V) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Read the receiver, transmitter, BSSID, replay counter, nonce, key MIC, and Key) Tj
+0 -14 Td
+/F1 10 Tf
+(Information flags. Identify the BSSID shared by the four frames. Then replace) Tj
+0 -14 Td
+/F1 10 Tf
+(RECORDED_BSSID below with that value to inspect only the relevant beacon:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(tshark \\) Tj
+0 -14 Td
+/F2 9 Tf
+(  -r ../data/wpa2/lab01-handshake.pcap \\) Tj
+0 -14 Td
+/F2 9 Tf
+(  -Y 'wlan.fc.type_subtype == 0x0008 && wlan.bssid == RECORDED_BSSID' \\) Tj
+0 -14 Td
+/F2 9 Tf
+(  -V) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Read the 802.11 header and tagged parameters to locate the SSID. The verbose) Tj
+0 -14 Td
+/F1 10 Tf
+(output is long by design: locating fields in a protocol tree is part of the) Tj
+0 -14 Td
+/F1 10 Tf
+(exercise.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(Identify M1-M4) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Use the AP/STA direction and these EAPOL-Key flags. A set bit is shown as 1.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(| Message | Direction | Key ACK | Key MIC | Secure | Main observation |) Tj
+0 -14 Td
+/F1 10 Tf
+(| --- | --- | ---: | ---: | ---: | --- |) Tj
+0 -14 Td
+/F1 10 Tf
+(| M1 | AP -> STA | 1 | 0 | 0 | AP supplies ANonce |) Tj
+0 -14 Td
+/F1 10 Tf
+(| M2 | STA -> AP | 0 | 1 | 0 | STA supplies SNonce and MIC |) Tj
+0 -14 Td
+/F1 10 Tf
+(| M3 | AP -> STA | 1 | 1 | 1 | AP authenticates key installation |) Tj
+0 -14 Td
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 17 0 R /F2 18 0 R >> >> /Contents 10 0 R >>
+endobj
+10 0 obj
+<< /Length 2956 >>
+stream
+BT
+54 760 Td
+/F1 10 Tf
+(| M4 | STA -> AP | 0 | 1 | 1 | STA acknowledges installation |) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Wireshark may display additional Key Information bits. Use only the direction,) Tj
+0 -14 Td
+/F1 10 Tf
+(three bits above, replay counter, and nonce behavior for this simplified) Tj
+0 -14 Td
+/F1 10 Tf
+(classification. If your four rows do not form a coherent exchange, recheck the) Tj
+0 -14 Td
+/F1 10 Tf
+(addresses and frame numbers before continuing.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(Manual observation questions) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Complete the worksheet without consulting an automated parser:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(  1. Which beacon-frame field contains the SSID? Which header field contains the) Tj
+0 -14 Td
+/F1 10 Tf
+(   BSSID?) Tj
+0 -14 Td
+/F1 10 Tf
+(  2. Which address belongs to the AP, and which belongs to the station?) Tj
+0 -14 Td
+/F1 10 Tf
+(  3. Which frames are M1, M2, M3, and M4? Give evidence from direction and flags.) Tj
+0 -14 Td
+/F1 10 Tf
+(  4. In which messages do ANonce and SNonce first appear?) Tj
+0 -14 Td
+/F1 10 Tf
+(  5. How do the replay counters group the request/response pairs?) Tj
+0 -14 Td
+/F1 10 Tf
+(6. Which messages contain a nonzero MIC, and why does M1 differ?) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Do not put the recovered passphrase in the worksheet, report, or screenshots.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -236,22 +576,16 @@ BT
 () Tj
 0 -14 Td
 /F1 14 Tf
-(How the WPA2 four-way handshake establishes keys) Tj
+(Background: PMK, PTK, KCK, and MIC) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(Despite its common name, the four-way handshake does not transmit the Wi-Fi) Tj
+(The password is not transmitted in the four-way handshake. For WPA2-Personal,) Tj
 0 -14 Td
 /F1 10 Tf
-(passphrase or directly exchange the final encryption key. Before the handshake,) Tj
-0 -14 Td
-/F1 10 Tf
-(both sides must already be able to obtain the same Pairwise Master Key \(PMK\).) Tj
-0 -14 Td
-/F1 10 Tf
-(For WPA2-Personal, the passphrase and SSID produce the PMK:) Tj
+(a candidate and SSID produce the Pairwise Master Key \(PMK\):) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -263,10 +597,10 @@ BT
 (PMK = PBKDF2-HMAC-SHA1\() Tj
 0 -14 Td
 /F2 9 Tf
-(    passphrase,) Tj
+(    password = UTF-8\(passphrase\),) Tj
 0 -14 Td
 /F2 9 Tf
-(    SSID,) Tj
+(    salt = UTF-8\(SSID\),) Tj
 0 -14 Td
 /F2 9 Tf
 (    iterations = 4096,) Tj
@@ -284,13 +618,7 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(The access point \(AP\) and station/client \(STA\) then contribute fresh nonces.) Tj
-0 -14 Td
-/F1 10 Tf
-(Both sides combine the PMK with the ordered MAC addresses and nonces to derive) Tj
-0 -14 Td
-/F1 10 Tf
-(the same session-specific Pairwise Transient Key \(PTK\):) Tj
+(The two peers order their raw address and nonce byte strings identically:) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -307,124 +635,49 @@ BT
 /F2 9 Tf
 () Tj
 0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Two 6-byte MAC addresses and two 32-byte nonces produce a 76-byte context. The) Tj
+0 -14 Td
+/F1 10 Tf
+(PMK and context are expanded into a 64-byte Pairwise Transient Key \(PTK\):) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
 /F2 9 Tf
-(PTK = PRF-512\(PMK, "Pairwise key expansion", context\)) Tj
+() Tj
 0 -14 Td
 /F2 9 Tf
-() Tj
+(block[i] = HMAC-SHA1\() Tj
 0 -14 Td
-/F1 10 Tf
-() Tj
+/F2 9 Tf
+(    key = PMK,) Tj
 0 -14 Td
-/F1 10 Tf
-(The min/max notation means lexicographic byte ordering. It ensures that the) Tj
-0 -14 Td
-/F1 10 Tf
-(AP and STA build exactly the same context even though each views itself as the) Tj
-0 -14 Td
-/F1 10 Tf
-(local endpoint.) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(The PTK is divided into keys with separate purposes:) Tj
+/F2 9 Tf
+(    data = "Pairwise key expansion" || 0x00 || context || BYTE\(i\)) Tj
 0 -14 Td
 ET
 endstream
 endobj
-7 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 8 0 R >>
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 17 0 R /F2 18 0 R >> >> /Contents 12 0 R >>
 endobj
-8 0 obj
-<< /Length 3624 >>
+12 0 obj
+<< /Length 3288 >>
 stream
 BT
 54 760 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(  - KCK \(Key Confirmation Key\): authenticates handshake messages by computing) Tj
-0 -14 Td
-/F1 10 Tf
-(  their MICs;) Tj
-0 -14 Td
-/F1 10 Tf
-(  - KEK \(Key Encryption Key\): protects key material transported in EAPOL-Key) Tj
-0 -14 Td
-/F1 10 Tf
-(  messages; and) Tj
-0 -14 Td
-/F1 10 Tf
-(  - TK \(Temporal Key\): protects later unicast data traffic.) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(The four EAPOL-Key messages have the following simplified roles:) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
+/F2 9 Tf
+(\)) Tj
 0 -14 Td
 /F2 9 Tf
 () Tj
 0 -14 Td
 /F2 9 Tf
-(AP                                                    STA) Tj
-0 -14 Td
-/F2 9 Tf
-( |                                                     |) Tj
-0 -14 Td
-/F2 9 Tf
-( |  M1: ANonce, replay counter                         |) Tj
-0 -14 Td
-/F2 9 Tf
-( |---------------------------------------------------->|) Tj
-0 -14 Td
-/F2 9 Tf
-( |                         STA generates SNonce        |) Tj
-0 -14 Td
-/F2 9 Tf
-( |                         STA derives PTK              |) Tj
-0 -14 Td
-/F2 9 Tf
-( |                                                     |) Tj
-0 -14 Td
-/F2 9 Tf
-( |  M2: SNonce, MIC computed with KCK                  |) Tj
-0 -14 Td
-/F2 9 Tf
-( |<----------------------------------------------------|) Tj
-0 -14 Td
-/F2 9 Tf
-( |  AP derives PTK and verifies the M2 MIC             |) Tj
-0 -14 Td
-/F2 9 Tf
-( |                                                     |) Tj
-0 -14 Td
-/F2 9 Tf
-( |  M3: key-install information, GTK data, KCK MIC     |) Tj
-0 -14 Td
-/F2 9 Tf
-( |---------------------------------------------------->|) Tj
-0 -14 Td
-/F2 9 Tf
-( |                         STA verifies MIC/installs keys|) Tj
-0 -14 Td
-/F2 9 Tf
-( |                                                     |) Tj
-0 -14 Td
-/F2 9 Tf
-( |  M4: acknowledgement, KCK MIC                       |) Tj
-0 -14 Td
-/F2 9 Tf
-( |<----------------------------------------------------|) Tj
-0 -14 Td
-/F2 9 Tf
-( |              protected data can follow             |) Tj
+(PTK = first 64 bytes of \(block[0] || block[1] || ...\)) Tj
 0 -14 Td
 /F2 9 Tf
 () Tj
@@ -433,96 +686,55 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(  - M1 gives the STA the AP-generated ANonce. It normally has no MIC because) Tj
+(Start the one-byte counter at zero. The first 16 PTK bytes are the Key) Tj
 0 -14 Td
 /F1 10 Tf
-(  the STA does not yet have all PTK inputs.) Tj
+(Confirmation Key \(KCK\) used to authenticate EAPOL-Key data with a MIC. Other) Tj
 0 -14 Td
 /F1 10 Tf
-(  - M2 returns the STA-generated SNonce and proves that the STA derived a KCK) Tj
-0 -14 Td
-/F1 10 Tf
-(  consistent with the shared PMK.) Tj
-0 -14 Td
-/F1 10 Tf
-(  - M3 proves the AP derived the same keys and tells the STA to install them;) Tj
-0 -14 Td
-/F1 10 Tf
-(  it can also carry group-key information protected with the KEK.) Tj
-0 -14 Td
-/F1 10 Tf
-(  - M4 acknowledges successful installation and completes the exchange.) Tj
+(PTK sections include the KEK and TK, which are not calculated separately here.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(Replay counters help reject reused handshake messages. Nonces make the PTK) Tj
+(For candidate verification, the captured MIC field in the EAPOL bytes is first) Tj
 0 -14 Td
 /F1 10 Tf
-(specific to this session, even when the same network passphrase is reused.) Tj
+(replaced with zeros. A candidate MIC is then computed with HMAC-SHA1 and) Tj
 0 -14 Td
 /F1 10 Tf
+(truncated to 16 bytes:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(candidate + SSID -> PMK) Tj
+0 -14 Td
+/F2 9 Tf
+(PMK + ordered addresses/nonces -> PTK -> first 16 bytes -> KCK) Tj
+0 -14 Td
+/F2 9 Tf
+(KCK + normalized EAPOL -> candidate MIC -> constant-time comparison) Tj
+0 -14 Td
+/F2 9 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
-/F1 12 Tf
-(Why the capture permits an offline guess) Tj
+/F1 10 Tf
+(A matching MIC is evidence that the candidate generated the same key material.) Tj
 0 -14 Td
 /F1 10 Tf
-() Tj
+(All inputs needed to test another candidate are already local, so no guess is) Tj
 0 -14 Td
 /F1 10 Tf
-(The capture exposes the SSID, AP/STA MAC addresses, ANonce, SNonce, an EAPOL) Tj
-0 -14 Td
-/F1 10 Tf
-(message, and its MIC. For each dictionary candidate, an offline program can:) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(  1. derive a candidate PMK from the candidate and captured SSID;) Tj
-0 -14 Td
-/F1 10 Tf
-(  2. derive a candidate PTK from the captured addresses and nonces;) Tj
-0 -14 Td
-/F1 10 Tf
-(  3. take the KCK from the candidate PTK;) Tj
-0 -14 Td
-/F1 10 Tf
-(  4. zero the MIC field in the captured EAPOL bytes and recompute the MIC; and) Tj
-0 -14 Td
-ET
-endstream
-endobj
-9 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 10 0 R >>
-endobj
-10 0 obj
-<< /Length 2680 >>
-stream
-BT
-54 760 Td
-/F1 10 Tf
-(  5. compare the candidate MIC with the captured MIC.) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(A match is evidence that the candidate generated the same key material. No) Tj
-0 -14 Td
-/F1 10 Tf
-(guess is sent to the AP, so the AP cannot apply server-side rate limiting. The) Tj
-0 -14 Td
-/F1 10 Tf
-(handshake still does not reveal a general shortcut: the attacker must test) Tj
-0 -14 Td
-/F1 10 Tf
-(candidates, which is why passphrase strength matters.) Tj
+(sent to the access point and server-side rate limiting cannot observe it.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -531,7 +743,64 @@ BT
 () Tj
 0 -14 Td
 /F1 14 Tf
-(Python files and usage examples) Tj
+(Exercise B: implement candidate verification) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Complete these TODOs in verify_candidate.py in order:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(  1. derive_pmk\(\) - encode the candidate and SSID as UTF-8, then use the PMK) Tj
+0 -14 Td
+/F1 10 Tf
+(   parameters above. Return exactly 32 bytes.) Tj
+0 -14 Td
+/F1 10 Tf
+(  2. build_context\(\) - decode the four hexadecimal JSON fields, sort the MACs) Tj
+0 -14 Td
+/F1 10 Tf
+(   and nonces independently as byte strings, and return the 76-byte context.) Tj
+0 -14 Td
+/F1 10 Tf
+(  3. derive_ptk\(\) - append HMAC-SHA1 PRF blocks for counters 0, 1, and so on,) Tj
+0 -14 Td
+/F1 10 Tf
+(   then truncate the accumulated result to 64 bytes.) Tj
+0 -14 Td
+/F1 10 Tf
+(  4. derive_kck\(\) - return the first 16 bytes of the PTK.) Tj
+0 -14 Td
+/F1 10 Tf
+(  5. normalized_eapol\(\) - decode the EAPOL hex, reject truncated input, and) Tj
+0 -14 Td
+/F1 10 Tf
+(   replace the 16-byte Python slice 81:97 with zeros.) Tj
+0 -14 Td
+/F1 10 Tf
+(6. compute_mic\(\) - calculate HMAC-SHA1 over normalized EAPOL and retain the) Tj
+0 -14 Td
+/F1 10 Tf
+(   first 16 bytes.) Tj
+0 -14 Td
+/F1 10 Tf
+(7. verify\(\) - connect the functions, decode the captured MIC, compare with) Tj
+0 -14 Td
+/F1 10 Tf
+(   hmac.compare_digest, and return only True or False.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The constants, command-line interface, and local JSON loading are supplied.) Tj
+0 -14 Td
+/F1 10 Tf
+(The starter raises NotImplementedError until you complete each TODO.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -540,34 +809,13 @@ BT
 () Tj
 0 -14 Td
 /F1 12 Tf
-(`inspect_capture.py`) Tj
+(Understand the synthetic input) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(Inspect the supplied packet capture without connecting to any network:) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-(cd /workspace/labs/lab01/part5_wpa2) Tj
-0 -14 Td
-/F2 9 Tf
-(python3 inspect_capture.py ../data/wpa2/lab01-handshake.pcap) Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(Expected summary:) Tj
+(After completing the manual PCAP work, inspect the separate calculation fixture:) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -575,60 +823,17 @@ BT
 /F2 9 Tf
 () Tj
 0 -14 Td
-/F2 9 Tf
-(Packets: <count>) Tj
-0 -14 Td
-/F2 9 Tf
-(Network: SSID=Coherer BSSID=00:0c:41:82:b2:55) Tj
-0 -14 Td
-/F2 9 Tf
-(EAPOL-Key frames: 4) Tj
-0 -14 Td
-/F2 9 Tf
-(M1: <sender> -> <receiver> \(replay=0\)) Tj
-0 -14 Td
-/F2 9 Tf
-(M2: <sender> -> <receiver> \(replay=0\)) Tj
-0 -14 Td
-/F2 9 Tf
-(M3: <sender> -> <receiver> \(replay=1\)) Tj
-0 -14 Td
-/F2 9 Tf
-(M4: <sender> -> <receiver> \(replay=1\)) Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(The M1-M4 sequence is evidence that the file contains the values needed for an) Tj
-0 -14 Td
-/F1 10 Tf
-(offline WPA/WPA2-Personal candidate check. This parser summarizes only the) Tj
-0 -14 Td
-/F1 10 Tf
-(course PCAP; it does not implement password cracking.) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 12 Tf
-(`explain_handshake.py`) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-() Tj
-0 -14 Td
-/F2 9 Tf
-(cd /workspace/labs/lab01/part5_wpa2) Tj
-0 -14 Td
+ET
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 17 0 R /F2 18 0 R >> >> /Contents 14 0 R >>
+endobj
+14 0 obj
+<< /Length 2416 >>
+stream
+BT
+54 760 Td
 /F2 9 Tf
 (python3 explain_handshake.py ../data/wpa2_capture.json) Tj
 0 -14 Td
@@ -639,37 +844,20 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(Expected output lists the synthetic SSID, AP and client MAC addresses, two) Tj
+(This program reads JSON; it does not parse the PCAP or answer Exercise A. Match) Tj
 0 -14 Td
 /F1 10 Tf
-(nonces, and the captured MIC, followed by the PMK -> PTK -> KCK -> MIC chain. The) Tj
-0 -14 Td
-/F1 10 Tf
-(JSON file is calculation metadata created for the course, not captured) Tj
-0 -14 Td
-/F1 10 Tf
-(third-party traffic.) Tj
+(the printed field names to the fields you located manually in Wireshark/TShark.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(To see its required local-file argument, run:) Tj
+(To view its argument syntax:) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
-ET
-endstream
-endobj
-11 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 12 0 R >>
-endobj
-12 0 obj
-<< /Length 2642 >>
-stream
-BT
-54 760 Td
 /F2 9 Tf
 () Tj
 0 -14 Td
@@ -686,7 +874,67 @@ BT
 () Tj
 0 -14 Td
 /F1 12 Tf
-(`verify_candidate.py`) Tj
+(Run the tests) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(Before implementing the TODOs, run the baseline data checks. Completion tests) Tj
+0 -14 Td
+/F1 10 Tf
+(will be skipped intentionally:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(python3 -m unittest test_wpa2_workflow.py -v) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(After implementing every TODO, enable all implementation checks:) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F2 9 Tf
+(LAB01_GRADE=1 python3 -m unittest test_wpa2_workflow.py -v) Tj
+0 -14 Td
+/F2 9 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+(The tests check output lengths, address/nonce ordering, sensitivity to changed) Tj
+0 -14 Td
+/F1 10 Tf
+(inputs, truncated EAPOL rejection, MIC normalization, and one match in the) Tj
+0 -14 Td
+/F1 10 Tf
+(bounded list. They do not print the matching candidate or reference digests.) Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 10 Tf
+() Tj
+0 -14 Td
+/F1 12 Tf
+(Check one candidate) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -719,19 +967,10 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(A candidate consistent with the synthetic record prints match; other inputs) Tj
+(A consistent candidate prints match; another input prints no match. The) Tj
 0 -14 Td
 /F1 10 Tf
-(print no match. Try candidates only from the provided classroom wordlist.) Tj
-0 -14 Td
-/F1 10 Tf
-(The script performs no network or radio operation.) Tj
-0 -14 Td
-/F1 10 Tf
-() Tj
-0 -14 Td
-/F1 10 Tf
-(The help output confirms that the only argument is a local metadata file:) Tj
+(script accepts only a local metadata file and performs no network operation.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -748,17 +987,31 @@ BT
 /F1 10 Tf
 () Tj
 0 -14 Td
+ET
+endstream
+endobj
+15 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 17 0 R /F2 18 0 R >> >> /Contents 16 0 R >>
+endobj
+16 0 obj
+<< /Length 2823 >>
+stream
+BT
+54 760 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 14 Tf
-(Offline dictionary check of the supplied PCAP) Tj
+(Exercise C: bounded dictionary comparison) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(Use aircrack-ng only with the two local course files:) Tj
+(Use the BSSID you recorded manually in CAPTURE_WORKSHEET.md. Replace) Tj
+0 -14 Td
+/F1 10 Tf
+(AP_BSSID_FROM_WORKSHEET in this command before running it:) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -773,7 +1026,7 @@ BT
 (  -w ../data/wpa2/lab01-pcap-wordlist.txt \\) Tj
 0 -14 Td
 /F2 9 Tf
-(  -b 00:0c:41:82:b2:55 \\) Tj
+(  -b AP_BSSID_FROM_WORKSHEET \\) Tj
 0 -14 Td
 /F2 9 Tf
 (  ../data/wpa2/lab01-handshake.pcap) Tj
@@ -785,31 +1038,25 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(The -b argument selects the Coherer access point found during inspection, so) Tj
+(Use only the two supplied course files. Record the tested-key count and elapsed) Tj
 0 -14 Td
 /F1 10 Tf
-(the command cannot accidentally choose another network in the file. The tool) Tj
+(time, but do not publish the recovered key. Do not substitute a downloaded) Tj
 0 -14 Td
 /F1 10 Tf
-(should report that it found a key from the small instructor-provided list.) Tj
-0 -14 Td
-/F1 10 Tf
-(Record the number of tested keys and elapsed time in your report, but do not) Tj
-0 -14 Td
-/F1 10 Tf
-(publish the recovered key. The password was not read from a packet: each) Tj
-0 -14 Td
-/F1 10 Tf
-(candidate was used to derive key material and reproduce the captured MIC.) Tj
+(wordlist or another capture.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
 /F1 10 Tf
-(Do not substitute a downloaded wordlist or another capture. This is an offline) Tj
+(Compare the tool's offline process with your Python pipeline. In both cases, a) Tj
 0 -14 Td
 /F1 10 Tf
-(classroom demonstration, not a procedure for acquiring wireless traffic.) Tj
+(candidate is used to derive key material and reproduce captured authentication) Tj
+0 -14 Td
+/F1 10 Tf
+(data; it is not submitted to an access point.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -818,42 +1065,37 @@ BT
 () Tj
 0 -14 Td
 /F1 14 Tf
-(Completion criteria and report evidence) Tj
+(Completion criteria) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
 0 -14 Td
-ET
-endstream
-endobj
-13 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 15 0 R /F2 16 0 R >> >> /Contents 14 0 R >>
-endobj
-14 0 obj
-<< /Length 1443 >>
-stream
-BT
-54 760 Td
 /F1 10 Tf
-(You have completed Part 5 when the inspector reports the expected target and) Tj
+(Part 5 is complete when:) Tj
 0 -14 Td
 /F1 10 Tf
-(all four handshake messages, you can explain the derivation chain, the) Tj
+() Tj
 0 -14 Td
 /F1 10 Tf
-(synthetic checker distinguishes a matching from a nonmatching candidate, and) Tj
+(  - CAPTURE_WORKSHEET.md contains your manually observed fields and M1-M4) Tj
 0 -14 Td
 /F1 10 Tf
-(aircrack-ng reports a result for the supplied course files. Include the M1-M4) Tj
+(  evidence;) Tj
 0 -14 Td
 /F1 10 Tf
-(summary, your own key-derivation diagram, commands, redacted result/timing, and) Tj
+(  - every TODO in verify_candidate.py is implemented;) Tj
 0 -14 Td
 /F1 10 Tf
-(authorization statement. Never include the recovered passphrase in a public) Tj
+(  - all opt-in tests pass with LAB01_GRADE=1;) Tj
 0 -14 Td
 /F1 10 Tf
-(report or screenshot.) Tj
+(  - the bounded PCAP check completes without revealing its key in your report;) Tj
+0 -14 Td
+/F1 10 Tf
+(  - you can explain every step from passphrase to MIC; and) Tj
+0 -14 Td
+/F1 10 Tf
+(  - you can explain why this is an authorized offline exercise.) Tj
 0 -14 Td
 /F1 10 Tf
 () Tj
@@ -868,59 +1110,64 @@ BT
 () Tj
 0 -14 Td
 /F1 10 Tf
-(  1. Which captured values make candidate verification possible?) Tj
+(  1. Where did you find the SSID, BSSID, station address, nonce, and MIC?) Tj
 0 -14 Td
 /F1 10 Tf
-(  2. Why is this classified as offline guessing?) Tj
+(  2. What direction and flags distinguish each handshake message?) Tj
 0 -14 Td
 /F1 10 Tf
-(  3. Where is the password used even though it never crosses the network?) Tj
+(  3. Which captured values make candidate verification possible?) Tj
 0 -14 Td
 /F1 10 Tf
-(  4. Why can server-side rate limiting not slow this computation?) Tj
+(  4. Why does changing the SSID change the PMK?) Tj
 0 -14 Td
 /F1 10 Tf
-(  5. Why should these WPA2-Personal observations not be generalized directly to) Tj
+(  5. Why must both peers sort MAC addresses and nonces in the same way?) Tj
+0 -14 Td
+/F1 10 Tf
+(6. Why must the captured MIC field be zeroed before MIC recomputation?) Tj
+0 -14 Td
+/F1 10 Tf
+(7. Why can server-side rate limiting not slow this computation?) Tj
+0 -14 Td
+/F1 10 Tf
+(8. Why should these observations not be generalized directly to) Tj
 0 -14 Td
 /F1 10 Tf
 (   WPA2-Enterprise or WPA3-SAE?) Tj
 0 -14 Td
-/F1 10 Tf
-(6. Which four EAPOL-Key messages does inspect_capture.py find, and which side) Tj
-0 -14 Td
-/F1 10 Tf
-(   transmits each one?) Tj
-0 -14 Td
 ET
 endstream
 endobj
-15 0 obj
+17 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
 endobj
-16 0 obj
+18 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Courier >>
 endobj
 xref
-0 17
+0 19
 0000000000 65535 f 
 0000000015 00000 n 
 0000000064 00000 n 
-0000000153 00000 n 
-0000000291 00000 n 
-0000003781 00000 n 
-0000003919 00000 n 
-0000007147 00000 n 
-0000007285 00000 n 
-0000010961 00000 n 
-0000011100 00000 n 
-0000013833 00000 n 
-0000013973 00000 n 
-0000016668 00000 n 
-0000016808 00000 n 
-0000018304 00000 n 
-0000018375 00000 n 
+0000000160 00000 n 
+0000000298 00000 n 
+0000003822 00000 n 
+0000003960 00000 n 
+0000007000 00000 n 
+0000007138 00000 n 
+0000010100 00000 n 
+0000010239 00000 n 
+0000013248 00000 n 
+0000013388 00000 n 
+0000016729 00000 n 
+0000016869 00000 n 
+0000019338 00000 n 
+0000019478 00000 n 
+0000022354 00000 n 
+0000022425 00000 n 
 trailer
-<< /Size 17 /Root 1 0 R >>
+<< /Size 19 /Root 1 0 R >>
 startxref
-18444
+22494
 %%EOF

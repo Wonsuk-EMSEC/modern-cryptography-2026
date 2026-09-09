@@ -2,8 +2,13 @@
 
 import json
 import os
+import sys
 import unittest
 from pathlib import Path
+
+IMPLEMENTATION = os.environ.get("LAB01_TABLE_IMPL")
+if IMPLEMENTATION:
+    sys.path.insert(0, IMPLEMENTATION)
 
 import build_precomputation_table as full
 import build_rainbow_table as rainbow

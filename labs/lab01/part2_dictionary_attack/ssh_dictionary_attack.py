@@ -12,7 +12,7 @@ import paramiko
 TARGET_HOST = "lab01-ssh-target"
 TARGET_PORT = 22
 TARGET_USERNAME = "labstudent"
-MAX_CANDIDATES = 20
+MAX_CANDIDATES = 120
 
 
 def load_candidates(path: Path) -> list[str]:

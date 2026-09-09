@@ -58,11 +58,13 @@ demonstrations are runnable immediately.
    the bounded toy password database. Expected: parsed verifier fields and a
    comparison of build work, storage, lookup work, and coverage. Checkpoint:
    explain the time-memory tradeoff and why salts prevent shared table reuse.
-5. **WPA2 verification (25 minutes).** Read
-   `part5_wpa2/PART5_WPA2_GUIDE.pdf`, inspect the supplied course PCAP and
-   synthetic metadata, then run the local dictionary check. Expected: a complete
-   M1–M4 sequence and one matching candidate from the course-only wordlist.
-   Checkpoint: explain PMK → PTK → KCK → MIC and offline rate limiting.
+5. **WPA2 verification (40 minutes).** Read
+   `part5_wpa2/PART5_WPA2_GUIDE.pdf`, inspect the supplied course PCAP manually
+   with Wireshark or TShark, complete the capture worksheet, implement the
+   PMK → PTK → KCK → MIC pipeline, then run the bounded local checks. Expected:
+   manual evidence of a complete M1–M4 sequence and one matching candidate from
+   the course-only wordlist. Checkpoint: explain each derivation step and
+   offline rate limiting.
 6. **Report (15 minutes).** Complete `report/LAB_REPORT_TEMPLATE.md` without
    including any real password.
 
