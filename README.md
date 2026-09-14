@@ -25,7 +25,7 @@ The course Docker image provides the software and libraries used by the labs.
 Students should use Docker as the execution environment while keeping their
 work in this Git repository.
 
-### 1. Prerequisites
+### 0. Prerequisites
 
 Install the following software before starting:
 
@@ -35,13 +35,22 @@ Install the following software before starting:
 - [Visual Studio Code](https://code.visualstudio.com/) is optional and can be
   used to edit the repository files.
 
-Open a terminal in the root directory of this repository before running the
-commands below.
-
 The same `docker compose` commands work in Windows PowerShell and macOS/Linux
 terminals. In VS Code, you may edit on the host and use its **Attach to Running
 Container** command after starting a long-running course container; a Dev
 Container configuration is not required.
+
+### 1. Clone the course repository
+
+Open a terminal in the directory where you want to keep the course files, then
+clone the repository and enter its root directory:
+
+```console
+git clone https://github.com/Wonsuk-EMSEC/modern-cryptography-2026.git
+cd modern-cryptography-2026
+```
+
+Run the remaining commands from this repository root directory.
 
 ### 2. Build the course Docker image
 
