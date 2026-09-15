@@ -31,14 +31,19 @@ Install the following software before starting:
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - [Git](https://git-scm.com/)
-- WSL2 is recommended for Windows users.
+- WSL2 with Ubuntu is required for Windows users.
 - [Visual Studio Code](https://code.visualstudio.com/) is optional and can be
   used to edit the repository files.
 
-The same `docker compose` commands work in Windows PowerShell and macOS/Linux
-terminals. In VS Code, you may edit on the host and use its **Attach to Running
-Container** command after starting a long-running course container; a Dev
-Container configuration is not required.
+On Windows, open PowerShell and enter Ubuntu before cloning the repository:
+
+```powershell
+wsl -d Ubuntu
+```
+
+Run the remaining Git and Docker commands inside Ubuntu. Make sure Docker
+Desktop's WSL integration is enabled for Ubuntu. On macOS and Linux, run the
+commands directly in a terminal.
 
 ### 1. Clone the course repository
 
