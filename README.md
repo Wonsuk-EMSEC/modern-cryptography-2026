@@ -109,14 +109,9 @@ docker compose -f docker/compose.yml down
 ```
 
 
-
-
-
-
-
 ### 4. Verify the environment
 
-After the container starts, run:
+After entering the course container, run the following commands:
 
 ```console
 whoami
@@ -126,8 +121,23 @@ gcc --version
 openssl version
 ```
 
+Example output:
+
+```text
+student
+/workspace
+Python 3.12.3
+gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0
+OpenSSL 3.0.13 30 Jan 2024
+```
+
 The expected user is `student`, and the expected working directory is
-`/workspace`. Version numbers may vary when the course image is updated.
+`/workspace`.
+
+The version numbers shown above are examples and may vary when the course image
+is updated. The important point is that each command executes successfully and
+reports the installed software version.
+
 
 ### 5. Run a lab
 
