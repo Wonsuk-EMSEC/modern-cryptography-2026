@@ -61,16 +61,58 @@ docker compose -f docker/compose.yml build
 This builds the `modern-cryptography-2026` image and installs the software and
 libraries required for the course. The initial build may take several minutes.
 
-### 3. Start an interactive course container
+### 3. Start the course container in the background
+
+Start the `course` service in detached mode:
 
 ```console
-docker compose -f docker/compose.yml run --rm course bash
+docker compose -f docker/compose.yml up -d course
 ```
 
-Here, `course` is the Docker Compose service name. The `--rm` option removes the
-temporary container after it exits. The Git repository is mounted inside the
-container at `/workspace`, so files created or modified under `/workspace`
-modify the repository on the host computer as well.
+Here, `course` is the Docker Compose service name, and the `-d` option runs the
+container in the background.
+
+You can check whether the container is running with:
+
+```console
+docker compose -f docker/compose.yml ps
+```
+
+To open an interactive shell inside the running course container, use:
+
+```console
+docker compose -f docker/compose.yml exec course bash
+```
+
+The Git repository is mounted inside the container at `/workspace`, so files
+created or modified under `/workspace` modify the repository on the host
+computer as well.
+
+You can leave the interactive shell by running:
+
+```console
+exit
+```
+
+Exiting the shell does not stop the course container because it continues to run
+in the background. You can enter the container again at any time with:
+
+```console
+docker compose -f docker/compose.yml exec course bash
+```
+
+When you are finished with the environment, stop and remove the Compose
+containers with:
+
+```console
+docker compose -f docker/compose.yml down
+```
+
+
+
+
+
+
 
 ### 4. Verify the environment
 
