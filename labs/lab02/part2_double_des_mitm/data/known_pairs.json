@@ -1,0 +1,14 @@
+{
+  "algorithm": "Double-DES E_K2(E_K1(P))",
+  "key_bits": 16,
+  "pairs": [
+    {
+      "ciphertext": "79456ff07d31fe5d",
+      "plaintext": "4d49544d2d503031"
+    },
+    {
+      "ciphertext": "3013f9f28f62a4f5",
+      "plaintext": "4d49544d2d503032"
+    }
+  ]
+}

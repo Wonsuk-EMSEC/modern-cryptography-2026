@@ -31,6 +31,7 @@ Thumbs.db
 auth_db.json
 benchmark-results.*
 labs/lab01/part4_system_hashes/generated/
+labs/lab02/part7_aes_cpa/plots/
 
 # Secrets
 .env

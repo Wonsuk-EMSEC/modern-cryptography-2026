@@ -1,0 +1,16 @@
+services:
+  lab02-course:
+    image: modern-cryptography-2026
+    working_dir: /workspace/labs/lab02
+    user: student
+    volumes:
+      - ../labs/lab02:/workspace/labs/lab02
+    networks:
+      - lab02-course
+    stdin_open: true
+    tty: true
+
+networks:
+  lab02-course:
+    name: modern-cryptography-2026-lab02
+    external: true

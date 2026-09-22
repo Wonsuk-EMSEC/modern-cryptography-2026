@@ -1,0 +1,5 @@
+{
+  "algorithm": "DES-ECB",
+  "key_bits": 16,
+  "key_mapping": "make_des_key(key_id, key_bits)"
+}

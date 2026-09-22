@@ -31,6 +31,8 @@ RUN python3 -m venv /opt/course-venv \
         bcrypt==4.3.0 \
         jupyterlab==4.4.6 \
         lark==1.2.2 \
+        matplotlib==3.10.6 \
+        numpy==2.3.3 \
         paramiko==5.0.0 \
         pycryptodome==3.23.0 \
         pytest==8.4.1
