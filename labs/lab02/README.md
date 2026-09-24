@@ -28,32 +28,56 @@ service, and synthetic traces. The final message is:
 
 ## Setup
 
-You have already used a target container in Lab 01 Part 2. Lab02 follows the
-same workflow: you start a target on your own computer, enter the course
-container, and run your Python code there. No instructor-hosted server is
-needed. The difference is that the Lab02 target is supplied as a prebuilt
-image, which you load instead of building from server source.
+You can start Lab02 without completing Lab 01. All labs share the same Docker
+environment: you build the course image, start the `course` container, and run
+your Python code inside it. **If you completed the Lab 01 setup, you have
+already built this common image and used this container.** Reuse that setup
+as described below.
+
+Parts 4–6 also need a target container running on your own computer. This is
+the same workflow used for the SSH target in Lab 01 Part 2. The Lab02 target
+is supplied as a prebuilt image, which you load instead of building from
+server source. No instructor-hosted server is needed.
 
 | Service | Purpose |
 | --- | --- |
 | `course` | Your shell, Python code, and repository files, shared by all labs |
 | `lab02-target` | The local application you interact with in Parts 4–6 |
 
-### 1. Update the common course image once for Lab02
+### 1. Prepare the common course image
 
-Use the repository you already cloned for Lab 01. In your **host terminal**
-(Ubuntu/WSL on Windows), go to the repository root containing `docker/` and
-`labs/`. If you are still inside a course shell, run `exit` first.
+- **Starting with Lab02:** follow the [prerequisites](../../README.md#0-prerequisites)
+  and [repository cloning instructions](../../README.md#1-clone-the-course-repository)
+  in the main README, then build the course image with the command below.
+- **Already completed the Lab 01 setup:** use the repository and image you
+  prepared there. If `docker/Dockerfile` has changed since your last build
+  (for example, to add Lab02 dependencies), rebuild with the same command.
+  Otherwise, skip the build and continue to step 2.
+
+`docker/Dockerfile` is the build recipe for the shared course image. It
+installs Python, cryptographic libraries, and the other tools needed for all
+labs, including the Part 7 plotting libraries. `docker/compose.yml` tells
+Docker how to build that image and run the `course` container with your
+repository mounted at `/workspace`. You do not need to install lab
+dependencies manually.
+
+In your **host terminal** (Ubuntu/WSL on Windows), make sure Docker is running
+and go to the repository root containing `docker/` and `labs/`. If you are
+still inside a course shell, run `exit` first. Build the image when needed:
 
 ```console
 docker compose -f docker/compose.yml build course
 ```
 
-The common `docker/Dockerfile` provides the tools for all labs, including the
-Part 7 plotting libraries. Extra applications use their own Dockerfiles in
-subdirectories such as `docker/lab01-ssh-target/` and `docker/lab02-target/`.
-The instructor builds the Lab02 target separately from private server files.
-You do not need to rebuild the course image at every session.
+This is the same image-build command used in the Lab 01 setup. The initial
+build may take several minutes; you do not need to repeat it at every session.
+
+Additional target services have separate build recipes:
+`docker/lab01-ssh-target/Dockerfile` for the Lab 01 SSH target and
+`docker/lab02-target/Dockerfile` for the Lab02 application. The instructor
+builds the Lab02 target from private server files and provides its image.
+For Parts 4–6, load that image in step 2; the common course build above
+prepares only your working environment.
 
 ### 2. Start the services you need
 
@@ -84,8 +108,9 @@ Use the image supplied with the same version of the Lab02 files; Part 5's
 ciphertext must match that image. Load a replacement only when the instructor
 provides an updated bundle.
 
-Start the course container and target, just as you started the SSH target in
-Lab 01:
+Start the course container and Lab02 target with the commands below. If you
+completed Lab 01 Part 2, this is the same Compose workflow you used to start
+the SSH target, with the `lab02` profile and `lab02-target` service:
 
 ```console
 docker compose -f docker/compose.yml --profile lab02 up -d --wait course lab02-target
@@ -112,10 +137,10 @@ You are now **inside the container**. Change to the Lab02 directory:
 cd /workspace/labs/lab02
 ```
 
-The repository is mounted at `/workspace`, just as in Lab 01. Changes to files
-there are saved in your host repository. Run Python commands in this shell
-for every Part. The clients for Parts 4–6 already know the local service name
-`lab02-target`; you do not need to enter an address.
+The repository is mounted at `/workspace`, the shared location used in every
+lab. Changes to files there are saved in your host repository. Run Python
+commands in this shell for every Part. The clients for Parts 4–6 already know
+the local service name `lab02-target`; you do not need to enter an address.
 
 ## Working through the Parts
 
