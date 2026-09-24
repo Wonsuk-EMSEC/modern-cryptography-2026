@@ -1,13 +1,40 @@
 #!/usr/bin/env bash
-# Build the Lab02 student source archive from an explicit file manifest.
+# Build the Lab02 student source archive and, optionally, a separate target image.
 set -euo pipefail
 
-if [[ $# -ne 1 ]]; then
-    echo "usage: $0 OUTPUT_DIRECTORY" >&2
+usage() {
+    echo "usage: $0 OUTPUT_DIRECTORY [--include-target-image]" >&2
+}
+
+release_dir=
+include_target_image=false
+for argument in "$@"; do
+    case "$argument" in
+        --include-target-image)
+            if "$include_target_image"; then
+                usage
+                exit 2
+            fi
+            include_target_image=true
+            ;;
+        -*)
+            usage
+            exit 2
+            ;;
+        *)
+            if [[ -n "$release_dir" ]]; then
+                usage
+                exit 2
+            fi
+            release_dir=$argument
+            ;;
+    esac
+done
+if [[ -z "$release_dir" ]]; then
+    usage
     exit 2
 fi
 
-release_dir=$1
 if [[ -e "$release_dir" ]]; then
     echo "output path already exists: $release_dir" >&2
     exit 2
@@ -16,7 +43,7 @@ fi
 repo_root=$(git rev-parse --show-toplevel)
 staging_dir=$(mktemp -d)
 trap 'rm -rf "$staging_dir"' EXIT
-mkdir -p "$release_dir"
+mkdir "$staging_dir/source"
 
 required_files=(
     labs/lab02/part1_des_bruteforce/data/known_plaintext.bin
@@ -99,8 +126,25 @@ for student_path in "${student_paths[@]}"; do
     fi
 done
 
-tar -C "$repo_root" -cf - "${student_paths[@]}" | tar -C "$staging_dir" -xf -
+tar -C "$repo_root" -cf - "${student_paths[@]}" | tar -C "$staging_dir/source" -xf -
 
-tar -C "$staging_dir" -czf "$release_dir/modern-cryptography-2026-student.tar.gz" .
+tar -C "$staging_dir/source" -czf "$staging_dir/modern-cryptography-2026-student.tar.gz" .
 
+if "$include_target_image"; then
+    # Staff build the current course image first. Check that the distributed
+    # ciphertexts and the private target secrets come from the same generator.
+    docker compose -f "$repo_root/docker/compose.yml" run --rm course \
+        python3 -m instructor.lab02.generators.build_data --check
+    docker compose -f "$repo_root/docker/compose.lab02.yml" --profile lab02 \
+        build lab02-target
+    docker save modern-cryptography-2026-lab02-target \
+        | gzip > "$staging_dir/lab02-target-image.tar.gz"
+fi
+
+mkdir -p "$release_dir"
+mv "$staging_dir/modern-cryptography-2026-student.tar.gz" "$release_dir/"
 echo "created $release_dir/modern-cryptography-2026-student.tar.gz"
+if "$include_target_image"; then
+    mv "$staging_dir/lab02-target-image.tar.gz" "$release_dir/"
+    echo "created $release_dir/lab02-target-image.tar.gz"
+fi

@@ -37,7 +37,7 @@ decoding it; do not attempt to guess the encryption key.
 
 ## Your Task
 
-1. Obtain a normal token from the course-operated Lab02 service.
+1. Start the supplied Lab02 target on your computer and obtain a normal token.
 2. Inspect the starter and determine how a controlled change to a preceding
    CBC input affects the decrypted token fields.
 3. Complete `forge_admin_token()` in `starter.py` so that it returns an
@@ -52,28 +52,71 @@ change between runs.
 
 ## How to Run
 
-Run these commands from the repository root after course staff confirm that
-the isolated `lab02-target` service is available. The target implementation
-and its secrets are not installed in the student workspace.
+As in Lab01 Part 2, you start a target container on your own computer and run
+the client from a course container. Parts 4–6 share this target. The instructor
+provides its prebuilt image separately; the server source and secret files are
+not added to your workspace. See the [Lab02 setup instructions](../README.md#setup)
+for the one-time course-image preparation.
+
+### Step 1: load and start the target
+
+In a **host terminal**, from the repository root, load the instructor-provided
+image once (or again when the instructor supplies an updated image):
+
+```console
+docker load -i lab02-target-image.tar.gz
+```
+
+Use the path where you saved the image file if it is outside the repository.
+Start the target and check its status:
+
+```console
+docker compose -f docker/compose.lab02.student.yml --profile lab02 up -d --wait lab02-target
+docker compose -f docker/compose.lab02.student.yml --profile lab02 ps
+```
+
+The target should be `healthy`. Docker creates the internal lab network
+automatically; you do not need to create a network or configure a server address.
+
+### Step 2: enter the course container
+
+From the same **host terminal**:
+
+```console
+docker compose -f docker/compose.lab02.student.yml run --rm lab02-course bash
+```
+
+This opens a shell in `/workspace/labs/lab02`. Run the following Python commands
+**inside this container**.
 
 Issue and verify a normal token:
 
 ```console
-docker compose -f docker/compose.lab02.student.yml run --rm lab02-course \
-  python3 part4_cbc_bit_flipping/client.py issue
-
-docker compose -f docker/compose.lab02.student.yml run --rm lab02-course \
-  python3 part4_cbc_bit_flipping/client.py verify TOKEN_VALUE
+python3 part4_cbc_bit_flipping/client.py issue
+python3 part4_cbc_bit_flipping/client.py verify TOKEN_VALUE
 ```
 
 Replace `TOKEN_VALUE` with the token printed by `issue`.  After completing the
 TODO, run the full workflow:
 
 ```console
-docker compose -f docker/compose.lab02.student.yml run --rm lab02-course \
-  python3 part4_cbc_bit_flipping/starter.py
+python3 part4_cbc_bit_flipping/starter.py
 ```
 
+### Step 3: finish or continue to Part 5
+
+Keep the target and course shell running if you are continuing to Part 5.
+When you are finished, leave the course shell:
+
+```console
+exit
+```
+
+Then stop and remove the Lab02 containers from the **host terminal**:
+
+```console
+docker compose -f docker/compose.lab02.student.yml --profile lab02 down
+```
 
 ## Flag Format
 

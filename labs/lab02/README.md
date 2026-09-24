@@ -28,40 +28,71 @@ service, and synthetic traces. The final message is:
 
 ## Setup
 
-### Parts 1–3 and 7
+You have already used a target container in Lab 01 Part 2. Lab02 follows the
+same workflow: you start a target on your own computer, enter the course
+container, and run your Python code there. No instructor-hosted server is
+needed. The difference is that the Lab02 target is supplied as a prebuilt
+image, which you load instead of building from server source.
 
-If you completed Lab 01 on this computer, use the same course container in
-the same way. From the repository root, start it if needed and enter it:
+| Service | Purpose |
+| --- | --- |
+| `lab02-course` | Your shell, Python code, and files, using the Lab 01 course image |
+| `lab02-target` | The local application you interact with in Parts 4–6 |
 
-```console
-docker compose -f docker/compose.yml up -d course
-docker compose -f docker/compose.yml exec course bash
-cd /workspace/labs/lab02
-```
+### 1. Update the course image once for Lab02
 
-You only need to build the image when you have not completed the Lab 01 setup
-on this computer, or when the instructor announces an image update:
+Use the repository you already cloned for Lab 01. In your **host terminal**
+(Ubuntu/WSL on Windows), go to the repository root containing `docker/` and
+`labs/`. If you are still inside a course shell, run `exit` first.
 
 ```console
 docker compose -f docker/compose.yml build course
 ```
 
-### Parts 4–6
+This updates the existing image with the Lab02 dependencies, including the
+Part 7 plotting libraries. You do not need to rebuild at every session.
 
-These Parts communicate with a service that course staff prepare before the
-lab. You do **not** download, start, configure, or inspect that service. When
-staff say that Parts 4–6 are ready, run their commands from your normal host
-terminal, not from the Lab 01 `course` shell. For example:
+### 2. Load and start your local target for Parts 4–6
+
+Download `lab02-target-image.tar.gz` provided with these lab materials and
+place it in the repository root. Load it once in the **host terminal**:
 
 ```console
-docker compose -f docker/compose.lab02.student.yml run --rm lab02-course \
-  python3 part4_cbc_bit_flipping/starter.py
+docker load -i lab02-target-image.tar.gz
 ```
 
-This starts a temporary course container that can reach the class service, then
-removes it when the command finishes. The supplied clients connect to the
-correct service automatically. If you see a connection error, contact course
-staff; do not change a client address or try another host.
+Use the image supplied with the same version of the Lab02 files; Part 5's
+ciphertext must match that image. Load a replacement only when the instructor
+provides an updated bundle.
+
+Now start the target, just as you started the SSH target in Lab 01:
+
+```console
+docker compose -f docker/compose.lab02.student.yml --profile lab02 up -d --wait lab02-target
+docker compose -f docker/compose.lab02.student.yml --profile lab02 ps
+```
+
+The first command waits until the service is ready. `ps` should show
+`lab02-target` as `healthy`. Docker Compose creates the internal network
+automatically. The service runs on your computer and has no published host
+port. Parts 1–3 and 7 do not need the target, so you can skip this step for
+those Parts.
+
+### 3. Enter the Lab02 course container
+
+From the **host terminal** at the repository root:
+
+```console
+docker compose -f docker/compose.lab02.student.yml run --rm lab02-course bash
+```
+
+You are now **inside the container**, already at `/workspace/labs/lab02`.
+Run Python commands here. This uses the same course image as Lab 01; the
+Lab02 Compose file connects your shell to the local target and mounts your
+Lab02 files. Changes to these files are saved in your host repository.
+
+Use this shell for every Part. The clients for Parts 4–6 already know the
+local service name `lab02-target`; you do not need to enter an address.
 
 ## Working through the Parts
 
@@ -71,32 +102,58 @@ to the analysis questions. Do not look for flags in filenames or source code:
 the supplied artifacts are designed so the intended cryptographic work reveals
 them.
 
-For Parts 1–3 and 7, run these commands **inside** the Lab 01 `course` shell:
+After completing each Part's TODOs, run its command **inside the Lab02
+container** at `/workspace/labs/lab02`:
 
 ```console
 python3 part1_des_bruteforce/starter.py
 python3 part2_double_des_mitm/starter.py
 python3 part3_aes_cbc_pkcs7/starter.py
-python3 part7_aes_cpa/starter.py
+python3 part4_cbc_bit_flipping/starter.py
+python3 part5_padding_oracle/starter.py
+python3 part6_mte_vs_etm/starter.py
+python3 part7_aes_cpa/starter.py --all
 ```
 
-For Parts 4–6, run these commands **from your normal host terminal** after
-course staff announce that the service is ready:
+The Part 6 command first probes the two services. Follow that Part's README
+to select a service and run recovery. Part 7's README also explains how to
+recover one byte first and save plots before recovering the full key.
+
+## Finish or restart a session
+
+Leave the course shell with:
 
 ```console
-docker compose -f docker/compose.lab02.student.yml run --rm lab02-course \
-  python3 part4_cbc_bit_flipping/starter.py
-docker compose -f docker/compose.lab02.student.yml run --rm lab02-course \
-  python3 part5_padding_oracle/starter.py
-docker compose -f docker/compose.lab02.student.yml run --rm lab02-course \
-  python3 part6_mte_vs_etm/starter.py
+exit
 ```
 
-Part 7 can save its plots in a directory you choose with `--plots`.
+The temporary shell container is removed, but your files remain. The target
+keeps running until you stop it. In the **host terminal**, from the repository
+root, stop the Lab02 target and remove the Lab02 network:
+
+```console
+docker compose -f docker/compose.lab02.student.yml --profile lab02 down
+```
+
+Next time, repeat the target-start and shell commands in steps 2 and 3. The
+loaded images remain on your computer.
+
+If a client cannot connect, check `ps` in the host terminal and confirm that
+you entered the shell using the Lab02 Compose file. If you reach the query
+limit while debugging Parts 5–6, correct your loop, then reset the counter in
+the **host terminal**:
+
+```console
+docker compose -f docker/compose.lab02.student.yml --profile lab02 restart lab02-target
+docker compose -f docker/compose.lab02.student.yml --profile lab02 ps
+```
+
+Wait for `healthy` before trying again. Restarting the same image preserves
+the keys, so your supplied Part 5 ciphertext remains usable.
 
 ## Tests
 
-Run the lightweight public checks from the Lab02 directory:
+Run the lightweight public checks inside the Lab02 container:
 
 ```console
 make test

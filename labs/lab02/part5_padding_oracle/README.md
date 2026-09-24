@@ -46,28 +46,64 @@ provided query interface.
 
 ## How to Run
 
-Run these commands from the repository root after course staff confirm that
-the isolated `lab02-target` service is available. The student release contains
-only the Boolean client interface, never the oracle implementation or keys.
+Use the same local target as Part 4. If you have not loaded the
+instructor-provided target image yet, follow the one-time
+[Lab02 setup instructions](../README.md#setup). The oracle source and keys are
+not supplied as files in your workspace.
 
-Run the starter after completing its TODOs:
+### Step 1: start the target and enter the course container
+
+In a **host terminal**, from the repository root:
 
 ```console
-docker compose -f docker/compose.lab02.student.yml run --rm lab02-course \
-  python3 part5_padding_oracle/starter.py
+docker compose -f docker/compose.lab02.student.yml --profile lab02 up -d --wait lab02-target
+docker compose -f docker/compose.lab02.student.yml --profile lab02 ps
+docker compose -f docker/compose.lab02.student.yml run --rm lab02-course bash
 ```
 
-To try a small query while developing, run an interactive shell in the student
-workspace and use `OracleClient` from there:
+The target should be `healthy`. The last command opens a shell in
+`/workspace/labs/lab02`. If your target and course shell are still running from
+Part 4, continue in that shell without starting another one.
+
+### Step 2: run your recovery code
+
+Run the starter **inside the course container** after completing its TODOs:
 
 ```console
-docker compose -f docker/compose.lab02.student.yml run --rm -it lab02-course bash
+python3 part5_padding_oracle/starter.py
+```
+
+To try a small query while developing, start Python from the Part 5 directory
+in the same course shell and use `OracleClient` from there:
+
+```console
 cd /workspace/labs/lab02/part5_padding_oracle
 python3
 ```
 
-If you reach the query limit while debugging, ask course staff to reset the
-course target after checking your loop.
+Use `exit()` to leave Python, then `cd /workspace/labs/lab02` to return to the
+lab directory.
+
+### Step 3: reset or stop the target
+
+If you reach the query limit while debugging, check your loop, then reset your
+local target from a **second host terminal** at the repository root:
+
+```console
+docker compose -f docker/compose.lab02.student.yml --profile lab02 restart lab02-target
+docker compose -f docker/compose.lab02.student.yml --profile lab02 ps
+```
+
+Wait until the target is `healthy`, then rerun your program. Restarting the
+target resets query counts for Parts 5 and 6.
+
+Keep the target running if you are continuing to Part 6. When finished, run
+`exit` in the course shell, then remove the Lab02 containers from the
+**host terminal**:
+
+```console
+docker compose -f docker/compose.lab02.student.yml --profile lab02 down
+```
 
 ## Flag Format
 

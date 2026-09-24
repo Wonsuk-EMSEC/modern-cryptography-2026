@@ -52,37 +52,72 @@ keys.
 
 ## How to Run
 
-Run these commands from the repository root after course staff confirm that
-the isolated `lab02-target` service is available. Its implementation and keys
-remain outside the student release.
+Service A and Service B both run in the same local target container used in
+Parts 4 and 5. If you have not loaded the instructor-provided target image yet,
+follow the one-time [Lab02 setup instructions](../README.md#setup). The server
+source and keys are not supplied as files in your workspace.
 
-Run the supplied probes:
+### Step 1: start the target and enter the course container
+
+In a **host terminal**, from the repository root:
 
 ```console
-docker compose -f docker/compose.lab02.student.yml run --rm lab02-course \
-  python3 part6_mte_vs_etm/starter.py
+docker compose -f docker/compose.lab02.student.yml --profile lab02 up -d --wait lab02-target
+docker compose -f docker/compose.lab02.student.yml --profile lab02 ps
+docker compose -f docker/compose.lab02.student.yml run --rm lab02-course bash
+```
+
+The target should be `healthy`. The last command opens a shell in
+`/workspace/labs/lab02`. If your target and course shell are still running from
+Part 5, continue in that shell without starting another one.
+
+### Step 2: compare the services
+
+Run the supplied probes **inside the course container**:
+
+```console
+python3 part6_mte_vs_etm/starter.py
 ```
 
 After identifying the service with useful padding responses, run recovery
 against the letter you found:
 
 ```console
-docker compose -f docker/compose.lab02.student.yml run --rm lab02-course \
-  python3 part6_mte_vs_etm/starter.py --recover-service SERVICE_LETTER
+python3 part6_mte_vs_etm/starter.py --recover-service SERVICE_LETTER
 ```
 
 Replace `SERVICE_LETTER` with your observed choice of `A` or `B`.
 
-Use a shell when you want to make short, controlled probes with `ServiceClient`:
+To make short, controlled probes with `ServiceClient`, start Python from the
+Part 6 directory in the same course shell:
 
 ```console
-docker compose -f docker/compose.lab02.student.yml run --rm -it lab02-course bash
 cd /workspace/labs/lab02/part6_mte_vs_etm
 python3
 ```
 
-The course service limits queries during one run. Ask course staff to reset it
-after correcting an unintended loop.
+Use `exit()` to leave Python, then `cd /workspace/labs/lab02` to return to the
+lab directory.
+
+### Step 3: reset or stop the target
+
+If you reach a query limit, check your loop, then reset your local target from
+a **second host terminal** at the repository root:
+
+```console
+docker compose -f docker/compose.lab02.student.yml --profile lab02 restart lab02-target
+docker compose -f docker/compose.lab02.student.yml --profile lab02 ps
+```
+
+Wait until the target is `healthy`, then rerun your program to obtain fresh
+items and repeat your probes. Restarting resets query counts for Parts 5 and 6.
+
+When finished, run `exit` in the course shell. Then remove the Lab02 containers
+from the **host terminal**:
+
+```console
+docker compose -f docker/compose.lab02.student.yml --profile lab02 down
+```
 
 ## Flag Format
 
