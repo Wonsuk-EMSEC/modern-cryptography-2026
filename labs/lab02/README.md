@@ -117,10 +117,9 @@ as `Up` (running). Run the `up` command even if `course` is already running:
 Compose recreates the container when needed to apply a rebuilt image or
 changed service settings.
 
-The target servers are in separate profiles:
-`lab01-ssh` enables `lab01-ssh-target`, and `lab02` enables `lab02-target`.
-Neither target starts by default. Start a target only when the relevant
-Part's instructions require it.
+The `lab02` profile enables the `lab02-target` service. This target does not
+start by default. Start it only for Parts 4–6, following the instructions
+below.
 
 The common `course` image can be built from the files in your student
 repository. Building `lab02-target` also requires the instructor's server
