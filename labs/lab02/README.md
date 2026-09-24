@@ -62,7 +62,15 @@ terminal** at the repository root, then continue to step 3:
 
 ```console
 docker compose -f docker/compose.yml up -d course
+docker compose -f docker/compose.yml ps
 ```
+
+These commands use the shared `docker/compose.yml` to start `course` in the
+background (`-d`) and check its status. The `ps` output should show `course`
+as `Up` (running). The target servers are in separate profiles:
+`lab01-ssh` enables `lab01-ssh-target`, and `lab02` enables `lab02-target`.
+Neither target starts by default. Start a target only when the relevant
+Part's instructions require it.
 
 For **Parts 4–6**, download `lab02-target-image.tar.gz` provided with these lab
 materials and place it in the repository root. Load it once in the **host

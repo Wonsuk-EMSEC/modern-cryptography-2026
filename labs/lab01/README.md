@@ -23,9 +23,37 @@ offline WPA2 candidate checking.
 
 ## Setup and tests
 
+From the repository root in a **host terminal**, build the common image if
+needed, start the shared course container in the background, and check its
+status:
+
 ```console
-docker compose -f docker/compose.yml build
-docker compose -f docker/compose.yml run --rm course bash
+docker compose -f docker/compose.yml build course
+docker compose -f docker/compose.yml up -d course
+docker compose -f docker/compose.yml ps
+```
+
+The `-d` option runs `course` in the background. `ps` should show it as `Up`
+(running). Both labs use this same `docker/compose.yml` and course container.
+The target servers have separate profiles and **do not start by default**:
+
+| Target service | Profile | Used in |
+| --- | --- | --- |
+| `lab01-ssh-target` | `lab01-ssh` | Lab01 Part 2 |
+| `lab02-target` | `lab02` | Lab02 Parts 4–6 |
+
+Start a target only when its Part requires it, following that Part's README.
+For Lab01 Part 2, follow the [SSH target setup](part2_dictionary_attack/README.md#step-1-build-and-start-the-isolated-target).
+
+Open the running course container from the **host terminal**:
+
+```console
+docker compose -f docker/compose.yml exec course bash
+```
+
+Then run the lab tests **inside the container**:
+
+```console
 cd /workspace/labs/lab01
 pytest -q
 ```
