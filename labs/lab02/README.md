@@ -122,6 +122,24 @@ The target servers are in separate profiles:
 Neither target starts by default. Start a target only when the relevant
 Part's instructions require it.
 
+The common `course` image can be built from the files in your student
+repository. Building `lab02-target` also requires the instructor's server
+implementation and challenge secrets: its Dockerfile copies files from
+`instructor/lab02/targets/`, which is absent from the student release.
+The instructor builds the target with the matching Lab02 data and exports
+it as `lab02-target-image.tar.gz` for students to load.
+
+For this reason, `lab02-target` in `docker/compose.yml` specifies an `image`
+without a `build` section. Compose can build multiple services when their
+source files are available; this lab deliberately distributes the target as
+an already-built image. `docker load` imports it into your local Docker
+installation, and Compose then starts it alongside `course`.
+
+This distribution keeps the server files out of the student source
+repository. The image itself still contains the files needed to run the
+server, and someone with access to the image can inspect them. The exercises
+are intended to be solved through the supplied clients.
+
 For **Parts 4–6**, download `lab02-target-image.tar.gz` provided with these lab
 materials and place it in the repository root. Load it once in the **host
 terminal**:
