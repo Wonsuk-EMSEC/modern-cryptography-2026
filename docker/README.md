@@ -12,6 +12,7 @@ docker/
 ├── compose.yml                   # Course container and optional targets
 ├── lab01-ssh-target/
 │   ├── Dockerfile                # Lab01 Part 2 SSH server
+│   ├── README.md
 │   └── sshd_config
 └── lab02-target/
     ├── Dockerfile                # Lab02 Parts 4–6 server; staff build
@@ -44,6 +45,9 @@ For Lab01 Part 2, build and start the supplied SSH server:
 ```console
 docker compose -f docker/compose.yml --profile lab01-ssh up -d --build --wait lab01-ssh-target
 ```
+
+See [lab01-ssh-target/README.md](lab01-ssh-target/README.md) for the target's
+build files, course-shell entry, and shutdown command.
 
 For Lab02 Parts 4–6, load the instructor-supplied image once, then start it:
 
@@ -84,6 +88,16 @@ docker compose -f docker/compose.yml --profile lab01-ssh --profile lab02 down
 4. Document target startup and shutdown in the Part README. Check the new lab
    and the existing labs in the common image.
 
-The older `compose.lab02*.yml` files remain for compatibility with previous
-handouts. New instructions use only `compose.yml`. Finish any old Lab02
-session with its original Compose file before switching to this workflow.
+## Older Lab02 Compose files
+
+Neither file below is required for the current labs. All current startup
+instructions use `compose.yml`, and the student release excludes both files.
+
+| Older file | Former role | Current replacement |
+| --- | --- | --- |
+| `compose.lab02.student.yml` | Run the supplied image and a separate `lab02-course` shell | `compose.yml` with the shared `course` service and optional `lab02-target` |
+| `compose.lab02.yml` | Build the target from private source and run a separate Lab02 workspace | Staff use `docker build -f docker/lab02-target/Dockerfile ...`, then run services with `compose.yml` |
+
+They remain only for compatibility with previous handouts. Finish any old
+Lab02 session with its original Compose file before switching to the common
+workflow.

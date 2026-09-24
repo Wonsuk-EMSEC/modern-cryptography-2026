@@ -71,6 +71,7 @@ student_paths=(
     docker/Dockerfile
     docker/compose.yml
     docker/lab01-ssh-target/Dockerfile
+    docker/lab01-ssh-target/README.md
     docker/lab01-ssh-target/sshd_config
     docker/lab02-target/Dockerfile
     docker/lab02-target/README.md
