@@ -121,15 +121,18 @@ The `lab02` profile enables the `lab02-target` service. This target does not
 start by default. Start it only for Parts 4–6, following the instructions
 below.
 
-The common `course` image can be built from the files in your student
-repository. Students do not build `lab02-target` locally: its build requires
-the instructor's server implementation and challenge secrets, which are
-excluded from the student source release. The target image contains those
-runtime files and secrets, and anyone with local access to the image can
-inspect them. The exercises are intended to be solved through the supplied
-clients.
+The goal of Parts 4–6 is to recover flags by applying cryptographic attacks.
+Reading the server source code and secret data could reveal the flags
+directly, bypassing the intended exercises. Therefore, these files are not
+included in the student repository. The instructor builds `lab02-target`
+in advance and publishes it on GitHub Container Registry (GHCR). Docker
+Compose downloads and runs that image, so students do not build the target
+locally.
 
-The instructor publishes the prebuilt target as a public GHCR package:
+The image can still be inspected locally. For this lab, recover flags through
+the supplied clients instead of reading files inside the image.
+
+The target uses the following GHCR image name:
 
 ```text
 ghcr.io/wonsuk-emsec/modern-cryptography-2026-lab02-target:2026-lab02-v1
