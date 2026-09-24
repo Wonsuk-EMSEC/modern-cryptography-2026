@@ -34,7 +34,7 @@ program stops at the first match, so it need not test the entire space.
 
 | File | Purpose |
 | --- | --- |
-| `des_demo.py` | Runnable single-block DES encryption/decryption with public example values |
+| `des_demo.py` | Runnable DES encryption/decryption and padding example using the lab helpers |
 | `starter.py` | Functions to complete for search, measurement, and decryption |
 | `data/parameters.json` | Public reduced-space parameters, including `key_bits` |
 | `data/known_plaintext.bin` | One known DES plaintext block |
@@ -76,42 +76,46 @@ cd /workspace/labs/lab02/part1_des_bruteforce
 python3 des_demo.py
 ```
 
-The sample runs immediately, without completing any TODOs. It shows two
-single-block examples:
+The sample runs immediately, without completing any TODOs. It uses the same
+helpers as `starter.py`, together with the padding and encryption helpers in
+`../common/des.py`:
 
-1. Call `DES.new(key, DES.MODE_ECB)`, then `encrypt()` and `decrypt()` using
-   public example bytes. It checks both the expected ciphertext and recovery
-   of the original plaintext.
-2. Convert the public example ID `17` in an **8-bit example space** with
-   `make_des_key()`, then use `encrypt_block()` and `decrypt_block()`. This
-   shows how the same DES operations are accessed through the lab helpers.
+1. Call `make_des_key(key_id=17, key_bits=8)` to create an eight-byte DES key
+   from a public example ID in an **8-bit example space**.
+2. Call `pad8()` on `b'Hello, DES!'`. This plaintext has 11 bytes; five
+   padding bytes, each with value `0x05`, extend it to 16 bytes (two DES blocks).
+3. Call `encrypt_bytes()` to encrypt the padded plaintext using that key.
+4. Call `decrypt_bytes()` with the same key to recover the padded plaintext.
+   Decryption restores the padding bytes as well as the message.
+5. Call `unpad8()` to validate and remove the padding, then check that the
+   recovered plaintext equals the original `b'Hello, DES!'`.
 
-For the first example, the output includes:
+Among the displayed values, you should see:
 
 ```text
-Key:        133457799bbcdff1
-Plaintext:  0123456789abcdef
-Ciphertext: 85e813540f0ab405
-Recovered:  0123456789abcdef
-Known-answer and round-trip checks: OK
+Plaintext: b'Hello, DES!'
+Recovered: b'Hello, DES!'
+Padding round-trip check: OK
 ```
 
-The helper example recovers `b'CRYPTO26'` and prints
-`Helper round-trip check: OK`. The script reads no task data and uses only
-public demonstration keys. It does not search for the task's key or decrypt
-its encrypted record.
+The script also displays the key and ciphertext in hexadecimal using
+`.hex()`, and the padded plaintext as bytes so you can see the padding.
+Hexadecimal is only an output representation; the key is constructed by
+`make_des_key()`, and the helpers operate on bytes.
+The script uses public example values independently of the task data. Keep
+the distinction between this 8-bit example space and the task's 24-bit space.
 
 DES processes **8-byte blocks** and accepts an **8-byte encoded key** with
-56 effective key bits and 8 parity bits. `bytes.fromhex()` converts the
-displayed hexadecimal values to bytes; `.hex()` displays binary ciphertext
-without treating it as text. The example uses ECB to demonstrate one block,
-so it needs no IV or padding. Keep the distinction between this 8-bit example
-space and the task's 24-bit space. DES is included for historical study.
+56 effective key bits and 8 parity bits. The byte helpers use ECB, which needs
+no IV, and require complete blocks; call `pad8()` before encryption and
+`unpad8()` after decryption. This is PKCS#7-style padding with an eight-byte
+block size. If the original length is already a multiple of eight, `pad8()`
+adds a full block of eight `0x08` bytes so that padding can still be removed
+unambiguously. DES is included for historical study.
 
-Try changing the example plaintext while keeping it exactly eight bytes;
-the recovered plaintext should still match. The first example's fixed
-expected ciphertext applies only to its original key/plaintext pair, so use
-the helper example for these changes.
+Try changing the example plaintext to `b'CRYPTO26'` (eight bytes) or a longer
+message. Compare the original and padded lengths, and verify that the
+recovered plaintext still matches after removing the padding.
 
 ### Run your brute-force implementation
 
