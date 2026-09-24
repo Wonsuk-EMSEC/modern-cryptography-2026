@@ -32,6 +32,7 @@ E_K1(P1) = D_K2(C1)
 
 | File | Purpose |
 | --- | --- |
+| `double_des_demo.py` | Runnable Double-DES encryption/decryption example using the lab helpers |
 | `starter.py` | Functions to complete for MITM recovery and decryption |
 | `data/known_pairs.json` | Two public known plaintext/ciphertext pairs and `key_bits` |
 | `data/encrypted_flag.bin` | A separately encrypted, padded record |
@@ -70,10 +71,66 @@ included here only as a complexity comparison.
 
 ## How to Run
 
-From inside the running course container:
+### Try Double-DES encryption and decryption first
+
+Start the course container as described in the Lab02 overview. Inside the
+container, run the demonstration before implementing the search:
 
 ```console
 cd /workspace/labs/lab02/part2_double_des_mitm
+python3 double_des_demo.py
+```
+
+The sample runs immediately, without completing any TODOs. It uses the same
+key-mapping and decryption helpers as `starter.py`, together with the padding
+and encryption helpers in `../common/des.py`:
+
+1. Call `make_des_key()` with the public example IDs `17` and `93`, using
+   `key_bits=8` for each, to create `key1` and `key2`.
+2. Call `pad8()` on `b'Hello, Double DES!'`. This plaintext has 18 bytes; six
+   padding bytes, each with value `0x06`, extend it to 24 bytes (three DES blocks).
+3. Call `encrypt_bytes(padded_plaintext, key1)` to obtain the intermediate
+   value, then `encrypt_bytes(intermediate, key2)` to obtain the ciphertext.
+4. Reverse the layer order: call `decrypt_bytes(ciphertext, key2)`, check that
+   the result equals the intermediate value, then decrypt that result with
+   `key1` to recover the padded plaintext.
+5. Call `unpad8()` to validate and remove the padding, then check that the
+   recovered plaintext equals the original `b'Hello, Double DES!'`.
+
+Among the displayed values, you should see:
+
+```text
+Plaintext: b'Hello, Double DES!'
+Recovered: b'Hello, Double DES!'
+Intermediate-value check: OK
+Double-DES round-trip check: OK
+```
+
+The script displays the keys and both encryption layers so you can follow
+`P → E_K1(P) → E_K2(E_K1(P))` and the reverse path. In these demonstration
+labels, `P` means the 24-byte padded plaintext, processed one eight-byte block
+at a time. The intermediate-value check illustrates why
+`E_K1(P) = D_K2(C)` for the correct keys.
+
+The byte helpers process complete eight-byte blocks using ECB. **Pad once
+before the first encryption layer and unpad once after both decryption
+layers.** The intermediate value already consists of complete blocks, so no
+additional padding belongs between the layers.
+
+The script uses public example values independently of the task files. Each
+example key ID belongs to an **8-bit space**, while the supplied MITM task uses
+**16 bits per key ID**. The demonstration performs no brute-force or MITM
+search and does not read the task's known pairs or encrypted record.
+
+Try changing the example plaintext and compare the original and padded
+lengths. Confirm that both checks still pass after reversing the layers and
+removing the padding.
+
+### Run your meet-in-the-middle implementation
+
+After completing the TODOs, run from the same Part directory:
+
+```console
 python3 starter.py
 ```
 

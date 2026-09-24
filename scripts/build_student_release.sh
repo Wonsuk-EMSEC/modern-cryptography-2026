@@ -89,6 +89,7 @@ student_paths=(
     labs/lab02/part1_des_bruteforce/data/known_plaintext.bin
     labs/lab02/part1_des_bruteforce/data/parameters.json
     labs/lab02/part2_double_des_mitm/README.md
+    labs/lab02/part2_double_des_mitm/double_des_demo.py
     labs/lab02/part2_double_des_mitm/starter.py
     labs/lab02/part2_double_des_mitm/data/encrypted_flag.bin
     labs/lab02/part2_double_des_mitm/data/known_pairs.json
