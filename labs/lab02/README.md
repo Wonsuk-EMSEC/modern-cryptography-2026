@@ -28,34 +28,40 @@ service, and synthetic traces. The final message is:
 
 ## Setup
 
-Build the course image from the repository root:
+### Parts 1–3 and 7
+
+If you completed Lab 01 on this computer, use the same course container in
+the same way. From the repository root, start it if needed and enter it:
+
+```console
+docker compose -f docker/compose.yml up -d course
+docker compose -f docker/compose.yml exec course bash
+cd /workspace/labs/lab02
+```
+
+You only need to build the image when you have not completed the Lab 01 setup
+on this computer, or when the instructor announces an image update:
 
 ```console
 docker compose -f docker/compose.yml build course
 ```
 
-Parts 1–3 and 7 run only in the course container:
+### Parts 4–6
+
+These Parts communicate with a service that course staff prepare before the
+lab. You do **not** download, start, configure, or inspect that service. When
+staff say that Parts 4–6 are ready, run their commands from your normal host
+terminal, not from the Lab 01 `course` shell. For example:
 
 ```console
-docker compose -f docker/compose.lab02.student.yml run --rm lab02-course bash
-cd /workspace/labs/lab02
+docker compose -f docker/compose.lab02.student.yml run --rm lab02-course \
+  python3 part4_cbc_bit_flipping/starter.py
 ```
 
-Parts 4–6 use the course-operated target service named `lab02-target`. Course
-staff start it from an instructor-only checkout on the course Docker host and
-attach it to the internal Lab02 course network before the lab begins. The
-target image, server code, and secret data are deliberately absent from the
-student release.
-Open the course shell as usual:
-
-```console
-docker compose -f docker/compose.lab02.student.yml run --rm lab02-course bash
-cd /workspace/labs/lab02
-```
-
-The supplied clients always use the fixed course service name; they do not
-accept a host argument. If a connection fails, contact course staff rather
-than changing the client or probing another service.
+This starts a temporary course container that can reach the class service, then
+removes it when the command finishes. The supplied clients connect to the
+correct service automatically. If you see a connection error, contact course
+staff; do not change a client address or try another host.
 
 ## Working through the Parts
 
@@ -65,18 +71,28 @@ to the analysis questions. Do not look for flags in filenames or source code:
 the supplied artifacts are designed so the intended cryptographic work reveals
 them.
 
+For Parts 1–3 and 7, run these commands **inside** the Lab 01 `course` shell:
+
 ```console
 python3 part1_des_bruteforce/starter.py
 python3 part2_double_des_mitm/starter.py
 python3 part3_aes_cbc_pkcs7/starter.py
-python3 part4_cbc_bit_flipping/starter.py
-python3 part5_padding_oracle/starter.py
-python3 part6_mte_vs_etm/starter.py
 python3 part7_aes_cpa/starter.py
 ```
 
-The Part 4–6 commands require the course-operated target to be available. Part
-7 also produces plots in a directory you choose with its `--plots` option.
+For Parts 4–6, run these commands **from your normal host terminal** after
+course staff announce that the service is ready:
+
+```console
+docker compose -f docker/compose.lab02.student.yml run --rm lab02-course \
+  python3 part4_cbc_bit_flipping/starter.py
+docker compose -f docker/compose.lab02.student.yml run --rm lab02-course \
+  python3 part5_padding_oracle/starter.py
+docker compose -f docker/compose.lab02.student.yml run --rm lab02-course \
+  python3 part6_mte_vs_etm/starter.py
+```
+
+Part 7 can save its plots in a directory you choose with `--plots`.
 
 ## Tests
 
