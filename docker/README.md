@@ -87,17 +87,3 @@ docker compose -f docker/compose.yml --profile lab01-ssh --profile lab02 down
    targets or `image:` for targets supplied as prebuilt images.
 4. Document target startup and shutdown in the Part README. Check the new lab
    and the existing labs in the common image.
-
-## Older Lab02 Compose files
-
-Neither file below is required for the current labs. All current startup
-instructions use `compose.yml`, and the student release excludes both files.
-
-| Older file | Former role | Current replacement |
-| --- | --- | --- |
-| `compose.lab02.student.yml` | Run the supplied image and a separate `lab02-course` shell | `compose.yml` with the shared `course` service and optional `lab02-target` |
-| `compose.lab02.yml` | Build the target from private source and run a separate Lab02 workspace | Staff use `docker build -f docker/lab02-target/Dockerfile ...`, then run services with `compose.yml` |
-
-They remain only for compatibility with previous handouts. Finish any old
-Lab02 session with its original Compose file before switching to the common
-workflow.
