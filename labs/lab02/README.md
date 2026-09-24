@@ -34,6 +34,24 @@ your Python code inside it. **If you completed the Lab 01 setup, you have
 already built this common image and used this container.** Use the same
 repository and refresh the environment as described below.
 
+**If you have not built the course image yet**, first complete the
+[prerequisites](../../README.md#0-prerequisites) and
+[clone the repository](../../README.md#1-clone-the-course-repository).
+Make sure Docker is running. In your **host terminal** (Ubuntu/WSL on
+Windows), go to the repository root containing `docker/` and `labs/`, then
+run:
+
+```console
+docker compose -f docker/compose.yml build course
+```
+
+This command uses `docker/Dockerfile` to build the shared
+`modern-cryptography-2026` image, including the tools and Python libraries
+required for the labs. The first build may take several minutes. Once it
+finishes successfully, your image is ready: continue to
+[step 2](#2-start-the-services-you-need) to start the container. You do not
+need to repeat the same build in step 1 below.
+
 Parts 4–6 also need a target container running on your own computer. This is
 the same workflow used for the SSH target in Lab 01 Part 2. The Lab02 target
 is supplied as a prebuilt image, which you load instead of building from
