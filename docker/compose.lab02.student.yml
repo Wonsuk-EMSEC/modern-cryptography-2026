@@ -1,3 +1,6 @@
+# Legacy entry point for older Lab02 handouts. New sessions use compose.yml
+# and its shared course service; see docker/README.md. Finish an old session
+# before switching files. Retained so existing handout commands still work.
 services:
   lab02-course:
     image: modern-cryptography-2026

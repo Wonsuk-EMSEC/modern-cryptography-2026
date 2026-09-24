@@ -68,11 +68,11 @@ docker load -i lab02-target-image.tar.gz
 ```
 
 Use the path where you saved the image file if it is outside the repository.
-Start the target and check its status:
+Start the common course container and target, then check their status:
 
 ```console
-docker compose -f docker/compose.lab02.student.yml --profile lab02 up -d --wait lab02-target
-docker compose -f docker/compose.lab02.student.yml --profile lab02 ps
+docker compose -f docker/compose.yml --profile lab02 up -d --wait course lab02-target
+docker compose -f docker/compose.yml --profile lab02 ps
 ```
 
 The target should be `healthy`. Docker creates the internal lab network
@@ -83,11 +83,16 @@ automatically; you do not need to create a network or configure a server address
 From the same **host terminal**:
 
 ```console
-docker compose -f docker/compose.lab02.student.yml run --rm lab02-course bash
+docker compose -f docker/compose.yml exec course bash
 ```
 
-This opens a shell in `/workspace/labs/lab02`. Run the following Python commands
-**inside this container**.
+Inside the container, change to the Lab02 directory:
+
+```console
+cd /workspace/labs/lab02
+```
+
+Run the following Python commands **inside this container**.
 
 Issue and verify a normal token:
 
@@ -112,11 +117,16 @@ When you are finished, leave the course shell:
 exit
 ```
 
-Then stop and remove the Lab02 containers from the **host terminal**:
+Exiting the shell leaves both containers running. Stop the Lab02 target from
+the **host terminal**:
 
 ```console
-docker compose -f docker/compose.lab02.student.yml --profile lab02 down
+docker compose -f docker/compose.yml --profile lab02 stop lab02-target
 ```
+
+The common course container remains available for other labs. See the
+[Lab02 session instructions](../README.md#finish-or-restart-a-session) to
+remove all course containers when you are finished with them.
 
 ## Flag Format
 

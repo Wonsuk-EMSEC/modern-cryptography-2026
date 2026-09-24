@@ -42,29 +42,39 @@ byte position, recover the full key, then decrypt `secret_ciphertext.bin`.
 
 ## How to Run
 
-Start the course environment from the repository root, then run:
+Part 7 needs only the common course container. Follow the one-time
+[Lab02 image preparation](../README.md#setup), then start it from the
+repository root in a **host terminal**:
 
 ```console
-docker compose -f docker/compose.lab02.student.yml run --rm lab02-course \
+docker compose -f docker/compose.yml up -d course
+```
+
+The following commands also run from the **host terminal** at the repository
+root. `exec` runs Python inside the existing course container, and `-w` sets
+the lab directory for that command:
+
+```console
+docker compose -f docker/compose.yml exec -w /workspace/labs/lab02 course \
   python3 part7_aes_cpa/starter.py --byte 0 --plots part7_aes_cpa/plots
 ```
 
 After completing full-key recovery:
 
 ```console
-docker compose -f docker/compose.lab02.student.yml run --rm lab02-course \
+docker compose -f docker/compose.yml exec -w /workspace/labs/lab02 course \
   python3 part7_aes_cpa/starter.py --all
 ```
 
-The first command should produce three plots: example traces, the score for
+The byte-0 command should produce three plots: example traces, the score for
 each candidate key byte, and correlation over sample position for the winning
-candidate. The `part7_aes_cpa/plots` directory is under the mounted Lab02
-workspace, so it remains available after the disposable course container exits.
+candidate. The repository is mounted at `/workspace`, so the plots are saved
+in `labs/lab02/part7_aes_cpa/plots` in your host repository.
 
 As an optional experiment, compare the byte-0 result at several trace counts:
 
 ```console
-docker compose -f docker/compose.lab02.student.yml run --rm lab02-course \
+docker compose -f docker/compose.yml exec -w /workspace/labs/lab02 course \
   python3 part7_aes_cpa/trace_count_experiment.py
 ```
 

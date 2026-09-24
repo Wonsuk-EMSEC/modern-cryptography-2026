@@ -56,14 +56,20 @@ not supplied as files in your workspace.
 In a **host terminal**, from the repository root:
 
 ```console
-docker compose -f docker/compose.lab02.student.yml --profile lab02 up -d --wait lab02-target
-docker compose -f docker/compose.lab02.student.yml --profile lab02 ps
-docker compose -f docker/compose.lab02.student.yml run --rm lab02-course bash
+docker compose -f docker/compose.yml --profile lab02 up -d --wait course lab02-target
+docker compose -f docker/compose.yml --profile lab02 ps
+docker compose -f docker/compose.yml exec course bash
 ```
 
-The target should be `healthy`. The last command opens a shell in
-`/workspace/labs/lab02`. If your target and course shell are still running from
-Part 4, continue in that shell without starting another one.
+The target should be `healthy`. The last command opens the common course
+shell. **Inside the container**, change to the lab directory:
+
+```console
+cd /workspace/labs/lab02
+```
+
+If your target and course shell are still running from Part 4, continue in
+that shell without starting another one.
 
 ### Step 2: run your recovery code
 
@@ -90,20 +96,24 @@ If you reach the query limit while debugging, check your loop, then reset your
 local target from a **second host terminal** at the repository root:
 
 ```console
-docker compose -f docker/compose.lab02.student.yml --profile lab02 restart lab02-target
-docker compose -f docker/compose.lab02.student.yml --profile lab02 ps
+docker compose -f docker/compose.yml --profile lab02 restart lab02-target
+docker compose -f docker/compose.yml --profile lab02 ps
 ```
 
 Wait until the target is `healthy`, then rerun your program. Restarting the
 target resets query counts for Parts 5 and 6.
 
 Keep the target running if you are continuing to Part 6. When finished, run
-`exit` in the course shell, then remove the Lab02 containers from the
-**host terminal**:
+`exit` in the course shell. This leaves both containers running. Stop the
+Lab02 target from the **host terminal**:
 
 ```console
-docker compose -f docker/compose.lab02.student.yml --profile lab02 down
+docker compose -f docker/compose.yml --profile lab02 stop lab02-target
 ```
+
+The common course container remains available for other labs. See the
+[Lab02 session instructions](../README.md#finish-or-restart-a-session) to
+remove all course containers when you are finished with them.
 
 ## Flag Format
 

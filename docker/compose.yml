@@ -16,6 +16,7 @@ services:
     networks:
       - default
       - lab01-ssh-internal
+      - lab02-internal
     stdin_open: true
     tty: true
 
@@ -36,11 +37,34 @@ services:
       - /run
       - /tmp
     healthcheck:
-      test: ["CMD-SHELL", "ssh-keyscan -T 1 localhost >/dev/null 2>&1"]
+      test: ["CMD-SHELL", "ssh-keyscan -T 1 127.0.0.1 >/dev/null 2>&1"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+
+  lab02-target:
+    profiles:
+      - lab02
+    # Staff build docker/lab02-target/Dockerfile with the private server source.
+    # Students load the supplied image; the common image needs no private files.
+    image: modern-cryptography-2026-lab02-target
+    pull_policy: never
+    hostname: lab02-target
+    expose:
+      - "8080"
+    networks:
+      - lab02-internal
+    read_only: true
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import socket; socket.create_connection(('localhost', 8080), 1).close()"]
       interval: 2s
       timeout: 2s
       retries: 10
 
 networks:
   lab01-ssh-internal:
+    internal: true
+  lab02-internal:
     internal: true

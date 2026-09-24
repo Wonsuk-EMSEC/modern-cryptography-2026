@@ -1,3 +1,5 @@
+# Shared student environment for all labs. Put new lab dependencies here;
+# additional target services have their own Dockerfiles in subdirectories.
 FROM ubuntu:24.04
 
 ARG DEBIAN_FRONTEND=noninteractive

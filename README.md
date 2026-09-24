@@ -25,6 +25,13 @@ The course Docker image provides the software and libraries used by the labs.
 Students should use Docker as the execution environment while keeping their
 work in this Git repository.
 
+Every lab uses the same `docker/Dockerfile` and the `course` service in
+`docker/compose.yml`. Parts that need an extra server use a target Dockerfile
+under `docker/`, such as `lab01-ssh-target/` or `lab02-target/`. Start those
+services only when the Part requires them. See [the Docker layout and service
+commands](docker/README.md) for details; Lab02 uses an instructor-supplied
+target image while keeping its server source private.
+
 ### 0. Prerequisites
 
 Install the following software before starting:
@@ -60,7 +67,7 @@ Run the remaining commands from this repository root directory.
 ### 2. Build the course Docker image
 
 ```console
-docker compose -f docker/compose.yml build
+docker compose -f docker/compose.yml build course
 ```
 
 This builds the `modern-cryptography-2026` image and installs the software and
@@ -106,11 +113,11 @@ in the background. You can enter the container again at any time with:
 docker compose -f docker/compose.yml exec course bash
 ```
 
-When you are finished with the environment, stop and remove the Compose
-containers with:
+When you are finished with all labs, stop and remove the course container,
+optional targets, and their networks with:
 
 ```console
-docker compose -f docker/compose.yml down
+docker compose -f docker/compose.yml --profile lab01-ssh --profile lab02 down
 ```
 
 
@@ -169,45 +176,51 @@ pytest -q
 exit
 ```
 
-The temporary container is removed, but files under `/workspace` remain because
-they are stored in the host Git repository.
+This closes the shell. The course container continues running, and files under
+`/workspace` remain in the host Git repository. Use the shutdown command in
+step 3 when you are finished with all containers.
 
 ### 7. Rebuild the environment
 
 If `docker/Dockerfile` changes, rebuild the image:
 
 ```console
-docker compose -f docker/compose.yml build
+docker compose -f docker/compose.yml build course
 ```
 
 For troubleshooting, you can force Docker to rebuild every layer:
 
 ```console
-docker compose -f docker/compose.yml build --no-cache
+docker compose -f docker/compose.yml build --no-cache course
 ```
 
 The `--no-cache` option is normally unnecessary and makes the build slower.
+After rebuilding, run `docker compose -f docker/compose.yml up -d course`
+to recreate the course container with the updated image.
 
 ### 8. Run JupyterLab (optional)
 
-JupyterLab is included in the course image. Start it from the repository root:
+JupyterLab is included in the course image. Start it in the shared course
+container from the repository root:
 
 ```console
-docker compose -f docker/compose.yml run --rm --service-ports course \
+docker compose -f docker/compose.yml up -d course
+docker compose -f docker/compose.yml exec course \
   jupyter lab --ip=0.0.0.0 --no-browser
 ```
 
-The `--service-ports` option publishes port 8888 as configured in
-`docker/compose.yml`. Open the URL printed by JupyterLab in a browser, including
-its access token. Press `Ctrl+C` in the terminal to stop JupyterLab.
+The course container publishes port 8888 as configured in `docker/compose.yml`.
+Open the URL printed by JupyterLab in a browser, including its access token.
+Press `Ctrl+C` in the terminal to stop JupyterLab; the course container remains
+running.
 
 ### 9. Important notes
 
 - Do not install course dependencies manually with `apt` or `pip` unless a lab
   or instructor explicitly tells you to do so. Required dependencies should be
   provided by the Docker image.
-- Do not create important course files outside `/workspace` inside the
-  temporary container; those files may disappear when the container exits.
+- Keep important course files under `/workspace`; files elsewhere in the
+  container are lost when it is removed or recreated.
 - Normally, edit files in the host Git repository and use Docker to run and
   test them.
 

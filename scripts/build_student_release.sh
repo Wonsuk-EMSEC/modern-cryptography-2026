@@ -67,9 +67,13 @@ done
 # prevents a stray file under labs/lab02 from becoming part of a student bundle.
 student_paths=(
     README.md
+    docker/README.md
     docker/Dockerfile
     docker/compose.yml
-    docker/compose.lab02.student.yml
+    docker/lab01-ssh-target/Dockerfile
+    docker/lab01-ssh-target/sshd_config
+    docker/lab02-target/Dockerfile
+    docker/lab02-target/README.md
     labs/lab02/Makefile
     labs/lab02/README.md
     labs/lab02/__init__.py
@@ -135,8 +139,8 @@ if "$include_target_image"; then
     # ciphertexts and the private target secrets come from the same generator.
     docker compose -f "$repo_root/docker/compose.yml" run --rm course \
         python3 -m instructor.lab02.generators.build_data --check
-    docker compose -f "$repo_root/docker/compose.lab02.yml" --profile lab02 \
-        build lab02-target
+    docker build -f "$repo_root/docker/lab02-target/Dockerfile" \
+        -t modern-cryptography-2026-lab02-target "$repo_root"
     docker save modern-cryptography-2026-lab02-target \
         | gzip > "$staging_dir/lab02-target-image.tar.gz"
 fi

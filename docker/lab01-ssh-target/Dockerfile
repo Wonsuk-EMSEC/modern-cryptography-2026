@@ -15,6 +15,6 @@ COPY docker/lab01-ssh-target/sshd_config /etc/ssh/sshd_config
 EXPOSE 22
 
 HEALTHCHECK --interval=2s --timeout=2s --retries=10 \
-    CMD ssh-keyscan -T 1 localhost >/dev/null 2>&1 || exit 1
+    CMD ssh-keyscan -T 1 127.0.0.1 >/dev/null 2>&1 || exit 1
 
 CMD ["/bin/sh", "-c", "mkdir -p /run/sshd && exec /usr/sbin/sshd -D -e"]
