@@ -49,26 +49,47 @@ docker compose -f docker/compose.yml --profile lab01-ssh up -d --build --wait la
 See [lab01-ssh-target/README.md](lab01-ssh-target/README.md) for the target's
 build files, course-shell entry, and shutdown command.
 
-For Lab02 Parts 4–6, load the instructor-supplied image once, then start it:
+For Lab02 Parts 4–6, start the common course container and the prebuilt target:
 
 ```console
-docker load -i lab02-target-image.tar.gz
 docker compose -f docker/compose.yml --profile lab02 up -d --wait course lab02-target
+docker compose -f docker/compose.yml --profile lab02 ps
 ```
+
+Compose automatically pulls the public GHCR image
+`ghcr.io/wonsuk-emsec/modern-cryptography-2026-lab02-target:2026-lab02-v1`
+when needed. The first `up` may take longer while it downloads the image;
+no manual image download or registry login is needed. Students do not build
+this target locally. Use the Lab02 files and image from the same
+**`2026-lab02-v1`** release: Part 5's ciphertext must match the target image.
+The target should appear as `healthy` in `ps`.
 
 Use the same `course` shell to run both labs. It can reach each target by its
 service name. Each target is on its own internal network, and neither target
 publishes a host port. Server runtime data lives in its target container.
 
 The Lab02 target's build recipe is public; its Python server and secret data
-remain in the instructor checkout. See [lab02-target/README.md](lab02-target/README.md)
-for the staff build command. Students use the supplied image.
+are excluded from the student source release. The image contains the private
+implementation and secrets needed at runtime and can be inspected by anyone
+with local access to it. Solve the exercises through the supplied clients.
+See [lab02-target/README.md](lab02-target/README.md) for the staff image
+publication workflow.
 
 To stop just the Lab02 target while keeping the course shell and Lab01 server:
 
 ```console
 docker compose -f docker/compose.yml --profile lab02 stop lab02-target
 ```
+
+To finish a Lab02 session and remove its target, the course container, and
+their networks:
+
+```console
+docker compose -f docker/compose.yml --profile lab02 down
+```
+
+Use the target-only `stop` command above if you want to keep the course
+container available for other labs.
 
 When finished with **all** labs, remove the course container, both targets,
 and their networks:

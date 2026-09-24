@@ -55,10 +55,12 @@ provided query interface.
 
 ## How to Run
 
-Use the same local target as Part 4. If you have not loaded the
-instructor-provided target image yet, follow the one-time
-[Lab02 setup instructions](../README.md#setup). The oracle source and keys are
-not supplied as files in your workspace.
+Use the same local target as Part 4. If you have not prepared the Lab02
+environment yet, follow the [Lab02 setup instructions](../README.md#setup).
+Compose automatically pulls the prebuilt target image from GHCR when needed.
+Use this Part's ciphertext and the target image from the same `2026-lab02-v1`
+release. The oracle source and keys are excluded from the student source
+release.
 
 ### Step 1: start the target and enter the course container
 

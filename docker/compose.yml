@@ -46,9 +46,8 @@ services:
     profiles:
       - lab02
     # Staff build docker/lab02-target/Dockerfile with the private server source.
-    # Students load the supplied image; the common image needs no private files.
-    image: modern-cryptography-2026-lab02-target
-    pull_policy: never
+    # Compose pulls this release from GHCR; students do not build the target.
+    image: ghcr.io/wonsuk-emsec/modern-cryptography-2026-lab02-target:2026-lab02-v1
     hostname: lab02-target
     expose:
       - "8080"

@@ -63,9 +63,10 @@ keys.
 ## How to Run
 
 Service A and Service B both run in the same local target container used in
-Parts 4 and 5. If you have not loaded the instructor-provided target image yet,
-follow the one-time [Lab02 setup instructions](../README.md#setup). The server
-source and keys are not supplied as files in your workspace.
+Parts 4 and 5. If you have not prepared the Lab02 environment yet, follow the
+[Lab02 setup instructions](../README.md#setup). Compose automatically pulls
+the prebuilt target image from GHCR when needed. The server source and keys
+are excluded from the student source release.
 
 ### Step 1: start the target and enter the course container
 

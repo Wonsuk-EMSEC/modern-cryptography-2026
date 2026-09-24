@@ -1,39 +1,16 @@
 #!/usr/bin/env bash
-# Build the Lab02 student source archive and, optionally, a separate target image.
+# Build the Lab02 student source archive. The target image is pulled from GHCR.
 set -euo pipefail
 
 usage() {
-    echo "usage: $0 OUTPUT_DIRECTORY [--include-target-image]" >&2
+    echo "usage: $0 OUTPUT_DIRECTORY" >&2
 }
 
-release_dir=
-include_target_image=false
-for argument in "$@"; do
-    case "$argument" in
-        --include-target-image)
-            if "$include_target_image"; then
-                usage
-                exit 2
-            fi
-            include_target_image=true
-            ;;
-        -*)
-            usage
-            exit 2
-            ;;
-        *)
-            if [[ -n "$release_dir" ]]; then
-                usage
-                exit 2
-            fi
-            release_dir=$argument
-            ;;
-    esac
-done
-if [[ -z "$release_dir" ]]; then
+if [[ $# -ne 1 || -z "$1" || "$1" == -* ]]; then
     usage
     exit 2
 fi
+release_dir=$1
 
 if [[ -e "$release_dir" ]]; then
     echo "output path already exists: $release_dir" >&2
@@ -137,21 +114,6 @@ tar -C "$repo_root" -cf - "${student_paths[@]}" | tar -C "$staging_dir/source" -
 
 tar -C "$staging_dir/source" -czf "$staging_dir/modern-cryptography-2026-student.tar.gz" .
 
-if "$include_target_image"; then
-    # Staff build the current course image first. Check that the distributed
-    # ciphertexts and the private target secrets come from the same generator.
-    docker compose -f "$repo_root/docker/compose.yml" run --rm course \
-        python3 -m instructor.lab02.generators.build_data --check
-    docker build -f "$repo_root/docker/lab02-target/Dockerfile" \
-        -t modern-cryptography-2026-lab02-target "$repo_root"
-    docker save modern-cryptography-2026-lab02-target \
-        | gzip > "$staging_dir/lab02-target-image.tar.gz"
-fi
-
 mkdir -p "$release_dir"
 mv "$staging_dir/modern-cryptography-2026-student.tar.gz" "$release_dir/"
 echo "created $release_dir/modern-cryptography-2026-student.tar.gz"
-if "$include_target_image"; then
-    mv "$staging_dir/lab02-target-image.tar.gz" "$release_dir/"
-    echo "created $release_dir/lab02-target-image.tar.gz"
-fi

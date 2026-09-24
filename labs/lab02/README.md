@@ -54,8 +54,8 @@ need to repeat the same build in step 1 below.
 
 Parts 4–6 also need a target container running on your own computer. This is
 the same workflow used for the SSH target in Lab 01 Part 2. The Lab02 target
-is supplied as a prebuilt image, which you load instead of building from
-server source. No instructor-hosted server is needed.
+is supplied as a prebuilt image that Docker Compose downloads automatically
+from GitHub Container Registry (GHCR). No instructor-hosted server is needed.
 
 | Service | Purpose |
 | --- | --- |
@@ -98,7 +98,7 @@ Additional target services have separate build recipes:
 `docker/lab01-ssh-target/Dockerfile` for the Lab 01 SSH target and
 `docker/lab02-target/Dockerfile` for the Lab02 application. The instructor
 builds the Lab02 target from private server files and provides its image.
-For Parts 4–6, load that image in step 2; the common course build above
+For Parts 4–6, start that image in step 2; the common course build above
 prepares only your working environment.
 
 ### 2. Start the services you need
@@ -122,36 +122,27 @@ start by default. Start it only for Parts 4–6, following the instructions
 below.
 
 The common `course` image can be built from the files in your student
-repository. Building `lab02-target` also requires the instructor's server
-implementation and challenge secrets: its Dockerfile copies files from
-`instructor/lab02/targets/`, which is absent from the student release.
-The instructor builds the target with the matching Lab02 data and exports
-it as `lab02-target-image.tar.gz` for students to load.
+repository. Students do not build `lab02-target` locally: its build requires
+the instructor's server implementation and challenge secrets, which are
+excluded from the student source release. The target image contains those
+runtime files and secrets, and anyone with local access to the image can
+inspect them. The exercises are intended to be solved through the supplied
+clients.
 
-For this reason, `lab02-target` in `docker/compose.yml` specifies an `image`
-without a `build` section. Compose can build multiple services when their
-source files are available; this lab deliberately distributes the target as
-an already-built image. `docker load` imports it into your local Docker
-installation, and Compose then starts it alongside `course`.
+The instructor publishes the prebuilt target as a public GHCR package:
 
-This distribution keeps the server files out of the student source
-repository. The image itself still contains the files needed to run the
-server, and someone with access to the image can inspect them. The exercises
-are intended to be solved through the supplied clients.
-
-For **Parts 4–6**, download `lab02-target-image.tar.gz` provided with these lab
-materials and place it in the repository root. Load it once in the **host
-terminal**:
-
-```console
-docker load -i lab02-target-image.tar.gz
+```text
+ghcr.io/wonsuk-emsec/modern-cryptography-2026-lab02-target:2026-lab02-v1
 ```
 
-Use the image supplied with the same version of the Lab02 files; Part 5's
-ciphertext must match that image. Load a replacement only when the instructor
-provides an updated bundle.
+`docker/compose.yml` specifies this image without a `build` section. Compose
+pulls it automatically when needed; no manual download, `docker load`, or
+registry login is needed for the public package. The Lab02 files and target
+image are a paired **`2026-lab02-v1`** release: Part 5's ciphertext must match
+the target image. Keep them on the same release when updating.
 
-Start the course container and Lab02 target with the commands below. If you
+For **Parts 4–6**, start the course container and Lab02 target in the **host
+terminal** at the repository root with the commands below. If you
 completed Lab 01 Part 2, this is the same Compose workflow you used to start
 the SSH target, with the `lab02` profile and `lab02-target` service:
 
@@ -160,11 +151,16 @@ docker compose -f docker/compose.yml --profile lab02 up -d --wait course lab02-t
 docker compose -f docker/compose.yml --profile lab02 ps
 ```
 
-The first command waits until the services are ready. `ps` should show
+The first `up` may take longer while it downloads the target image. The
+command then waits until the services are ready. `ps` should show
 `lab02-target` as `healthy`. Docker Compose creates the internal network
 automatically. The target runs on your computer and has no published host
 port. The `lab02` profile enables this additional service; the course
 container is the same one used for the other labs.
+
+If the image pull reports `denied` or `manifest unknown`, ask the instructor
+to confirm that this release has been published and the GHCR package is
+public. You do not need to change the clients or build the target locally.
 
 ### 3. Enter the common course container
 
@@ -228,7 +224,17 @@ docker compose -f docker/compose.yml --profile lab02 stop lab02-target
 
 The course container remains available for other Parts and labs. Next time,
 repeat the appropriate start command in step 2 and enter the shell as in
-step 3. The loaded images remain on your computer.
+step 3. The built and downloaded images remain on your computer.
+
+If you are finished with the Lab02 session and want to remove its target,
+the course container, and their networks, run from the **host terminal**:
+
+```console
+docker compose -f docker/compose.yml --profile lab02 down
+```
+
+Use the target-only `stop` command above if you want to keep working in other
+labs with the course container.
 
 If you have finished all lab work and no longer need any course containers,
 stop and remove them and their networks from the **host terminal**:

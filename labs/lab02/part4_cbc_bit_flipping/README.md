@@ -63,28 +63,34 @@ change between runs.
 
 As in Lab01 Part 2, you start a target container on your own computer and run
 the client from a course container. Parts 4–6 share this target. The instructor
-provides its prebuilt image separately; the server source and secret files are
-not added to your workspace. See the [Lab02 setup instructions](../README.md#setup)
-for the one-time course-image preparation.
+publishes its prebuilt image on GitHub Container Registry (GHCR); students do
+not build the target locally. The server implementation and secret files are
+excluded from the student source release, but the image contains them at
+runtime and can be inspected locally. See the
+[Lab02 setup instructions](../README.md#setup) for the one-time course-image
+preparation.
 
-### Step 1: load and start the target
+### Step 1: start the target
 
-In a **host terminal**, from the repository root, load the instructor-provided
-image once (or again when the instructor supplies an updated image):
+Compose automatically pulls this public image when needed, without a manual
+download or registry login:
 
-```console
-docker load -i lab02-target-image.tar.gz
+```text
+ghcr.io/wonsuk-emsec/modern-cryptography-2026-lab02-target:2026-lab02-v1
 ```
 
-Use the path where you saved the image file if it is outside the repository.
-Start the common course container and target, then check their status:
+Use the Lab02 files and image from the same **`2026-lab02-v1`** release;
+Part 5's supplied ciphertext must match the target image. In a **host
+terminal**, from the repository root, start the common course container and
+target, then check their status:
 
 ```console
 docker compose -f docker/compose.yml --profile lab02 up -d --wait course lab02-target
 docker compose -f docker/compose.yml --profile lab02 ps
 ```
 
-The target should be `healthy`. Docker creates the internal lab network
+The first `up` may take longer while Docker downloads the image. The target
+should be `healthy`. Docker creates the internal lab network
 automatically; you do not need to create a network or configure a server address.
 
 ### Step 2: enter the course container
@@ -133,9 +139,16 @@ the **host terminal**:
 docker compose -f docker/compose.yml --profile lab02 stop lab02-target
 ```
 
-The common course container remains available for other labs. See the
-[Lab02 session instructions](../README.md#finish-or-restart-a-session) to
-remove all course containers when you are finished with them.
+The common course container remains available for other labs. To remove the
+course container, Lab02 target, and their networks when this session is
+finished, run:
+
+```console
+docker compose -f docker/compose.yml --profile lab02 down
+```
+
+See the [Lab02 session instructions](../README.md#finish-or-restart-a-session)
+for cleanup when you have also started the Lab01 target.
 
 ## Flag Format
 

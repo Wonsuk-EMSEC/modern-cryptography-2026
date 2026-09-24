@@ -30,7 +30,9 @@ Every lab uses the same `docker/Dockerfile` and the `course` service in
 under `docker/`, such as `lab01-ssh-target/` or `lab02-target/`. Start those
 services only when the Part requires them. See [the Docker layout and service
 commands](docker/README.md) for details; Lab02 uses an instructor-supplied
-target image while keeping its server source private.
+target image that Compose automatically pulls from public GHCR; its server
+implementation and secrets are excluded from the student source release but
+are present in the locally inspectable runtime image.
 
 ### 0. Prerequisites
 
