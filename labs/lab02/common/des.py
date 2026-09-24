@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from Crypto.Cipher import DES
 
-MAX_KEY_BITS = 20
+MAX_KEY_BITS = 24
 
 
 def make_des_key(key_id: int, key_bits: int) -> bytes:
@@ -15,7 +15,7 @@ def make_des_key(key_id: int, key_bits: int) -> bytes:
     odd parity. PyCryptodome ignores those low parity bits during DES.
     """
     if not 1 <= key_bits <= MAX_KEY_BITS:
-        raise ValueError("reduced DES spaces are limited to 1..20 bits")
+        raise ValueError(f"reduced DES spaces are limited to 1..{MAX_KEY_BITS} bits")
     if not 0 <= key_id < (1 << key_bits):
         raise ValueError("key ID does not fit the selected space")
     encoded = bytearray()

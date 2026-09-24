@@ -11,12 +11,12 @@ from pathlib import Path
 LAB_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(LAB_ROOT))
 
-from common.des import decrypt_bytes, encrypt_block, make_des_key, unpad8
+from common.des import MAX_KEY_BITS, decrypt_bytes, encrypt_block, make_des_key, unpad8
 
 
 def brute_force(plaintext: bytes, ciphertext: bytes, key_bits: int) -> tuple[int | None, int, float]:
     """Return (recovered ID, candidates tested, elapsed seconds)."""
-    if not 1 <= key_bits <= 20:
+    if not 1 <= key_bits <= MAX_KEY_BITS:
         raise ValueError("refusing an impractical key space")
     # TODO: test every candidate with make_des_key() and encrypt_block().
     # Stop at the first match and measure time with time.perf_counter().

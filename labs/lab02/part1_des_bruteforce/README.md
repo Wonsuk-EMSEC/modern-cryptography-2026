@@ -24,6 +24,12 @@ C = E_K(P)
 The exercise uses real DES, but only a bounded key-ID space. Do not attempt to
 search DES's full 56-bit effective key space.
 
+The supplied instance uses **24 key-ID bits**, giving **16,777,216 candidates**.
+This is 256 times the search space of a 16-bit instance. Budget roughly
+**1–3 minutes for one sequential Python search** in the course container;
+the time varies with your CPU, Docker resources, and implementation. The
+program stops at the first match, so it need not test the entire space.
+
 ## Provided Files
 
 | File | Purpose |
@@ -66,6 +72,12 @@ cd /workspace/labs/lab02/part1_des_bruteforce
 python3 starter.py
 ```
 
+The starter prints its result after the search finishes. A completed search
+loop may therefore run for a while without terminal output. Check your code
+first with the small, synthetic fixtures in the tests before running the
+supplied 24-bit instance. Do not insert delays or repeat matching candidates
+to increase the measured time; measure the actual candidate search.
+
 After completing this part, run the Lab02 checks from the lab root:
 
 ```console
@@ -73,8 +85,10 @@ cd /workspace/labs/lab02
 make grade
 ```
 
-The search is intentionally bounded. If you changed `key_bits` while
-experimenting, restore the supplied data before measuring your final result.
+The search is intentionally bounded. Keep `parameters.json` and both
+ciphertext files from the same release. Increasing `key_bits` alone leaves
+the old key and ciphertext unchanged, so it does not necessarily make the
+search take longer. Use the supplied 24-bit data for your final measurement.
 
 ## Flag Format
 
