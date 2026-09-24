@@ -31,8 +31,8 @@ service, and synthetic traces. The final message is:
 You can start Lab02 without completing Lab 01. All labs share the same Docker
 environment: you build the course image, start the `course` container, and run
 your Python code inside it. **If you completed the Lab 01 setup, you have
-already built this common image and used this container.** Reuse that setup
-as described below.
+already built this common image and used this container.** Use the same
+repository and refresh the environment as described below.
 
 Parts 4–6 also need a target container running on your own computer. This is
 the same workflow used for the SSH target in Lab 01 Part 2. The Lab02 target
@@ -49,10 +49,12 @@ server source. No instructor-hosted server is needed.
 - **Starting with Lab02:** follow the [prerequisites](../../README.md#0-prerequisites)
   and [repository cloning instructions](../../README.md#1-clone-the-course-repository)
   in the main README, then build the course image with the command below.
-- **Already completed the Lab 01 setup:** use the repository and image you
-  prepared there. If `docker/Dockerfile` has changed since your last build
-  (for example, to add Lab02 dependencies), rebuild with the same command.
-  Otherwise, skip the build and continue to step 2.
+- **Already completed the Lab 01 setup:** use the repository you prepared
+  there. **We recommend repeating the image build below and the service
+  start commands in step 2 before beginning Lab02.** `docker/Dockerfile`
+  and `docker/compose.yml` may have been updated since Lab 01 to add
+  dependencies or change service settings. Use the current course files
+  so these commands apply the Lab02 environment updates.
 
 `docker/Dockerfile` is the build recipe for the shared course image. It
 installs Python, cryptographic libraries, and the other tools needed for all
@@ -63,14 +65,16 @@ dependencies manually.
 
 In your **host terminal** (Ubuntu/WSL on Windows), make sure Docker is running
 and go to the repository root containing `docker/` and `labs/`. If you are
-still inside a course shell, run `exit` first. Build the image when needed:
+still inside a course shell, run `exit` first. Build the course image:
 
 ```console
 docker compose -f docker/compose.yml build course
 ```
 
 This is the same image-build command used in the Lab 01 setup. The initial
-build may take several minutes; you do not need to repeat it at every session.
+build may take several minutes; subsequent builds reuse cached layers where
+possible. After preparing the environment for Lab02, you only need to rebuild
+when updated environment files are provided.
 
 Additional target services have separate build recipes:
 `docker/lab01-ssh-target/Dockerfile` for the Lab 01 SSH target and
@@ -91,7 +95,11 @@ docker compose -f docker/compose.yml ps
 
 These commands use the shared `docker/compose.yml` to start `course` in the
 background (`-d`) and check its status. The `ps` output should show `course`
-as `Up` (running). The target servers are in separate profiles:
+as `Up` (running). Run the `up` command even if `course` is already running:
+Compose recreates the container when needed to apply a rebuilt image or
+changed service settings.
+
+The target servers are in separate profiles:
 `lab01-ssh` enables `lab01-ssh-target`, and `lab02` enables `lab02-target`.
 Neither target starts by default. Start a target only when the relevant
 Part's instructions require it.
