@@ -82,6 +82,7 @@ student_paths=(
     labs/lab02/common/des.py
     labs/lab02/common/service_client.py
     labs/lab02/part1_des_bruteforce/README.md
+    labs/lab02/part1_des_bruteforce/des_demo.py
     labs/lab02/part1_des_bruteforce/starter.py
     labs/lab02/part1_des_bruteforce/data/encrypted_flag.bin
     labs/lab02/part1_des_bruteforce/data/known_ciphertext.bin
