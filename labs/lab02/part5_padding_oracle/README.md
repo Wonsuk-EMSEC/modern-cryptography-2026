@@ -30,6 +30,15 @@ service enforces a per-run query limit to help you detect an unintended loop.
 
 ## Your Task
 
+**Before completing any TODOs, read `main()` in `starter.py` from beginning to end.**
+Trace the inputs, function calls, return values, and outputs so you understand
+the overall execution flow.
+
+Here, `main()` reads the hexadecimal packet and opens an `OracleClient`
+context. It converts the packet to bytes, passes it and the `oracle.query`
+callback to `recover_plaintext()`, then prints the returned message and query
+count. Complete the TODOs only after you understand this flow.
+
 1. Read the supplied packet as `IV || C_1 || C_2 || ...`, using AES's
    16-byte block size.
 2. Complete `recover_block()` so it uses only the Boolean query result to

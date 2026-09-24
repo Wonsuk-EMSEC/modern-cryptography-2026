@@ -42,6 +42,15 @@ intermediate-value matches, and use the second to reject accidental matches.
 
 ## Your Task
 
+**Before completing any TODOs, read `main()` in `starter.py` from beginning
+to end.** Trace the inputs, function calls, return values, and outputs so you
+understand the overall execution flow.
+
+Follow how `main()` loads and decodes the known pairs, times `recover_keys()`,
+checks that exactly one key pair was returned, and passes that pair to
+`decrypt_flag()`. Complete the TODOs below only after you understand how
+these steps fit together.
+
 1. Read the two pairs and the bounded `key_bits` value in `known_pairs.json`.
 2. Complete `recover_keys()` in `starter.py`.
 3. For every possible `K1` ID, compute `E_K1(P1)` and store the result in a

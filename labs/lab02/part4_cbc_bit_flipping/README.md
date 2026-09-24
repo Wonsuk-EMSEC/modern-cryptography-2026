@@ -37,6 +37,15 @@ decoding it; do not attempt to guess the encryption key.
 
 ## Your Task
 
+**Before completing any TODOs, read `main()` in `starter.py` from beginning to end.**
+Trace the inputs, function calls, return values, and outputs so you understand
+the overall execution flow.
+
+Here, `main()` requests a normal token, verifies it, passes it to
+`forge_admin_token()`, and verifies the returned token. Follow how both
+verification results are printed, then complete the TODO only after you
+understand this flow.
+
 1. Start the supplied Lab02 target on your computer and obtain a normal token.
 2. Inspect the starter and determine how a controlled change to a preceding
    CBC input affects the decrypted token fields.

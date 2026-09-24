@@ -40,6 +40,16 @@ PKCS#7 padding helper for the required functions.
 
 ## Your Task
 
+**Before completing any TODOs, read `main()` in `starter.py` from beginning
+to end.** Trace the inputs, function calls, return values, and outputs so you
+understand the overall execution flow.
+
+Follow how `main()` reads the key, IV, and ciphertext, passes them to
+`cbc_decrypt()`, and displays the recovered plaintext. Also inspect the tests
+to see how the padding and encryption functions are used beyond this entry
+point. Complete the TODOs below only after you understand how these steps
+fit together.
+
 1. Complete `pkcs7_pad()`.
    - Append between 1 and 16 bytes for AES.
    - Append a complete padding block when the input length is already block

@@ -26,7 +26,15 @@ measurements generated for this course.
 
 ## Your Task
 
-Complete the TODOs in `starter.py`.
+**Before completing any TODOs, read `main()` in `starter.py` from beginning to end.**
+Trace the inputs, function calls, return values, and outputs so you understand
+the overall execution flow.
+
+Here, `main()` parses the command-line options and loads the plaintexts,
+traces, and encrypted packet. With `--all`, it recovers the full key, prints
+the key and decrypted message, and returns. Otherwise, it analyzes the selected
+byte, prints its result, and optionally saves plots. Complete the TODOs in
+`starter.py` only after you understand both branches.
 
 For plaintext row `i`, target byte position `j`, and a candidate byte `k`, use
 the first-round leakage model

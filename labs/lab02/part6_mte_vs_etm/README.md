@@ -35,6 +35,16 @@ have determined that the service's responses make that interpretation useful.
 
 ## Your Task
 
+**Before completing any TODOs, read `main()` in `starter.py` from beginning to end.**
+Trace the inputs, function calls, return values, and outputs so you understand
+the overall execution flow.
+
+Here, `main()` parses `--recover-service`, obtains an item from each service,
+and prints the original and modified responses. Without a selected service,
+it returns after the probes; with one, it passes that service's item and
+padding callback to `recover_vulnerable_message()` and prints the message and
+query count. Complete the TODOs only after you understand both branches.
+
 1. Obtain an item from each service and submit it unchanged to establish a
    baseline response.
 2. Make controlled modifications to an IV byte and to a ciphertext byte, then

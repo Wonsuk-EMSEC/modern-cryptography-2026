@@ -49,6 +49,15 @@ do not invent a second key mapping.
 
 ## Your Task
 
+**Before completing any TODOs, read `main()` in `starter.py` from beginning
+to end.** Trace the inputs, function calls, return values, and outputs so you
+understand the overall execution flow.
+
+Follow how `main()` loads the parameters and known pair, receives the key ID,
+candidate count, and elapsed time from `brute_force()`, reports the search
+rate, and passes the recovered ID to `decrypt_flag()`. Complete the TODOs
+below only after you understand how these steps fit together.
+
 1. Complete `brute_force()` in `starter.py`.
 2. Enumerate candidate IDs from `0` through `2**key_bits - 1`.
 3. For each ID, create its DES key with `make_des_key()` and encrypt the known
