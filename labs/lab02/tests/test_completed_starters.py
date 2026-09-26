@@ -97,6 +97,24 @@ class CompletedStarterTests(unittest.TestCase):
 
         self.assertEqual(part6.recover_vulnerable_message(packet, padding_oracle), message)
 
+    def test_part6_probe_uses_the_service_query_interface(self) -> None:
+        part6 = load("part6")
+        packet = bytes(range(48))
+        calls: list[bytes] = []
+
+        class Service:
+            def query(self, candidate: bytes) -> str:
+                calls.append(candidate)
+                return "PADDING_OK"
+
+        modified_iv = bytearray(packet)
+        modified_iv[0] ^= 1
+        modified_ciphertext = bytearray(packet)
+        modified_ciphertext[20] ^= 1
+
+        self.assertEqual(part6.probe(Service(), packet), ("PADDING_OK", "PADDING_OK"))
+        self.assertEqual(calls, [bytes(modified_iv), bytes(modified_ciphertext)])
+
     def test_part7_low_noise_byte_and_full_key(self) -> None:
         part7 = load("part7")
         from labs.lab02.part7_aes_cpa.model import generate_traces
