@@ -9,11 +9,13 @@ from client import ServiceClient
 
 
 def probe(service: ServiceClient, packet: bytes) -> tuple[str, str]:
+    """Submit both controlled changes through the provided service client."""
     modified_iv = bytearray(packet)
     modified_iv[0] ^= 1
     modified_ciphertext = bytearray(packet)
     modified_ciphertext[20] ^= 1
-    return service.query(bytes(modified_iv)), service.query(bytes(modified_ciphertext))
+    return (service.query(bytes(modified_iv)),
+            service.query(bytes(modified_ciphertext)))
 
 
 def recover_vulnerable_message(packet: bytes, padding_query) -> bytes:
