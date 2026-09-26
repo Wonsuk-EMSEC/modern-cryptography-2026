@@ -93,8 +93,8 @@ demonstrations are runnable immediately.
    manual evidence of a complete M1–M4 sequence and one matching candidate from
    the course-only wordlist. Checkpoint: explain each derivation step and
    offline rate limiting.
-6. **Report (15 minutes).** Complete `report/LAB_REPORT_TEMPLATE.md` without
-   including any real password.
+6. **Report (15 minutes).** Summarize your results and answers to the
+   checkpoints without including any real password.
 
 No real credential is included. The supplied PCAP is restricted to this
 authorized offline exercise. The instructor may optionally provide a deliberately

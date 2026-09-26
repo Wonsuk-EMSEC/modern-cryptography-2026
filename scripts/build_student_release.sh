@@ -96,7 +96,6 @@ student_paths=(
     labs/lab02/part7_aes_cpa/data/plaintexts.npy
     labs/lab02/part7_aes_cpa/data/secret_ciphertext.bin
     labs/lab02/part7_aes_cpa/data/traces.npy
-    labs/lab02/report/LAB_REPORT_TEMPLATE.md
     labs/lab02/tests/__init__.py
     labs/lab02/tests/_load_impl.py
     labs/lab02/tests/test_completed_starters.py

@@ -82,8 +82,7 @@ labs/lab01/
 ├── part2_dictionary_attack/        Online SSH guessing
 ├── part3_password_kdfs/            Offline guessing and KDFs
 ├── part4_system_hashes/            System verifiers and table attacks
-├── part5_wpa2/                     WPA2 capture verification
-└── report/                         Report materials
+└── part5_wpa2/                     WPA2 capture verification
 ```
 
 The README in each `part.../` directory gives the instructions and submission

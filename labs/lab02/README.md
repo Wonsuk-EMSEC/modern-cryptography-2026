@@ -276,5 +276,4 @@ make grade
 
 `make test` remains useful while TODOs are unfinished; implementation checks
 are skipped in that mode. `make grade` exercises the completed Part 1–7
-functions with obvious test-only values and does not reveal the lab flags. The
-report template is in `report/LAB_REPORT_TEMPLATE.md`.
+functions with obvious test-only values and does not reveal the lab flags.
