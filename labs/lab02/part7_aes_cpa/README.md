@@ -17,6 +17,8 @@ key and obtain the Part 7 flag.
 - `plaintexts.npy`: one known AES plaintext per trace, shaped `(N, 16)`.
 - `traces.npy`: the corresponding synthetic power traces, shaped `(N, S)`.
 - `secret_ciphertext.bin`: a packet containing `IV || AES-CBC ciphertext`.
+- `power_trace_demo.py`: a complete example for viewing the supplied power
+  traces before starting the CPA TODOs.
 - `starter.py` / `cpa.py`: incomplete CPA code and a sample-correlation
   plotting TODO, with figure-saving code provided.
 - `model.py`: the public AES S-box, Hamming-weight helper, and generic trace
@@ -79,6 +81,38 @@ docker compose -f docker/compose.yml up -d course
 The following commands also run from the **host terminal** at the repository
 root. `exec` runs Python inside the existing course container, and `-w` sets
 the lab directory for that command:
+
+### Inspect the power traces first
+
+Run the standalone sample before completing any CPA TODOs:
+
+```console
+docker compose -f docker/compose.yml exec -w /workspace/labs/lab02 course \
+  python3 part7_aes_cpa/power_trace_demo.py
+```
+
+Open `labs/lab02/part7_aes_cpa/plots/power_traces.png` in your host editor or
+image viewer. The upper panel shows trace 0, and the lower panel overlays
+the first 10 traces. Each row of `traces.npy` is one encryption measurement;
+each column is a sample position within that measurement. The x-axis shows
+sample positions, and the y-axis shows synthetic power in arbitrary units.
+Compare the shapes and the differences between traces.
+
+To inspect a different trace and overlay more traces:
+
+```console
+docker compose -f docker/compose.yml exec -w /workspace/labs/lab02 course \
+  python3 part7_aes_cpa/power_trace_demo.py --trace 25 --count 20 \
+  --output part7_aes_cpa/plots/power_traces_trace25.png
+```
+
+Read `main()` to follow data loading, option validation, and the call to
+`plot_power_traces()`. This example loads only `traces.npy` and runs as
+supplied; the CPA and correlation-plotting TODOs remain in `starter.py`.
+
+### Run the CPA implementation
+
+After completing the byte-recovery and correlation-plotting TODOs:
 
 ```console
 docker compose -f docker/compose.yml exec -w /workspace/labs/lab02 course \

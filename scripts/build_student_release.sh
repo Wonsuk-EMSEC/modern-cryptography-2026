@@ -91,6 +91,7 @@ student_paths=(
     labs/lab02/part7_aes_cpa/aes.py
     labs/lab02/part7_aes_cpa/cpa.py
     labs/lab02/part7_aes_cpa/model.py
+    labs/lab02/part7_aes_cpa/power_trace_demo.py
     labs/lab02/part7_aes_cpa/starter.py
     labs/lab02/part7_aes_cpa/trace_count_experiment.py
     labs/lab02/part7_aes_cpa/data/plaintexts.npy
