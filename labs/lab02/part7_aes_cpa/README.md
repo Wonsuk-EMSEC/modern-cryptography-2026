@@ -17,7 +17,8 @@ key and obtain the Part 7 flag.
 - `plaintexts.npy`: one known AES plaintext per trace, shaped `(N, 16)`.
 - `traces.npy`: the corresponding synthetic power traces, shaped `(N, S)`.
 - `secret_ciphertext.bin`: a packet containing `IV || AES-CBC ciphertext`.
-- `starter.py` / `cpa.py`: incomplete CPA code and a plotting helper.
+- `starter.py` / `cpa.py`: incomplete CPA code and a sample-correlation
+  plotting TODO, with figure-saving code provided.
 - `model.py`: the public AES S-box, Hamming-weight helper, and generic trace
   generator used for local experiments.
 
@@ -34,7 +35,8 @@ Here, `main()` parses the command-line options and loads the plaintexts,
 traces, and encrypted packet. With `--all`, it recovers the full key, prints
 the key and decrypted message, and returns. Otherwise, it analyzes the selected
 byte, prints its result, and optionally saves plots. Complete the TODOs in
-`starter.py` only after you understand both branches.
+`starter.py` only after you understand both branches and the call from
+`save_plots()` to `plot_sample_correlations()` when `--plots` is selected.
 
 For plaintext row `i`, target byte position `j`, and a candidate byte `k`, use
 the first-round leakage model
@@ -47,6 +49,22 @@ For every candidate `k` and trace sample `t`, calculate Pearson correlation
 between the predicted vector `H[k]` and `traces[:, t]`.  Score each candidate
 by its largest absolute correlation.  Begin with byte 0, generalize to each
 byte position, recover the full key, then decrypt `secret_ciphertext.bin`.
+
+Complete `plot_sample_correlations()` to visualize the correlation at every
+sample position for the selected AES byte. Its `correlations` input has shape
+`(256, S)`: row `k` contains the correlations for key-byte guess `k`, and
+column `t` compares all guesses at sample position `t`. Each correlation is
+calculated across the captured traces, not within a single trace.
+
+Use sample positions on the x-axis and signed Pearson correlation on the
+y-axis, with limits from -1 to 1. Draw the other 255 candidates as faint
+curves and highlight the winning candidate with a legend label. Mark the
+sample where the winning candidate has its largest absolute correlation,
+and label that sample position and its signed correlation. Include a zero
+reference line, axis labels, and a title. A strong negative correlation can
+also identify leakage: keep its sign in the plot, even though candidate
+scores use absolute correlation. The supplied `save_plots()` handles saving
+and closing the figures; draw on the `axis` passed to your TODO function.
 
 ## How to Run
 
@@ -74,10 +92,22 @@ docker compose -f docker/compose.yml exec -w /workspace/labs/lab02 course \
   python3 part7_aes_cpa/starter.py --all
 ```
 
-The byte-0 command should produce three plots: example traces, the score for
-each candidate key byte, and correlation over sample position for the winning
-candidate. The repository is mounted at `/workspace`, so the plots are saved
-in `labs/lab02/part7_aes_cpa/plots` in your host repository.
+After completing the CPA and plotting TODOs, the byte-0 command should
+produce these three plots:
+
+| File | What to inspect |
+| --- | --- |
+| `example_traces.png` | The first 20 synthetic power traces over sample positions |
+| `key_guess_scores_byte_0.png` | Each candidate's maximum absolute correlation across samples |
+| `sample_correlations_byte_0.png` | All candidates' signed correlations at each sample, with the winner and its peak sample highlighted |
+
+The repository is mounted at `/workspace`, so the plots are saved in
+`labs/lab02/part7_aes_cpa/plots` in your host repository. Open the PNG files
+there with your editor or an image viewer; no graphical desktop is needed
+inside Docker. Matplotlib is already installed in the common course image.
+Selecting another byte with `--byte` changes the byte number in the last two
+filenames. Plotting is a separate TODO: until it is completed, `--plots`
+raises `NotImplementedError` at `plot_sample_correlations()`.
 
 As an optional experiment, compare the byte-0 result at several trace counts:
 
@@ -113,3 +143,6 @@ FLAG{...}
    key-byte hypothesis and incorrect hypotheses?
 3. Why does this experiment attack an implementation rather than breaking the
    AES algorithm itself?
+4. Which sample position has the winning candidate's largest absolute
+   correlation? How does that peak compare with the other candidates, and
+   why can a negative correlation also be useful?

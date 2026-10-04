@@ -11,10 +11,12 @@ from __future__ import annotations
 try:
     from .starter import (decrypt_flag, hamming_weight, hypothesis_matrix,
                           load_data, main, pearson_correlations,
+                          plot_sample_correlations,
                           recover_full_key, recover_key_byte, save_plots)
 except ImportError:  # pragma: no cover - direct script execution.
     from starter import (decrypt_flag, hamming_weight, hypothesis_matrix,
                          load_data, main, pearson_correlations,
+                         plot_sample_correlations,
                          recover_full_key, recover_key_byte, save_plots)
 
 

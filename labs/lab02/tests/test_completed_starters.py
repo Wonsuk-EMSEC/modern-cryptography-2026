@@ -124,6 +124,35 @@ class CompletedStarterTests(unittest.TestCase):
         self.assertEqual(part7.recover_key_byte(traces, plaintexts, 0), key[0])
         self.assertEqual(part7.recover_full_key(traces, plaintexts), key)
 
+    def test_part7_sample_plot_preserves_signed_correlations(self) -> None:
+        part7 = load("part7")
+        import matplotlib.pyplot as plt
+
+        correlations = np.random.default_rng(7).uniform(-.1, .1, (256, 9))
+        best_guess, peak_sample = 23, 4
+        correlations[best_guess, peak_sample] = -.9
+        figure, axis = plt.subplots()
+        try:
+            part7.plot_sample_correlations(axis, correlations, 0, best_guess)
+            curves = [line for line in axis.lines
+                      if len(line.get_xdata()) == correlations.shape[1]]
+            for guess in (0, best_guess):
+                self.assertTrue(any(
+                    np.array_equal(line.get_xdata(), np.arange(correlations.shape[1]))
+                    and np.allclose(line.get_ydata(), correlations[guess])
+                    for line in curves
+                ), f"missing signed sample correlations for guess {guess}")
+            self.assertTrue(any(
+                np.array_equal(line.get_xdata(), [peak_sample, peak_sample])
+                for line in axis.lines
+            ), "mark the strongest sample using absolute correlation")
+            np.testing.assert_allclose(axis.get_ylim(), [-1, 1])
+            self.assertTrue(axis.get_xlabel())
+            self.assertTrue(axis.get_ylabel())
+            self.assertIsNotNone(axis.get_legend())
+        finally:
+            plt.close(figure)
+
 
 if __name__ == "__main__":
     unittest.main()

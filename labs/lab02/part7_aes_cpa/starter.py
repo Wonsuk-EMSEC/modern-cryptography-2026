@@ -101,9 +101,30 @@ def byte_attack_details(traces: np.ndarray, plaintexts: np.ndarray,
     return recover_key_byte(traces, plaintexts, byte_index), scores, correlations
 
 
+def plot_sample_correlations(axis: plt.Axes, correlations: np.ndarray,
+                             byte_index: int, best_guess: int) -> None:
+    """Draw signed Pearson correlation against sample position on ``axis``.
+
+    ``correlations`` has shape ``(256, sample_count)``: a row belongs to one
+    key guess, and a column belongs to one sample position across all traces.
+    Compare the other candidates with the winning candidate without replacing
+    its signed correlations with absolute values.
+    """
+    if correlations.ndim != 2 or correlations.shape[0] != 256 or not correlations.shape[1]:
+        raise ValueError("correlations must have shape (256, sample_count) with samples")
+    if not 0 <= byte_index < BLOCK_SIZE or not 0 <= best_guess < 256:
+        raise ValueError("expected byte index 0..15 and key guess 0..255")
+    # TODO: plot the other 255 guesses as faint curves over sample positions,
+    # then highlight correlations[best_guess] and label the winning guess.
+    # Mark its peak sample (largest absolute correlation) and display the
+    # signed correlation there. Add a zero line, axis labels, title, legend,
+    # and y-axis limits of [-1, 1]. Draw on axis; save_plots() handles the file.
+    raise NotImplementedError
+
+
 def save_plots(traces: np.ndarray, scores: np.ndarray, correlations: np.ndarray,
                byte_index: int, best_guess: int, output_dir: Path) -> None:
-    """Save the three plots requested in the Part 7 instructions."""
+    """Save three plots after completing plot_sample_correlations()."""
     output_dir.mkdir(parents=True, exist_ok=True)
 
     figure, axis = plt.subplots(figsize=(9, 4))
@@ -124,12 +145,12 @@ def save_plots(traces: np.ndarray, scores: np.ndarray, correlations: np.ndarray,
     plt.close(figure)
 
     figure, axis = plt.subplots(figsize=(9, 4))
-    axis.plot(correlations[best_guess])
-    axis.set(title=f"Correlation over samples for winning byte-{byte_index} guess",
-             xlabel="Sample position", ylabel="Pearson correlation")
-    figure.tight_layout()
-    figure.savefig(output_dir / f"winning_correlation_byte_{byte_index}.png", dpi=150)
-    plt.close(figure)
+    try:
+        plot_sample_correlations(axis, correlations, byte_index, best_guess)
+        figure.tight_layout()
+        figure.savefig(output_dir / f"sample_correlations_byte_{byte_index}.png", dpi=150)
+    finally:
+        plt.close(figure)
 
 
 def load_data(data_dir: Path) -> tuple[np.ndarray, np.ndarray, bytes]:
