@@ -34,9 +34,28 @@ your Python code inside it. **If you completed the Lab 01 setup, you have
 already built this common image and used this container.** Use the same
 repository and refresh the environment as described below.
 
+**If you already cloned the repository for Lab 01**, update that existing
+copy before building the Lab02 environment. In your **host terminal**
+(Ubuntu/WSL on Windows), go to the existing `modern-cryptography-2026`
+directory containing `docker/` and `labs/`. If you are inside the course
+container, run `exit` first. Then run:
+
+```console
+git status
+git pull --ff-only
+```
+
+This downloads the latest lab files, README instructions, and Docker
+configuration. You do not need to clone the repository again. If Git reports
+that your local work would be overwritten, commit or stash that work before
+retrying. If the branches have diverged, ask the instructor for help
+reconciling them while preserving your work. After updating, continue to
+[step 1](#1-prepare-the-common-course-image) to rebuild the common image.
+
 **If you have not built the course image yet**, first complete the
-[prerequisites](../../README.md#0-prerequisites) and
-[clone the repository](../../README.md#1-clone-the-course-repository).
+[prerequisites](../../README.md#0-prerequisites). If you do not have a local
+copy yet, [clone the repository](../../README.md#1-clone-the-course-repository);
+otherwise, update your existing copy as described above.
 Make sure Docker is running. In your **host terminal** (Ubuntu/WSL on
 Windows), go to the repository root containing `docker/` and `labs/`, then
 run:
@@ -68,7 +87,8 @@ from GitHub Container Registry (GHCR). No instructor-hosted server is needed.
   and [repository cloning instructions](../../README.md#1-clone-the-course-repository)
   in the main README, then build the course image with the command below.
 - **Already completed the Lab 01 setup:** use the repository you prepared
-  there. **We recommend repeating the image build below and the service
+  there and run `git pull --ff-only` as described above before building.
+  **We recommend repeating the image build below and the service
   start commands in step 2 before beginning Lab02.** `docker/Dockerfile`
   and `docker/compose.yml` may have been updated since Lab 01 to add
   dependencies or change service settings. Use the current course files
