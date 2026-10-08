@@ -150,12 +150,17 @@ docker compose -f docker/compose.yml --profile lab02 down
 See the [Lab02 session instructions](../README.md#finish-or-restart-a-session)
 for cleanup when you have also started the Lab01 target.
 
-## Flag Format
+## Example Output
 
-The accepted administrator response contains one flag in this format:
+A successful run has the following output format. Values are hidden in this
+example. Include your actual results in your report.
 
-```text
-FLAG{...}
+Run from `/workspace/labs/lab02` inside the course container.
+
+```console
+python3 part4_cbc_bit_flipping/starter.py
+normal: <original token response>
+modified: <administrator response> FLAG{<recovered value>}
 ```
 
 ## Optional Hints
@@ -165,7 +170,7 @@ FLAG{...}
 2. The difference between two known byte values can be expressed with XOR.
 3. Preserve the packet's encoding when returning it from your function.
 
-## Analysis Questions
+## Checkpoint Questions
 
 1. Why can an attacker change a selected plaintext byte without knowing the
    AES key?
@@ -174,3 +179,10 @@ FLAG{...}
 3. Why does this demonstrate a missing integrity property rather than a flaw
    in AES?
 4. Which authenticated-encryption property would prevent this modification?
+
+## Report Checklist
+
+- [ ] Answers to the Checkpoint Questions
+- [ ] Main code changes and an explanation of how they work
+- [ ] Execution screenshots and the recovered FLAG
+- [ ] Original and modified token verification responses (visible in the screenshot)

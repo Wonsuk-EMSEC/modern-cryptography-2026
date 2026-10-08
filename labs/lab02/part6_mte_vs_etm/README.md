@@ -140,12 +140,20 @@ The common course container remains available for other labs. See the
 [Lab02 session instructions](../README.md#finish-or-restart-a-session) to
 remove all course containers when you are finished with them.
 
-## Flag Format
+## Example Output
 
-The recovered protected message includes one flag in this format:
+A successful run has the following output format. Values are hidden in this
+example. Include your actual results in your report.
 
-```text
-FLAG{...}
+Run from `/workspace/labs/lab02` inside the course container. Replace
+`<selected service letter>` with your choice of `A` or `B`.
+
+```console
+python3 part6_mte_vs_etm/starter.py --recover-service <selected service letter>
+Service A: original=<response>, modified=('<IV modification response>', '<ciphertext modification response>')
+Service B: original=<response>, modified=('<IV modification response>', '<ciphertext modification response>')
+FLAG{<recovered value>}
+oracle queries: <query count>
 ```
 
 ## Optional Hints
@@ -157,7 +165,7 @@ FLAG{...}
 3. Authentication that covers every transmitted CBC input must be checked
    before decryption to suppress that distinction.
 
-## Analysis Questions
+## Checkpoint Questions
 
 1. Which observed response pattern identifies a useful padding oracle?
 2. Why can an encrypted MAC still leave padding behavior observable in one
@@ -165,3 +173,11 @@ FLAG{...}
 3. Why does verifying an authentication tag before decryption stop the same
    attack?
 4. Why must the authentication calculation cover both the IV and ciphertext?
+
+## Report Checklist
+
+- [ ] Answers to the Checkpoint Questions
+- [ ] Main code changes and an explanation of how they work
+- [ ] Execution screenshots and the recovered FLAG
+- [ ] Original, IV-modified, and ciphertext-modified responses from both services
+- [ ] Selected service and recovery query count (visible in the screenshot)

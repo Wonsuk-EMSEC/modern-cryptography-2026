@@ -88,16 +88,15 @@ cd /workspace/labs/lab02
 make grade
 ```
 
-## Flag Format
+## Example Output
 
-Successful decryption prints a value in this format:
+A successful run has the following output format. Values are hidden in this
+example. Include your actual results in your report.
 
-```text
-FLAG{...}
+```console
+python3 starter.py
+FLAG{<recovered value>}
 ```
-
-Use the recovered value only as directed by your course submission policy. Do
-not add it to public code, a public report, or a reusable test fixture.
 
 ## Optional Hints
 
@@ -109,7 +108,7 @@ not add it to public code, a public report, or a reusable test fixture.
 3. Decryption produces padded plaintext first. Validate and remove the padding
    only after all blocks have been processed.
 
-## Analysis Questions
+## Checkpoint Questions
 
 1. Why must PKCS#7 add a full block of padding when plaintext is already a
    multiple of the AES block size?
@@ -122,3 +121,10 @@ not add it to public code, a public report, or a reusable test fixture.
 5. Why is AES-ECB acceptable here only as an underlying one-block primitive,
    while an ECB mode applied directly to a multi-block message has different
    security properties?
+
+## Report Checklist
+
+- [ ] Answers to the Checkpoint Questions
+- [ ] Main code changes and an explanation of how they work
+- [ ] Execution screenshots and the recovered FLAG
+- [ ] Implementation check results (`make grade`)

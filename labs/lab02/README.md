@@ -248,6 +248,33 @@ The Part 6 command first probes the two services. Follow that Part's README
 to select a service and run recovery. Part 7's README also explains how to
 recover one byte first and save plots before recovering the full key.
 
+## Report and execution evidence
+
+Grading is based on your report and execution screenshots.
+
+- **Checkpoint Questions:** Answer each Part's questions.
+- **Implementation:** Include the main code changes and explain how they work.
+- **Execution evidence:** Include readable screenshots showing the command,
+  relevant output, and completion result. Keep recovered FLAGs visible.
+- **Measurements:** Include values requested by each Part, such as candidates
+  tested, elapsed time, throughput, or oracle queries. These need not match the
+  instructor's reference values when the supplied input, method, and final
+  result are correct.
+- **Redaction:** Hide personal information and real credentials, such as
+  passwords and API tokens.
+- **Not required:** Hardware specifications and container cleanup screenshots.
+
+Synthetic keys requested by this lab may also appear in your course report.
+Do not publish recovered FLAGs or keys in public repositories or reports.
+
+Do not submit or use real credentials,
+third-party captures, private tokens, or data from systems outside the supplied
+course files and local services. Do not inspect target image internals or
+hard-code a recovered FLAG or key to bypass the required method. Exposure of
+real secrets, work outside the authorized course boundary, or bypassing the
+intended exercise may result in a deduction even if the displayed result is
+correct.
+
 ## Finish or restart a session
 
 For a terminal-only session, leave the course shell with:

@@ -152,17 +152,16 @@ ciphertext files from the same release. Increasing `key_bits` alone leaves
 the old key and ciphertext unchanged, so it does not necessarily make the
 search take longer. Use the supplied 24-bit data for your final measurement.
 
-## Flag Format
+## Example Output
 
-Successful decryption prints a value in this format:
+A successful run has the following output format. Values are hidden in this
+example. Include your actual results in your report.
 
-```text
-FLAG{...}
+```console
+python3 starter.py
+candidate=<key ID> tested=<candidate count> elapsed=<seconds>s rate=<keys per second> keys/s
+FLAG{<recovered value>}
 ```
-
-Treat the recovered value as course-completion evidence. Follow your
-instructor's submission policy and do not place it in public source code or a
-public report.
 
 ## Optional Hints
 
@@ -173,7 +172,7 @@ public report.
 3. The encrypted record contains complete DES blocks. Remove padding only
    after every block has been decrypted.
 
-## Analysis Questions
+## Checkpoint Questions
 
 1. Why does this exercise use a reduced key space instead of searching all of
    DES's effective 56-bit key space?
@@ -186,3 +185,10 @@ public report.
    effective key?
 5. Does this result show a mathematical weakness in every DES round function,
    or a practical limitation of its key-space size? Explain.
+
+## Report Checklist
+
+- [ ] Answers to the Checkpoint Questions
+- [ ] Main code changes and an explanation of how they work
+- [ ] Execution screenshots and the recovered FLAG
+- [ ] Candidate count, elapsed time, and keys per second (visible in the screenshot)

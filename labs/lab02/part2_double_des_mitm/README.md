@@ -144,16 +144,16 @@ make grade
 The public key-space limit is intentional. Keep the supplied parameters for
 the required run so that the exercise remains reproducible.
 
-## Flag Format
+## Example Output
 
-Successful decryption prints a value in this format:
+A successful run has the following output format. Values are hidden in this
+example. Include your actual results in your report.
 
-```text
-FLAG{...}
+```console
+python3 starter.py
+verified_pairs=<verified pair count> elapsed=<seconds>s
+FLAG{<recovered value>}
 ```
-
-Keep the recovered value out of public repositories, screenshots, and source
-code unless your instructor explicitly requests it through a private channel.
 
 ## Optional Hints
 
@@ -164,7 +164,7 @@ code unless your instructor explicitly requests it through a private channel.
 3. An intermediate-value match is only a candidate. The second known pair is
    what verifies it.
 
-## Analysis Questions
+## Checkpoint Questions
 
 1. Why would a naive search over two `n`-bit reduced key spaces require about
    `2**(2*n)` block-cipher operations?
@@ -176,3 +176,11 @@ code unless your instructor explicitly requests it through a private channel.
    apparent match in a particular run?
 5. Why does adding a second cipher invocation not automatically provide the
    security one might expect from simply doubling a key length?
+
+## Report Checklist
+
+- [ ] Answers to the Checkpoint Questions
+- [ ] Main code changes and an explanation of how they work
+- [ ] Execution screenshots and the recovered FLAG
+- [ ] Verified pair count and elapsed time (visible in the screenshot)
+- [ ] Expected forward-table size

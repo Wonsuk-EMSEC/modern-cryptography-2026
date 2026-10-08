@@ -126,12 +126,17 @@ The common course container remains available for other labs. See the
 [Lab02 session instructions](../README.md#finish-or-restart-a-session) to
 remove all course containers when you are finished with them.
 
-## Flag Format
+## Example Output
 
-The recovered plaintext includes one flag in this format:
+A successful run has the following output format. Values are hidden in this
+example. Include your actual results in your report.
 
-```text
-FLAG{...}
+Run from `/workspace/labs/lab02` inside the course container.
+
+```console
+python3 part5_padding_oracle/starter.py
+FLAG{<recovered value>}
+oracle queries: <query count>
 ```
 
 ## Optional Hints
@@ -143,9 +148,16 @@ FLAG{...}
 3. A second perturbation can distinguish a genuine one-byte result from a
    longer valid padding suffix.
 
-## Analysis Questions
+## Checkpoint Questions
 
 1. What information does the Boolean oracle reveal about a modified packet?
 2. Why can this small amount of information reveal an entire plaintext block?
 3. Why should a receiver avoid distinguishable padding errors for unauthenticated input?
 4. How does this part connect CBC's XOR relationship to the attack in Part 4?
+
+## Report Checklist
+
+- [ ] Answers to the Checkpoint Questions
+- [ ] Main code changes and an explanation of how they work
+- [ ] Execution screenshots and the recovered FLAG
+- [ ] Oracle query count (visible in the screenshot)

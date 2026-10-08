@@ -153,12 +153,20 @@ docker compose -f docker/compose.yml exec -w /workspace/labs/lab02 course \
 Small subsets may give unstable guesses. Record how the result changes as the
 number of traces grows.
 
-## Flag Format
+## Example Output
 
-The decrypted record has the form:
+A successful run has the following output format. Values are hidden in this
+example. Include your actual results in your report.
 
-```text
-FLAG{...}
+Run from `/workspace/labs/lab02` inside the course container.
+
+```console
+python3 part7_aes_cpa/starter.py --byte 0 --plots part7_aes_cpa/plots
+byte 0: best guess = <key byte in hex>; score = <correlation score>
+
+python3 part7_aes_cpa/starter.py --all
+recovered AES-128 key: <recovered key in hex>
+FLAG{<recovered value>}
 ```
 
 ## Optional Hints
@@ -170,7 +178,7 @@ FLAG{...}
 3. AES-CBC decryption needs the IV stored in the first 16 packet bytes, then
    PKCS#7 padding must be validated and removed.
 
-## Analysis Questions
+## Checkpoint Questions
 
 1. Why can each AES key byte be attacked independently in this leakage model?
 2. Why do more traces generally improve the distinction between the correct
@@ -180,3 +188,11 @@ FLAG{...}
 4. Which sample position has the winning candidate's largest absolute
    correlation? How does that peak compare with the other candidates, and
    why can a negative correlation also be useful?
+
+## Report Checklist
+
+- [ ] Answers to the Checkpoint Questions
+- [ ] Main code changes and an explanation of how they work
+- [ ] Execution screenshots and the recovered FLAG
+- [ ] Byte-0 guess and score, and the recovered full key (visible in the screenshots)
+- [ ] Generated trace, key-guess score, and signed sample-correlation plots
