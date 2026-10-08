@@ -43,6 +43,7 @@ done
 # This manifest is intentionally file-level rather than directory-level. It
 # prevents a stray file under labs/lab02 from becoming part of a student bundle.
 student_paths=(
+    .devcontainer/devcontainer.json
     README.md
     docker/README.md
     docker/Dockerfile

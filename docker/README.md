@@ -35,6 +35,22 @@ Run `exit` to leave the shell; `course` continues running for the next session.
 Rebuild the common image when its Dockerfile changes, then run `up -d course`
 again to apply the updated image.
 
+## Use VS Code with the course container
+
+Follow the [common VS Code instructions](../README.md#use-vs-code-with-the-course-container):
+open the **repository root** and run **Dev Containers: Reopen in Container**.
+The repository's `.devcontainer/devcontainer.json` uses the same `course`
+service and `/workspace` mount. It installs the Python extensions in the
+container and sets `/opt/course-venv/bin/python3` as the default interpreter.
+Use this connected window for editing, Python run/debug, and integrated
+terminals across all labs. If VS Code already saved a different interpreter,
+follow the common guide to correct that selection once.
+
+`docker compose ... exec course bash` opens only a shell. It does not connect
+a host VS Code window to the container. Dev Containers starts only `course`;
+start optional target services separately from a **host terminal** as below.
+Closing the VS Code window leaves the shared course container running.
+
 ## Start an extra service only when needed
 
 The targets use Compose profiles and do not start with the plain course

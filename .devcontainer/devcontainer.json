@@ -1,0 +1,28 @@
+{
+  "name": "Modern Cryptography 2026",
+  "dockerComposeFile": "../docker/compose.yml",
+  "service": "course",
+  "runServices": ["course"],
+  "workspaceFolder": "/workspace",
+  "remoteUser": "student",
+  "updateRemoteUserUID": false,
+  "overrideCommand": false,
+  "shutdownAction": "none",
+  "remoteEnv": {
+    "VIRTUAL_ENV": "/opt/course-venv",
+    "PATH": "/opt/course-venv/bin:${containerEnv:PATH}"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.debugpy",
+        "ms-python.vscode-pylance"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/opt/course-venv/bin/python3",
+        "python.terminal.activateEnvironment": true
+      }
+    }
+  }
+}

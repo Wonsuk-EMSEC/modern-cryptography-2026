@@ -23,9 +23,16 @@ offline WPA2 candidate checking.
 
 ## Setup and tests
 
-From the repository root in a **host terminal**, build the common image if
-needed, start the shared course container in the background, and check its
-status:
+For VS Code, follow the common [course-container setup](../../README.md#use-vs-code-with-the-course-container):
+open the **repository root** and run **Dev Containers: Reopen in Container**.
+Use that window for all Parts and labs. Its Python run/debug commands and
+integrated terminal use the course environment, with
+`/opt/course-venv/bin/python3` as the default interpreter. The common guide
+also explains how to correct a previously saved interpreter selection once.
+
+For a terminal-only session, run the commands below from the repository root
+in a **host terminal** to build the common image if needed, start the shared
+course container in the background, and check its status:
 
 ```console
 docker compose -f docker/compose.yml build course
@@ -45,11 +52,16 @@ The target servers have separate profiles and **do not start by default**:
 Start a target only when its Part requires it, following that Part's README.
 For Lab01 Part 2, follow the [SSH target setup](part2_dictionary_attack/README.md#step-1-build-and-start-the-isolated-target).
 
-Open the running course container from the **host terminal**:
+If using VS Code in the container, open its integrated terminal. For a
+terminal-only session, open the running course container from the **host
+terminal**:
 
 ```console
 docker compose -f docker/compose.yml exec course bash
 ```
+
+This command opens a container shell; it does not connect a host VS Code
+window to the container.
 
 Then run the lab tests **inside the container**:
 

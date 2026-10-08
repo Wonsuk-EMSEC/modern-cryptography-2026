@@ -34,6 +34,15 @@ your Python code inside it. **If you completed the Lab 01 setup, you have
 already built this common image and used this container.** Use the same
 repository and refresh the environment as described below.
 
+For VS Code, follow the common [course-container setup](../../README.md#use-vs-code-with-the-course-container):
+open the **repository root** and run **Dev Containers: Reopen in Container**.
+Use that window for every Part and lab. It sets
+`/opt/course-venv/bin/python3` as the default interpreter for Python
+run/debug commands, and its integrated terminal runs inside `course`.
+The common guide includes the one-time correction for an interpreter
+previously selected in VS Code. Optional targets still need the host-terminal
+commands in step 2.
+
 **If you already cloned the repository for Lab 01**, update that existing
 copy before building the Lab02 environment. In your **host terminal**
 (Ubuntu/WSL on Windows), go to the existing `modern-cryptography-2026`
@@ -103,7 +112,8 @@ dependencies manually.
 
 In your **host terminal** (Ubuntu/WSL on Windows), make sure Docker is running
 and go to the repository root containing `docker/` and `labs/`. If you are
-still inside a course shell, run `exit` first. Build the course image:
+still inside a course shell, run `exit` first. If VS Code is connected to
+the container, use a separate host terminal. Build the course image:
 
 ```console
 docker compose -f docker/compose.yml build course
@@ -185,13 +195,21 @@ If the image pull reports `denied` or `manifest unknown`, ask the instructor
 to confirm that this release has been published and the GHCR package is
 public. You do not need to change the clients or build the target locally.
 
-### 3. Enter the common course container
+### 3. Open the common course container
 
-From the **host terminal** at the repository root:
+For VS Code, use **Dev Containers: Reopen in Container** with the repository
+root open, as explained in the [common guide](../../README.md#use-vs-code-with-the-course-container),
+then open an integrated terminal in that window.
+
+For a terminal-only session, enter the container from the **host terminal**
+at the repository root:
 
 ```console
 docker compose -f docker/compose.yml exec course bash
 ```
+
+This command opens a container shell; it does not connect a host VS Code
+window to the container.
 
 You are now **inside the container**. Change to the Lab02 directory:
 
@@ -201,8 +219,9 @@ cd /workspace/labs/lab02
 
 The repository is mounted at `/workspace`, the shared location used in every
 lab. Changes to files there are saved in your host repository. Run Python
-commands in this shell for every Part. The clients for Parts 4–6 already know
-the local service name `lab02-target`; you do not need to enter an address.
+commands in this shell or use Python run/debug in the connected VS Code
+window for every Part. The clients for Parts 4–6 already know the local
+service name `lab02-target`; you do not need to enter an address.
 
 ## Working through the Parts
 
@@ -231,15 +250,16 @@ recover one byte first and save plots before recovering the full key.
 
 ## Finish or restart a session
 
-Leave the course shell with:
+For a terminal-only session, leave the course shell with:
 
 ```console
 exit
 ```
 
-Exiting the shell leaves the course container and target running. Your files
-remain in the host repository. If you have finished Parts 4–6, stop only the
-Lab02 target from the **host terminal** at the repository root:
+Exiting the shell or closing the Dev Containers window leaves the course
+container and target running. Your files remain in the host repository.
+If you have finished Parts 4–6, stop only the Lab02 target from the **host
+terminal** at the repository root:
 
 ```console
 docker compose -f docker/compose.yml --profile lab02 stop lab02-target
