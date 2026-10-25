@@ -51,6 +51,36 @@ done
 student_paths=(
     .devcontainer/devcontainer.json
     README.md
+    CONTRIBUTING.md
+    scripts/check_translations.py
+    en/.translation-status.json
+    en/README.md
+    en/CONTRIBUTING.md
+    en/docker/README.md
+    en/docker/lab01-ssh-target/README.md
+    en/docker/lab02-target/README.md
+    en/labs/lab01/README.md
+    en/labs/lab01/common/README.md
+    en/labs/lab01/part1_hashing/README.md
+    en/labs/lab01/part1_hashing/data/README.md
+    en/labs/lab01/part2_dictionary_attack/README.md
+    en/labs/lab01/part2_dictionary_attack/data/README.md
+    en/labs/lab01/part3_password_kdfs/README.md
+    en/labs/lab01/part3_password_kdfs/data/README.md
+    en/labs/lab01/part4_system_hashes/README.md
+    en/labs/lab01/part4_system_hashes/data/README.md
+    en/labs/lab01/part5_wpa2/README.md
+    en/labs/lab01/part5_wpa2/CAPTURE_WORKSHEET.md
+    en/labs/lab01/part5_wpa2/data/README.md
+    en/labs/lab01/part5_wpa2/data/wpa2/PLACE_PCAP_HERE.md
+    en/labs/lab02/README.md
+    en/labs/lab02/part1_des_bruteforce/README.md
+    en/labs/lab02/part2_double_des_mitm/README.md
+    en/labs/lab02/part3_aes_cbc_pkcs7/README.md
+    en/labs/lab02/part4_cbc_bit_flipping/README.md
+    en/labs/lab02/part5_padding_oracle/README.md
+    en/labs/lab02/part6_mte_vs_etm/README.md
+    en/labs/lab02/part7_aes_cpa/README.md
     docker/README.md
     docker/Dockerfile
     docker/compose.yml

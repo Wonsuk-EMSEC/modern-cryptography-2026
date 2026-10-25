@@ -1,8 +1,9 @@
-# Part 1 data
+**한국어** | [English](../../../../en/labs/lab01/part1_hashing/data/README.md)
 
-These two distinct binary files have the same MD5 digest. Compare them with
-the hash functions demonstrated in this Part to see why MD5 is unsuitable for
-collision resistance. They do not contain credentials.
+# Part 1 데이터
+
+서로 다른 두 바이너리 파일의 MD5 해시값이 같습니다. 이 Part에서 배운 해시 함수로 두 파일을
+비교하여 MD5가 충돌 저항성 측면에서 부적절한 이유를 확인하세요. 인증 정보는 포함되어 있지 않습니다.
 
 - `md5_collision_a.bin`
 - `md5_collision_b.bin`

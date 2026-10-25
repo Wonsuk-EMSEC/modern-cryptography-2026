@@ -1,40 +1,41 @@
-# Part 4: System password records and table attacks
+# Part 4: 시스템 비밀번호 레코드와 테이블 공격
 
-Run all Python programs inside the course Docker container. Read only the
-synthetic files under this Part's `data/`; never read the host's `/etc/shadow`.
-The fixed SHA-256 toy password space is an educational model, not a real
-system-password configuration.
+[한국어](README.md) | [English](../../../en/labs/lab01/part4_system_hashes/README.md)
 
-## Learning objectives and files
+모든 Python 프로그램은 수업용 Docker 컨테이너 안에서 실행하세요. 이 Part의 `data/`에 있는
+합성 파일만 읽고, 호스트의 `/etc/shadow`는 읽지 마세요.
+고정된 SHA-256 예제 비밀번호 공간은 교육용 모델이며 실제 시스템의 비밀번호 설정이 아닙니다.
 
-Parse a stored verifier, distinguish parsing from guessing, build a full table
-and rainbow endpoints, replay chains to verify matches, and compare storage,
-construction work, lookup work, and coverage. Explain why public unique salts
-prevent reuse of one unsalted table across accounts.
+## 학습 목표와 파일
 
-| File | Role |
+저장된 검증값(verifier)을 파싱하고, 파싱과 비밀번호 추측의 차이를 구분합니다.
+전체 사전 계산 테이블과 레인보우 테이블의 끝점(endpoint)을 구성하고, 체인을 재생해 일치를 검증합니다.
+저장 공간, 구성 비용, 조회 비용, 커버리지를 비교하고, 공개된 고유 솔트가 있으면 하나의 무솔트 테이블을
+여러 계정에 재사용할 수 없는 이유를 설명합니다.
+
+| 파일 | 역할 |
 | --- | --- |
-| `samples/analyze_shadow_hash.py` | Complete synthetic shadow-record parser |
-| `samples/table_io_demo.py` | Complete public example of table-building ingredients |
-| `table_common.py` | Provided bounded config, hashing, enumeration, and JSON helpers |
-| `build_precomputation_table.py` | Empty full-table exercise |
-| `build_rainbow_table.py` | Empty rainbow-construction exercise |
-| `compare_table_attacks.py` | Empty database-lookup/comparison exercise |
-| `data/rainbow_lab_config.json` | Required construction parameters |
-| `data/rainbow_password_database.csv` | Same target database for both methods |
-| `test_table_attacks.py` | Helper checks and opt-in implementation checks |
-| `samples/flag_unlock_demo.py` | Public helper-usage example; no Part answer |
-| `data/flag_challenge.json` | Encrypted completion flag, opened by the experiment result |
+| `samples/analyze_shadow_hash.py` | 완성된 합성 shadow 레코드 파서 |
+| `samples/table_io_demo.py` | 테이블 구성 요소를 보여 주는 완성된 공개 예제 |
+| `table_common.py` | 제한된 설정, 해시, 열거, JSON 처리를 위한 제공 도우미 |
+| `build_precomputation_table.py` | 전체 테이블 구성을 위한 빈 실습 파일 |
+| `build_rainbow_table.py` | 레인보우 테이블 구성을 위한 빈 실습 파일 |
+| `compare_table_attacks.py` | 데이터베이스 조회·비교를 위한 빈 실습 파일 |
+| `data/rainbow_lab_config.json` | 필수 테이블 구성 매개변수 |
+| `data/rainbow_password_database.csv` | 두 방법에 공통으로 사용하는 대상 데이터베이스 |
+| `test_table_attacks.py` | 도우미 검사와 선택적으로 활성화하는 구현 검사 |
+| `samples/flag_unlock_demo.py` | 공개 도우미 사용 예제. 이 Part의 정답은 포함하지 않음 |
+| `data/flag_challenge.json` | 실험 결과로 여는 암호화된 완료 플래그 |
 
-Write all imports, functions, CLI parsing, measurement, and execution guards.
-During each step, imports must work without running a program. Add calls to
-later functions only when those functions have been written.
+모든 import, 함수, 명령행 인자 처리, 측정, 실행 가드를 직접 작성하세요.
+각 단계에서 프로그램을 실행하지 않고도 모듈을 import할 수 있어야 합니다.
+나중 단계의 함수는 해당 함수를 구현한 뒤에 호출하도록 추가하세요.
 
-The classroom configuration is SHA-256, alphabet `abc123`, length 4
-(`6**4 = 1296` passwords), chain length 12, 96 unique starts, seed 2026.
-Keep these bounds unchanged in the required experiment.
+수업 설정은 SHA-256, 문자 집합 `abc123`, 길이 4(`6**4 = 1296`개의 비밀번호),
+체인 길이 12, 서로 다른 시작점 96개, 시드 2026입니다.
+필수 실험에서는 이 범위를 변경하지 마세요.
 
-## 1. Run and inspect the samples
+## 1. 예제 실행 및 살펴보기
 
 ```console
 cd /workspace/labs/lab01/part4_system_hashes
@@ -43,30 +44,26 @@ python3 samples/table_io_demo.py
 python3 -m unittest test_table_attacks.py -v
 ```
 
-The parser prints a dictionary for each fictional record with `account`,
-algorithm `id`, human-readable `algorithm`, `salt_or_parameters`, and
-`verifier`. Identify these fields in the supplied record. The parser does
-not crack a password or contact a service.
+파서는 가상의 레코드마다 `account`, 알고리즘 `id`, 사람이 읽을 수 있는 `algorithm`,
+`salt_or_parameters`, `verifier`가 포함된 딕셔너리를 출력합니다.
+제공된 레코드에서 각 필드를 확인하세요. 파서는 비밀번호를 크래킹하거나 서비스에 접속하지 않습니다.
 
-The table sample prints the configured space size 1296, the tiny public space
-`['aa', 'ab', 'ba', 'bb']`, digest length 64, and the integer/quotient/remainder
-for hexadecimal `0f`: 15, 2, 3. It also prints reproducible seeded choices and
-`Grouped values after JSON round trip: ['first', 'second']`.
-`Temporary JSON exists: True` followed by `Temporary JSON removed` confirms
-file creation and cleanup.
+테이블 예제는 설정된 공간 크기 1296, 작은 공개 공간 `['aa', 'ab', 'ba', 'bb']`,
+다이제스트 길이 64, 16진수 `0f`의 정숫값·몫·나머지 15, 2, 3을 출력합니다.
+시드를 사용한 재현 가능한 선택 결과와 `Grouped values after JSON round trip: ['first', 'second']`도 출력합니다.
+`Temporary JSON exists: True` 다음에 `Temporary JSON removed`가 나오면 파일 생성과 정리가 확인된 것입니다.
 
-Study enumeration, hex-to-integer conversion, `divmod`, seeded selection,
-`dict.setdefault`, and the JSON helpers. This sample does not construct a
-graded attack table. Two helper tests pass before implementation; five
-completion tests are skipped.
+열거, 16진수의 정수 변환, `divmod`, 시드를 사용한 선택, `dict.setdefault`, JSON 도우미를 살펴보세요.
+이 예제는 평가에 사용하는 공격 테이블을 구성하지 않습니다.
+구현 전에는 도우미 테스트 2개가 통과하고 완료 테스트 5개는 건너뜁니다.
 
-### Public flag utility sample
+### 공개 플래그 유틸리티 예제
 
 ```console
 python3 samples/flag_unlock_demo.py
 ```
 
-Expected output:
+예상 출력:
 
 ```text
 Wrong proof rejected: OK
@@ -74,22 +71,21 @@ FLAG{public_demo_only}
 This public demo flag is not a Part completion flag.
 ```
 
-The sample leaves no file behind. Inspect how the shared utility is imported,
-how authentication failure is handled, and how a successful return value is
-printed. Your final program will use its own experiment result, not this public
-demo proof.
+예제는 실행 후 파일을 남기지 않습니다. 공통 유틸리티를 import하는 방법, 인증 실패를 처리하는 방법,
+성공했을 때 반환값을 출력하는 방법을 살펴보세요.
+최종 프로그램에는 이 공개 데모의 증명값이 아니라 자신의 실험 결과를 사용합니다.
 
-## 2. Write the full-table build_table(), then check a tiny space
+## 2. 전체 테이블의 build_table() 구현 및 작은 공간 검사
 
-In `build_precomputation_table.py`, implement:
+`build_precomputation_table.py`에 다음 함수를 구현하세요.
 
 ```text
 build_table(config: dict[str, int | str]) -> dict[str, str]
 ```
 
-Enumerate `password_space(alphabet, password_length)`, hash each password once
-with the configured algorithm, and return lowercase `digest -> password`
-entries. The provided `hash_password()` is a fast toy hash, not a password KDF.
+`password_space(alphabet, password_length)`를 열거하고, 설정된 알고리즘으로 각 비밀번호를 한 번씩
+해시한 뒤 소문자 `digest -> password` 항목을 반환하세요.
+제공된 `hash_password()`는 빠른 예제용 해시이며 비밀번호용 KDF가 아닙니다.
 
 ```console
 python3 - <<'PY'
@@ -104,21 +100,20 @@ print("Full-table check: OK")
 PY
 ```
 
-Proceed after `Full-table check: OK`.
+`Full-table check: OK`를 확인한 뒤 진행하세요.
 
-## 3. Write reduce_digest(), then check its mapping
+## 3. reduce_digest() 구현 및 매핑 검사
 
-In `build_rainbow_table.py`, define `MIX_CONSTANT = 0x9E3779B1` and implement:
+`build_rainbow_table.py`에 `MIX_CONSTANT = 0x9E3779B1`을 정의하고 다음 함수를 구현하세요.
 
 ```text
 reduce_digest(digest_hex: str, column: int, alphabet: str, length: int) -> str
 ```
 
-Compute `(int(digest_hex, 16) + column * MIX_CONSTANT) % (len(alphabet)**length)`.
-Encode that integer as exactly `length` base-`len(alphabet)` digits,
-most significant first, using `alphabet[digit]`; include leading zero digits.
-This is a column-dependent map into a bounded password space, not an inverse
-of SHA-256.
+`(int(digest_hex, 16) + column * MIX_CONSTANT) % (len(alphabet)**length)`를 계산하세요.
+이 정수를 정확히 `length`자리의 `len(alphabet)`진수로 표현하고, 가장 높은 자리부터
+`alphabet[digit]`을 사용해 문자열로 변환하세요. 맨 앞의 0에 해당하는 자리도 포함해야 합니다.
+이는 제한된 비밀번호 공간으로 보내는 열 의존적 매핑이며 SHA-256의 역함수가 아닙니다.
 
 ```console
 python3 - <<'PY'
@@ -134,13 +129,13 @@ print("Reduction check: OK")
 PY
 ```
 
-Proceed after `Reduction check: OK`.
+`Reduction check: OK`를 확인한 뒤 진행하세요.
 
-## 4. Write choose_starts() and check it; then write chain_endpoint()
+## 4. choose_starts() 구현·검사 후 chain_endpoint() 구현
 
-First implement `choose_starts(config) -> list[str]`: enumerate the configured
-space and use `random.Random(seed).sample(candidates, chain_count)` to choose
-unique starts without changing global random state.
+먼저 `choose_starts(config) -> list[str]`를 구현하세요. 설정된 공간을 열거하고
+`random.Random(seed).sample(candidates, chain_count)`를 사용해 서로 다른 시작점을 선택하세요.
+전역 난수 상태를 변경하면 안 됩니다.
 
 ```console
 python3 - <<'PY'
@@ -154,10 +149,9 @@ print("Start-selection check: OK")
 PY
 ```
 
-After that check passes, implement
-`chain_endpoint(start: str, config: dict[str, int | str]) -> str`.
-Starting at `start`, hash the current password and reduce the digest for
-columns `0 .. chain_length-1`. Return only the final reduced password.
+위 검사가 통과하면 `chain_endpoint(start: str, config: dict[str, int | str]) -> str`을 구현하세요.
+`start`에서 시작해 열 `0 .. chain_length-1`마다 현재 비밀번호를 해시하고 다이제스트를 축약하세요.
+마지막으로 축약된 비밀번호만 반환합니다.
 
 ```console
 python3 - <<'PY'
@@ -173,14 +167,13 @@ print("Chain check: OK")
 PY
 ```
 
-Proceed after both messages end with `OK`.
+두 메시지가 모두 `OK`로 끝나는지 확인한 뒤 진행하세요.
 
-## 5. Write rainbow build_table(), then check endpoint grouping
+## 5. 레인보우 build_table() 구현 및 끝점 그룹화 검사
 
-Implement `build_table(config) -> dict[str, list[str]]` in
-`build_rainbow_table.py`. For every chosen start, calculate its endpoint and
-append the start to that endpoint's list. Retain all starts when chains merge;
-do not overwrite a previous start or store every intermediate password.
+`build_rainbow_table.py`에 `build_table(config) -> dict[str, list[str]]`를 구현하세요.
+선택한 각 시작점의 끝점을 계산하고, 해당 끝점의 리스트에 시작점을 추가하세요.
+체인이 합쳐져도 모든 시작점을 유지해야 합니다. 이전 시작점을 덮어쓰거나 모든 중간 비밀번호를 저장하지 마세요.
 
 ```console
 python3 - <<'PY'
@@ -199,19 +192,19 @@ print("Endpoint grouping check: OK")
 PY
 ```
 
-The forced merge is a public unit fixture. Proceed after
-`Endpoint grouping check: OK`.
+강제로 병합하는 경우는 공개 단위 테스트용 데이터입니다.
+`Endpoint grouping check: OK`를 확인한 뒤 진행하세요.
 
-## 6. Write lookup_precomputation(), then check it
+## 6. lookup_precomputation() 구현 및 검사
 
-In `compare_table_attacks.py`, implement:
+`compare_table_attacks.py`에 다음 함수를 구현하세요.
 
 ```text
 lookup_precomputation(digest: str, entries: dict[str, str]) -> tuple[str | None, int]
 ```
 
-Return a matching password, or `None`, and the number of new hash computations.
-A dictionary lookup requires zero new hashes.
+일치하는 비밀번호 또는 `None`과 새로 수행한 해시 계산 횟수를 반환하세요.
+딕셔너리 조회에는 새로운 해시 계산이 필요하지 않습니다.
 
 ```console
 python3 - <<'PY'
@@ -224,27 +217,27 @@ print("Full lookup check: OK")
 PY
 ```
 
-Proceed after `Full lookup check: OK`.
+`Full lookup check: OK`를 확인한 뒤 진행하세요.
 
-## 7. Write lookup_rainbow(), then check chain replay
+## 7. lookup_rainbow() 구현 및 체인 재생 검사
 
-Implement in `compare_table_attacks.py`:
+`compare_table_attacks.py`에 다음 함수를 구현하세요.
 
 ```text
 lookup_rainbow(digest: str, endpoints: dict[str, list[str]],
               config: dict[str, int | str]) -> tuple[str | None, int]
 ```
 
-Try target columns from the last column to zero. Reduce the target digest at
-the selected column, then hash/reduce forward through the remaining columns
-to propose an endpoint. Replay each start stored at that endpoint from column
-zero. Compare each replayed password's hash with the **original** target digest
-before returning it; an endpoint collision alone is not a match.
-Count every hash performed during endpoint prediction and replay, including
-verification. Return `(None, count)` when no chain verifies.
+마지막 열부터 0번째 열까지 대상 다이제스트가 놓일 수 있는 위치를 차례로 시도하세요.
+선택한 열에서 대상 다이제스트를 축약한 다음, 남은 열에 대해 해시·축약을 진행해 후보 끝점을 구하세요.
+그 끝점에 저장된 각 시작점에서 0번째 열부터 체인을 재생하세요.
+비밀번호를 반환하기 전에 재생된 각 비밀번호의 해시를 **원래** 대상 다이제스트와 비교해야 합니다.
+끝점 충돌만으로는 일치가 확인되지 않습니다.
+검증을 포함해 끝점 예측과 체인 재생 중 수행한 모든 해시를 세세요.
+검증되는 체인이 없으면 `(None, count)`를 반환하세요.
 
-A small rainbow table has incomplete coverage, so missing some valid passwords
-is expected. The lookup must never invent an unverified match.
+작은 레인보우 테이블의 커버리지는 불완전하므로 유효한 비밀번호 중 일부를 찾지 못하는 것이 정상입니다.
+조회 함수는 검증되지 않은 값을 일치 결과로 반환하면 안 됩니다.
 
 ```console
 python3 - <<'PY'
@@ -263,16 +256,15 @@ print("Rainbow replay check: OK")
 PY
 ```
 
-Proceed after `Rainbow replay check: OK`.
+`Rainbow replay check: OK`를 확인한 뒤 진행하세요.
 
-## 8. Write database loading, check it, then add measurement
+## 8. 데이터베이스 로딩 구현·검사 후 측정 추가
 
-### Write load_database() and check its schema
+### load_database() 구현 및 스키마 검사
 
-In `compare_table_attacks.py`, implement
-`load_database(path: Path) -> list[dict[str, str]]`: read nonempty CSV records,
-require exactly `account,sha256` columns, and reject an invalid or empty
-file with `ValueError`.
+`compare_table_attacks.py`에 `load_database(path: Path) -> list[dict[str, str]]`를 구현하세요.
+비어 있지 않은 CSV 레코드를 읽고, 열이 정확히 `account,sha256`인지 확인하세요.
+유효하지 않거나 비어 있는 파일에는 `ValueError`를 발생시키세요.
 
 ```console
 python3 - <<'PY'
@@ -296,13 +288,13 @@ print("Database loading check: OK")
 PY
 ```
 
-Proceed after `Database loading check: OK`.
+`Database loading check: OK`를 확인한 뒤 진행하세요.
 
-### Write attack_database() and check its metrics
+### attack_database() 구현 및 측정값 검사
 
-Implement `attack_database(database, lookup) -> tuple[dict[str, str], int, float]`:
-call the supplied lookup on each lowercase target digest, sum lookup hash
-counts, collect verified matches by account, and time the operation.
+`attack_database(database, lookup) -> tuple[dict[str, str], int, float]`를 구현하세요.
+소문자로 표현된 각 대상 다이제스트에 제공된 조회 함수를 호출하고, 조회 시 해시 횟수를 합산하세요.
+검증된 일치 결과를 계정별로 모으고 수행 시간을 측정하세요.
 
 ```console
 python3 - <<'PY'
@@ -318,42 +310,42 @@ print("Database measurement check: OK")
 PY
 ```
 
-Proceed after `Database measurement check: OK`.
+`Database measurement check: OK`를 확인한 뒤 진행하세요.
 
-## 9. Write the three main programs and JSON artifacts
+## 9. 세 프로그램의 메인 로직과 JSON 결과물 작성
 
-Use `argparse`, `Path`, `perf_counter()`, `load_config()`, and
-`write_json()`. Put generated files under `generated/`, which Git ignores.
+`argparse`, `Path`, `perf_counter()`, `load_config()`, `write_json()`을 사용하세요.
+생성 파일은 Git이 추적하지 않는 `generated/` 아래에 저장하세요.
 
-| Program | Positional arguments | Required artifact fields |
+| 프로그램 | 위치 인자 | 결과물의 필수 필드 |
 | --- | --- | --- |
-| `build_precomputation_table.py` | config JSON, output JSON | `type="full-precomputation"`, `config`, `build_hashes`, `build_seconds`, `entries` |
-| `build_rainbow_table.py` | config JSON, output JSON | `type="rainbow-endpoints"`, `config`, `build_hashes`, `build_seconds`, `endpoints` |
-| `compare_table_attacks.py` | database CSV, full-table JSON, rainbow JSON | Print a metrics row per method; no artifact required |
+| `build_precomputation_table.py` | 설정 JSON, 출력 JSON | `type="full-precomputation"`, `config`, `build_hashes`, `build_seconds`, `entries` |
+| `build_rainbow_table.py` | 설정 JSON, 출력 JSON | `type="rainbow-endpoints"`, `config`, `build_hashes`, `build_seconds`, `endpoints` |
+| `compare_table_attacks.py` | 데이터베이스 CSV, 전체 테이블 JSON, 레인보우 JSON | 방법별 측정값을 한 행씩 출력. 결과 파일은 필요 없음 |
 
-The full build hash count is the password-space size; rainbow build hashes
-are `chain_count * chain_length`. Time table construction separately from JSON
-serialization. Each builder reports entries/starts, distinct endpoints where
-applicable, build hashes, seconds, and serialized file bytes.
+전체 테이블 구성의 해시 횟수는 비밀번호 공간 크기이며, 레인보우 테이블 구성의 해시 횟수는
+`chain_count * chain_length`입니다. 테이블 구성 시간은 JSON 직렬화 시간과 분리해서 측정하세요.
+각 구성 프로그램은 항목 수 또는 시작점 수, 해당하는 경우 서로 다른 끝점 수, 구성 해시 횟수,
+소요 시간(초), 직렬화된 파일 크기(바이트)를 보고해야 합니다.
 
-The comparison reads both table JSON files, applies both methods to the same
-database, and reports recovered/total accounts, build hashes, build seconds,
-stored records, distinct endpoints, file bytes, lookup hashes, and lookup
-seconds. A rainbow stored record is a start/endpoint pair, including starts
-sharing an endpoint. Print counts rather than recovered course passwords.
+비교 프로그램은 두 테이블의 JSON 파일을 읽고 같은 데이터베이스에 두 방법을 적용합니다.
+복구 계정 수/전체 계정 수, 구성 해시 횟수, 구성 시간(초), 저장 레코드 수, 서로 다른 끝점 수,
+파일 크기(바이트), 조회 해시 횟수, 조회 시간(초)을 보고하세요.
+레인보우 테이블의 저장 레코드 한 개는 시작점/끝점 쌍이며, 끝점을 공유하는 시작점도 각각 포함합니다.
+복구한 수업용 비밀번호 대신 개수만 출력하세요.
 
 ```console
 python3 -c "import build_precomputation_table, build_rainbow_table, compare_table_attacks; print('Import check: OK')"
 LAB01_GRADE=1 python3 -m unittest test_table_attacks.py -v
 ```
 
-All seven enabled tests should pass.
+활성화된 테스트 7개가 모두 통과해야 합니다.
 
-### Shared completion utility
+### 공통 완료 유틸리티
 
-The whole main program is still yours to write. Resolve the envelope relative
-to your exercise file, rather than the shell's current directory. To import
-the provided shared utility from a numbered Part exercise file, use:
+메인 프로그램 전체는 직접 작성해야 합니다. 암호화 봉투 파일의 경로는 셸의 현재 디렉토리가 아니라
+실습 파일을 기준으로 해석하세요. 번호가 붙은 Part 실습 파일에서 제공된 공통 유틸리티를
+import하려면 다음을 사용하세요.
 
 ```python
 import sys
@@ -362,32 +354,29 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from labs.lab01.common.flags import unlock_flag, canonical_account_proof
 ```
 
-`unlock_flag(path, proof)` returns a `FLAG{...}` string after authenticating
-the encrypted envelope. An incorrect proof raises `ValueError`; inspect your
-implementation and proof format rather than changing the envelope.
-The public demo proof opens only the demo artifact and cannot open this Part's
-flag. Submit the computed Part flag through the instructor's designated channel.
+`unlock_flag(path, proof)`는 암호화 봉투를 인증한 뒤 `FLAG{...}` 문자열을 반환합니다.
+증명값이 잘못되면 `ValueError`가 발생합니다. 봉투를 변경하지 말고 구현과 증명값 형식을 점검하세요.
+공개 데모 증명값은 데모 결과물만 열 수 있으며 이 Part의 플래그를 열 수는 없습니다.
+계산한 Part 플래그는 강사가 지정한 채널로 제출하세요.
 
-### Open the flag after the full/rainbow comparison
+### 전체 테이블·레인보우 비교 후 플래그 열기
 
-In your `compare_table_attacks.py` main, retain the recovered account mapping
-returned by the full-table attack. Require it to cover every account in the
-input database, then call `canonical_account_proof(full_recovered)` and pass
-the result to `unlock_flag()` for `data/flag_challenge.json`. Print the
-returned `FLAG{...}` after both methods' metric rows.
+`compare_table_attacks.py`의 메인에서 전체 테이블 공격이 반환한 복구 계정 매핑을 유지하세요.
+입력 데이터베이스의 모든 계정이 포함되는지 확인한 다음 `canonical_account_proof(full_recovered)`를
+호출하고, 결과를 `data/flag_challenge.json`에 대한 `unlock_flag()`에 전달하세요.
+두 방법의 측정값 행을 출력한 뒤 반환된 `FLAG{...}`를 출력하세요.
 
-The canonical text is compact JSON with sorted account keys and Unicode
-preserved:
+정규화된 텍스트는 계정 키를 정렬하고 유니코드를 보존한 간결한 JSON입니다.
 `json.dumps(mapping, sort_keys=True, separators=(',', ':'), ensure_ascii=False)`.
-For the public mapping `{"b": "public-two", "a": "public-one"}`, it is
-`{"a":"public-one","b":"public-two"}`. Use the shared encoder and do not
-print the recovered course mapping or proof.
+공개 매핑 `{"b": "public-two", "a": "public-one"}`의 경우
+`{"a":"public-one","b":"public-two"}`가 됩니다.
+공통 인코더를 사용하고 복구한 수업용 매핑이나 증명값을 출력하지 마세요.
 
-Use the **full-table** result as the proof because it guarantees coverage.
-Rainbow's partial coverage remains an expected result, and implementing,
-running, and interpreting the rainbow method is still mandatory.
+전체 커버리지를 보장하는 **전체 테이블** 결과를 증명값으로 사용하세요.
+레인보우의 부분적 커버리지는 정상적인 결과입니다.
+레인보우 방법의 구현, 실행, 결과 해석도 반드시 수행해야 합니다.
 
-## 10. Generate course tables and compare them
+## 10. 수업용 테이블 생성 및 비교
 
 ```console
 python3 build_precomputation_table.py data/rainbow_lab_config.json generated/precomputation.json
@@ -395,16 +384,17 @@ python3 build_rainbow_table.py data/rainbow_lab_config.json generated/rainbow.js
 python3 compare_table_attacks.py data/rainbow_password_database.csv generated/precomputation.json generated/rainbow.json
 ```
 
-The full table contains 1,296 entries and uses 1,296 build hashes. Rainbow uses
-96 starts and 1,152 build hashes; it has at most 96 distinct endpoints.
-Fewer endpoints than starts indicates chain merges.
+전체 테이블에는 항목 1,296개가 있으며 구성에 해시 1,296회를 사용합니다.
+레인보우 테이블은 시작점 96개와 구성 해시 1,152회를 사용하며, 서로 다른 끝점은 최대 96개입니다.
+끝점 수가 시작점 수보다 적으면 체인이 합쳐진 것입니다.
 
-The full table should recover every supplied target with zero new lookup hashes.
-Rainbow should demonstrate partial coverage and positive lookup work.
-Exact elapsed times and JSON sizes vary. The comparison ends with the recovered
-`FLAG{...}` after both metric rows. Do not add hard-coded target cases.
+전체 테이블은 새로운 조회 해시 없이 제공된 모든 대상을 복구해야 합니다.
+레인보우 테이블에서는 부분적 커버리지와 0보다 큰 조회 비용이 나타나야 합니다.
+정확한 소요 시간과 JSON 크기는 달라질 수 있습니다.
+두 측정값 행 뒤에 복구한 `FLAG{...}`를 출력하며 비교가 끝납니다.
+대상별 하드코딩을 추가하지 마세요.
 
-Finally observe why an unsalted table cannot be reused directly with a salt:
+마지막으로 무솔트 테이블을 솔트가 있는 경우에 그대로 재사용할 수 없는 이유를 관찰하세요.
 
 ```console
 python3 - <<'PY'
@@ -418,29 +408,28 @@ print("Salted present:", hashlib.sha256(b"public-salt:" + public).hexdigest() in
 PY
 ```
 
-Expect `Unsalted present: True` and `Salted present: False`.
-The public salt changes the lookup key; separate salts require separate
-precomputation. Real password storage additionally needs a password KDF.
+예상 출력은 `Unsalted present: True`와 `Salted present: False`입니다.
+공개 솔트는 조회 키를 바꾸므로 서로 다른 솔트에는 별도의 사전 계산이 필요합니다.
+실제 비밀번호 저장에는 추가로 비밀번호용 KDF가 필요합니다.
 
-## 11. Completion and report
+## 11. 완료 확인 및 보고서
 
-- [ ] All three initially empty files contain complete programs.
-- [ ] Every staged public check and all enabled tests pass.
-- [ ] Both artifacts have the required schema and deterministic configuration.
-- [ ] Both methods attack the same course database without special cases.
-- [ ] Full coverage and rainbow limitations are measured and explained.
-- [ ] The salt observation and synthetic record parsing are documented.
-- [ ] The final program authenticates its own `data/flag_challenge.json` and prints the Part flag.
+- [ ] 처음에 비어 있던 파일 3개에 완성된 프로그램을 작성했다.
+- [ ] 단계별 공개 검사와 활성화된 모든 테스트가 통과한다.
+- [ ] 두 결과물이 필수 스키마와 결정적인 설정을 사용한다.
+- [ ] 두 방법이 예외 처리 없이 같은 수업용 데이터베이스를 공격한다.
+- [ ] 전체 커버리지와 레인보우의 한계를 측정하고 설명했다.
+- [ ] 솔트 관찰 결과와 합성 레코드 파싱을 문서화했다.
+- [ ] 최종 프로그램이 자신의 `data/flag_challenge.json`을 인증하고 Part 플래그를 출력한다.
 
-Submit the three Python files and a report using this comparison table:
+Python 파일 3개와 다음 비교 표를 사용한 보고서를 제출하세요.
 
-| Method | Build hashes | Build seconds | Stored records | Distinct endpoints | JSON bytes | Recovered/total | Lookup hashes | Lookup seconds |
+| 방법 | 구성 해시 횟수 | 구성 시간(초) | 저장 레코드 수 | 서로 다른 끝점 수 | JSON 바이트 수 | 복구/전체 | 조회 해시 횟수 | 조회 시간(초) |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Full | | | | N/A | | | | |
-| Rainbow | | | | | | | | |
+| 전체 테이블 | | | | 해당 없음 | | | | |
+| 레인보우 | | | | | | | | |
 
-Explain parsing versus guessing, why reduction is not an inverse hash, why
-endpoint merges affect coverage, what storage rainbow saves and what lookup
-work it adds, and why salts prevent shared unsalted precomputation. Discuss
-conceptual stored values as well as JSON overhead. Do not publish recovered
-course passwords.
+파싱과 추측의 차이, 축약이 해시의 역함수가 아닌 이유, 끝점 병합이 커버리지에 미치는 영향,
+레인보우가 절약하는 저장 공간과 추가하는 조회 비용, 솔트가 무솔트 사전 계산의 공유를 막는 이유를 설명하세요.
+개념적으로 저장하는 값과 JSON의 부가 비용을 함께 논의하세요.
+복구한 수업용 비밀번호를 공개하지 마세요.

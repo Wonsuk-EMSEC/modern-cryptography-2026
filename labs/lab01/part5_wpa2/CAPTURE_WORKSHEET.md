@@ -1,54 +1,56 @@
-# Part 5 capture worksheet
+# Part 5 캡처 워크시트
 
-Name:
-Date:
+[한국어](CAPTURE_WORKSHEET.md) | [English](../../../en/labs/lab01/part5_wpa2/CAPTURE_WORKSHEET.md)
 
-Use only `data/wpa2/lab01-handshake.pcap`. Complete this worksheet by reading
-the Wireshark or TShark decoded packet tree. Do not use a Python parser or an
-automated field-export command. Do not record the recovered passphrase.
+이름:
+날짜:
 
-## Network identification
+`data/wpa2/lab01-handshake.pcap`만 사용하세요.
+Wireshark 또는 TShark가 디코딩한 패킷 트리를 읽고 이 워크시트를 완성하세요.
+Python 파서나 자동 필드 내보내기 명령은 사용하지 마세요.
+복구한 패스프레이즈를 기록하지 마세요.
 
-| Observation | Your result | Frame number and protocol-tree location |
+## 네트워크 식별
+
+| 관찰 항목 | 관찰 결과 | 프레임 번호 및 프로토콜 트리 위치 |
 | --- | --- | --- |
 | SSID |  |  |
 | BSSID / AP MAC |  |  |
-| Station/client MAC |  |  |
+| 스테이션/클라이언트 MAC |  |  |
 
-How did you distinguish the AP address from the station address?
+AP 주소와 스테이션 주소를 어떻게 구분했나요?
 
 
-## Four-way handshake
+## 4방향 핸드셰이크
 
-Enter `0` or `1` for each flag. Record only a shortened nonce or MIC prefix in
-this worksheet; keep any full values out of public screenshots and reports.
+각 플래그에 `0` 또는 `1`을 입력하세요.
+이 워크시트에는 논스 또는 MIC의 짧은 접두부만 기록하세요.
+전체 값은 공개 스크린샷과 보고서에 넣지 마세요.
 
-| Label | Frame | Transmitter -> Receiver | Replay counter | ACK | MIC | Secure | Nonce/MIC observation |
+| 분류 | 프레임 | 송신자 -> 수신자 | 재전송 카운터 | ACK | MIC | Secure | 논스/MIC 관찰 내용 |
 | --- | ---: | --- | ---: | ---: | ---: | ---: | --- |
 | M1 |  |  |  |  |  |  |  |
 | M2 |  |  |  |  |  |  |  |
 | M3 |  |  |  |  |  |  |  |
 | M4 |  |  |  |  |  |  |  |
 
-What evidence supports each label rather than simply assuming capture order?
+단순히 캡처 순서라고 가정하는 대신 각 분류를 뒷받침하는 근거는 무엇인가요?
 
 
-How do the replay counters relate the messages?
+재전송 카운터는 메시지 사이의 관계를 어떻게 나타내나요?
 
 
-Why is the M1 MIC behavior different from M2-M4?
+M1의 MIC 동작이 M2~M4와 다른 이유는 무엇인가요?
 
 
-## Offline verification
+## 오프라인 검증
 
-Which observed fields would an offline checker need for PMK -> PTK -> KCK ->
-MIC candidate verification?
-
-
-Why can this verification proceed without sending a guess to the AP?
+PMK -> PTK -> KCK -> MIC 후보 검증을 수행하는 오프라인 검사기에 필요한 관찰 필드는 무엇인가요?
 
 
-## Authorization statement
+이 검증은 왜 AP에 추측값을 보내지 않고도 진행할 수 있나요?
 
-Explain why this particular activity is authorized and what actions remain out
-of scope.
+
+## 허가 범위 명시
+
+이 활동이 허가된 이유와 실습 범위에 포함되지 않는 행동을 설명하세요.

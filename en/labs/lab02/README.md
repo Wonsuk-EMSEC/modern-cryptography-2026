@@ -1,0 +1,381 @@
+# Lab 02: Practical Security of Block Ciphers
+
+[한국어](../../../labs/lab02/README.md) | **English**
+
+**Estimated time:** 4–5 hours. **Environment:** course Docker container.
+
+This is a local CTF-style lab. Each Part is a cryptographic puzzle that ends
+when you recover a value in the form `FLAG{...}`. Work only against the data
+and local services supplied for this course. Do not use these techniques on
+systems, devices, accounts, or services without explicit authorization.
+
+## Learning progression
+
+| Part | Topic | Main lesson |
+| --- | --- | --- |
+| 1 | DES Brute-Force Attack | Short key spaces are dangerous. |
+| 2 | Double-DES Meet-in-the-Middle Attack | Cryptographic composition matters. |
+| 3 | AES-CBC and PKCS#7 | Understand the construction before attacking it. |
+| 4 | CBC Bit-Flipping Attack | Confidentiality does not imply integrity. |
+| 5 | Padding Oracle Attack | Decryption behavior can leak plaintext. |
+| 6 | MAC-then-Encrypt vs. Encrypt-then-MAC | Authentication order matters. |
+| 7 | CPA against AES | Implementation leakage can expose strong cryptographic keys. |
+
+The Parts use only bounded searches, generated data, an isolated course target
+service, and synthetic traces. The final message is:
+
+> Cryptographic security depends not only on the cipher itself, but also on
+> key size, composition, mode of operation, authentication, error handling,
+> and implementation.
+
+## Setup
+
+You can start Lab02 without completing Lab 01. All labs share the same Docker
+environment: you build the course image, start the `course` container, and run
+your Python code inside it. **If you completed the Lab 01 setup, you have
+already built this common image and used this container.** Use the same
+repository and refresh the environment as described below.
+
+For VS Code, follow the common [course-container setup](../../README.md#use-vs-code-with-the-course-container):
+open the **repository root** and run **Dev Containers: Reopen in Container**.
+Use that window for every Part and lab. It sets
+`/opt/course-venv/bin/python3` as the default interpreter for Python
+run/debug commands, and its integrated terminal runs inside `course`.
+The common guide includes the one-time correction for an interpreter
+previously selected in VS Code. Optional targets still need the host-terminal
+commands in step 2.
+
+**If you already cloned the repository for Lab 01**, update that existing
+copy before building the Lab02 environment. In your **host terminal**
+(Ubuntu/WSL on Windows), go to the existing `modern-cryptography-2026`
+directory containing `docker/` and `labs/`. If you are inside the course
+container, run `exit` first. Then run:
+
+```console
+git status
+git pull --ff-only
+```
+
+This downloads the latest lab files, README instructions, and Docker
+configuration. You do not need to clone the repository again. If Git reports
+that your local work would be overwritten, commit or stash that work before
+retrying. If the branches have diverged, ask the instructor for help
+reconciling them while preserving your work. After updating, continue to
+[step 1](#1-prepare-the-common-course-image) to rebuild the common image.
+
+**If you have not built the course image yet**, first complete the
+[prerequisites](../../README.md#0-prerequisites). If you do not have a local
+copy yet, [clone the repository](../../README.md#1-clone-the-course-repository);
+otherwise, update your existing copy as described above.
+Make sure Docker is running. In your **host terminal** (Ubuntu/WSL on
+Windows), go to the repository root containing `docker/` and `labs/`, then
+run:
+
+```console
+docker compose -f docker/compose.yml build course
+```
+
+This command uses `docker/Dockerfile` to build the shared
+`modern-cryptography-2026` image, including the tools and Python libraries
+required for the labs. The first build may take several minutes. Once it
+finishes successfully, your image is ready: continue to
+[step 2](#2-start-the-services-you-need) to start the container. You do not
+need to repeat the same build in step 1 below.
+
+Parts 4–6 also need a target container running on your own computer. This is
+the same workflow used for the SSH target in Lab 01 Part 2. The Lab02 target
+is supplied as a prebuilt image that Docker Compose downloads automatically
+from GitHub Container Registry (GHCR). No instructor-hosted server is needed.
+
+| Service | Purpose |
+| --- | --- |
+| `course` | Your shell, Python code, and repository files, shared by all labs |
+| `lab02-target` | The local application you interact with in Parts 4–6 |
+
+### 1. Prepare the common course image
+
+- **Starting with Lab02:** follow the [prerequisites](../../README.md#0-prerequisites)
+  and [repository cloning instructions](../../README.md#1-clone-the-course-repository)
+  in the main README, then build the course image with the command below.
+- **Already completed the Lab 01 setup:** use the repository you prepared
+  there and run `git pull --ff-only` as described above before building.
+  **We recommend repeating the image build below and the service
+  start commands in step 2 before beginning Lab02.** `docker/Dockerfile`
+  and `docker/compose.yml` may have been updated since Lab 01 to add
+  dependencies or change service settings. Use the current course files
+  so these commands apply the Lab02 environment updates.
+
+`docker/Dockerfile` is the build recipe for the shared course image. It
+installs Python, cryptographic libraries, and the other tools needed for all
+labs, including the Part 7 plotting libraries. `docker/compose.yml` tells
+Docker how to build that image and run the `course` container with your
+repository mounted at `/workspace`. You do not need to install lab
+dependencies manually.
+
+In your **host terminal** (Ubuntu/WSL on Windows), make sure Docker is running
+and go to the repository root containing `docker/` and `labs/`. If you are
+still inside a course shell, run `exit` first. If VS Code is connected to
+the container, use a separate host terminal. Build the course image:
+
+```console
+docker compose -f docker/compose.yml build course
+```
+
+This is the same image-build command used in the Lab 01 setup. The initial
+build may take several minutes; subsequent builds reuse cached layers where
+possible. After preparing the environment for Lab02, you only need to rebuild
+when updated environment files are provided.
+
+Additional target services have separate build recipes:
+`docker/lab01-ssh-target/Dockerfile` for the Lab 01 SSH target and
+`docker/lab02-target/Dockerfile` for the Lab02 application. The instructor
+builds the Lab02 target from private server files and provides its image.
+For Parts 4–6, start that image in step 2; the common course build above
+prepares only your working environment.
+
+### 2. Start the services you need
+
+For **Parts 1–3 and 7**, start only the common course container in the **host
+terminal** at the repository root, then continue to step 3:
+
+```console
+docker compose -f docker/compose.yml up -d course
+docker compose -f docker/compose.yml ps
+```
+
+These commands use the shared `docker/compose.yml` to start `course` in the
+background (`-d`) and check its status. The `ps` output should show `course`
+as `Up` (running). Run the `up` command even if `course` is already running:
+Compose recreates the container when needed to apply a rebuilt image or
+changed service settings.
+
+The `lab02` profile enables the `lab02-target` service. This target does not
+start by default. Start it only for Parts 4–6, following the instructions
+below.
+
+The goal of Parts 4–6 is to recover flags by applying cryptographic attacks.
+Reading the server source code and secret data could reveal the flags
+directly, bypassing the intended exercises. Therefore, these files are not
+included in the student repository. The instructor builds `lab02-target`
+in advance and publishes it on GitHub Container Registry (GHCR). Docker
+Compose downloads and runs that image, so students do not build the target
+locally.
+
+The image can still be inspected locally. For this lab, recover flags through
+the supplied clients instead of reading files inside the image.
+
+The target uses the following GHCR image name:
+
+```text
+ghcr.io/wonsuk-emsec/modern-cryptography-2026-lab02-target:2026-lab02-v1
+```
+
+`docker/compose.yml` specifies this image without a `build` section. Compose
+pulls it automatically when needed; no manual download, `docker load`, or
+registry login is needed for the public package. The Lab02 files and target
+image are a paired **`2026-lab02-v1`** release: Part 5's ciphertext must match
+the target image. Keep them on the same release when updating.
+
+For **Parts 4–6**, start the course container and Lab02 target in the **host
+terminal** at the repository root with the commands below. If you
+completed Lab 01 Part 2, this is the same Compose workflow you used to start
+the SSH target, with the `lab02` profile and `lab02-target` service:
+
+```console
+docker compose -f docker/compose.yml --profile lab02 up -d --wait course lab02-target
+docker compose -f docker/compose.yml --profile lab02 ps
+```
+
+The first `up` may take longer while it downloads the target image. The
+command then waits until the services are ready. `ps` should show
+`lab02-target` as `healthy`. Docker Compose creates the internal network
+automatically. The target runs on your computer and has no published host
+port. The `lab02` profile enables this additional service; the course
+container is the same one used for the other labs.
+
+If the image pull reports `denied` or `manifest unknown`, ask the instructor
+to confirm that this release has been published and the GHCR package is
+public. You do not need to change the clients or build the target locally.
+
+### 3. Open the common course container
+
+For VS Code, use **Dev Containers: Reopen in Container** with the repository
+root open, as explained in the [common guide](../../README.md#use-vs-code-with-the-course-container),
+then open an integrated terminal in that window.
+
+For a terminal-only session, enter the container from the **host terminal**
+at the repository root:
+
+```console
+docker compose -f docker/compose.yml exec course bash
+```
+
+This command opens a container shell; it does not connect a host VS Code
+window to the container.
+
+You are now **inside the container**. Change to the Lab02 directory:
+
+```console
+cd /workspace/labs/lab02
+```
+
+The repository is mounted at `/workspace`, the shared location used in every
+lab. Changes to files there are saved in your host repository. Run Python
+commands in this shell or use Python run/debug in the connected VS Code
+window for every Part. The clients for Parts 4–6 already know the local
+service name `lab02-target`; you do not need to enter an address.
+
+## Working through the Parts
+
+Follow each Part README in order. First run the independent examples in its
+`samples/` directory and inspect the documented output. Then implement one
+function in the provided empty exercise file and run the small check directly
+below its requirements. Continue only when that check passes. After checking
+the individual functions, write `main()` and the execution guard, connect the
+file inputs and outputs, and run the supplied challenge. Record the recovered
+flag, measurements, and answers to the analysis questions.
+
+Exercise files are initially zero bytes: write the imports, functions, input
+handling, and program entry point yourself. Samples demonstrate library and
+client use with public examples; they run before any exercise is implemented.
+
+After completing each Part's local checks and program entry point, run its command **inside the course
+container** at `/workspace/labs/lab02`:
+
+```console
+python3 part1_des_bruteforce/des_bruteforce.py
+python3 part2_double_des_mitm/double_des_mitm.py
+python3 part3_aes_cbc_pkcs7/aes_cbc_pkcs7.py
+python3 part4_cbc_bit_flipping/cbc_bit_flipping.py
+python3 part5_padding_oracle/padding_oracle.py
+python3 part6_mte_vs_etm/mte_vs_etm.py
+python3 part7_aes_cpa/aes_cpa.py --all
+```
+
+The Part 6 command first probes the two services. Follow that Part's README
+to select a service and run recovery. Part 7's README also explains how to
+recover one byte first and save plots before recovering the full key.
+
+## Report and execution evidence
+
+Grading is based on your report and execution screenshots.
+
+- **Checkpoint Questions:** Answer each Part's questions.
+- **Implementation:** Include the main code changes and explain how they work.
+- **Execution evidence:** Include readable screenshots showing the command,
+  relevant output, and completion result. Keep recovered FLAGs visible.
+- **Measurements:** Include values requested by each Part, such as candidates
+  tested, elapsed time, throughput, or oracle queries. These need not match the
+  instructor's reference values when the supplied input, method, and final
+  result are correct.
+- **Redaction:** Hide personal information and real credentials, such as
+  passwords and API tokens.
+- **Not required:** Hardware specifications and container cleanup screenshots.
+
+Synthetic keys requested by this lab may also appear in your course report.
+Do not publish recovered FLAGs or keys in public repositories or reports.
+
+Do not submit or use real credentials,
+third-party captures, private tokens, or data from systems outside the supplied
+course files and local services. Do not inspect target image internals or
+hard-code a recovered FLAG or key to bypass the required method. Exposure of
+real secrets, work outside the authorized course boundary, or bypassing the
+intended exercise may result in a deduction even if the displayed result is
+correct.
+
+## Finish or restart a session
+
+For a terminal-only session, leave the course shell with:
+
+```console
+exit
+```
+
+Exiting the shell or closing the Dev Containers window leaves the course
+container and target running. Your files remain in the host repository.
+If you have finished Parts 4–6, stop only the Lab02 target from the **host
+terminal** at the repository root:
+
+```console
+docker compose -f docker/compose.yml --profile lab02 stop lab02-target
+```
+
+The course container remains available for other Parts and labs. Next time,
+repeat the appropriate start command in step 2 and enter the shell as in
+step 3. The built and downloaded images remain on your computer.
+
+If you are finished with the Lab02 session and want to remove its target,
+the course container, and their networks, run from the **host terminal**:
+
+```console
+docker compose -f docker/compose.yml --profile lab02 down
+```
+
+Use the target-only `stop` command above if you want to keep working in other
+labs with the course container.
+
+If you have finished all lab work and no longer need any course containers,
+stop and remove them and their networks from the **host terminal**:
+
+```console
+docker compose -f docker/compose.yml --profile lab01-ssh --profile lab02 down
+```
+
+If a client cannot connect, check `ps` in the host terminal and confirm that
+the target is running. If you reach the query limit while debugging Parts
+5–6, correct your loop, then reset the counter in the **host terminal**:
+
+```console
+docker compose -f docker/compose.yml --profile lab02 restart lab02-target
+docker compose -f docker/compose.yml --profile lab02 ps
+```
+
+Wait for `healthy` before trying again. Restarting the same image preserves
+the keys, so your supplied Part 5 ciphertext remains usable.
+
+## Tests
+
+Run the lightweight public checks inside the course container at
+`/workspace/labs/lab02`:
+
+```console
+make test
+```
+
+After completing one Part, select only that Part's implementation checks. For
+example, after Part 1:
+
+```console
+make grade PART=1
+```
+
+Use `PART=1` through `PART=7`. This does not require implementing later Parts.
+After completing all seven Parts, run all implementation checks:
+
+```console
+make grade
+```
+
+`make test` remains useful while exercise files are empty; implementation checks
+are skipped in that mode. `make grade` exercises the completed Part 1–7
+functions with obvious test-only values and does not reveal the lab flags.
+
+The files in `tests/` provide these checks and their supporting code:
+
+| File | Role |
+| --- | --- |
+| [`test_des_primitives.py`](../../../labs/lab02/tests/test_des_primitives.py) | Checks shared DES key generation, odd parity, encryption/decryption, and invalid input handling. |
+| [`test_service_interface.py`](../../../labs/lab02/tests/test_service_interface.py) | Checks the configured target service name and port without connecting to a server. |
+| [`test_exercises.py`](../../../labs/lab02/tests/test_exercises.py) | Checks the functions implemented in Parts 1–7 when you run `make grade`. |
+| [`_load_impl.py`](../../../labs/lab02/tests/_load_impl.py) | Loads the selected Part's student implementation for testing; instructors can also select a private reference implementation. |
+| [`__init__.py`](../../../labs/lab02/tests/__init__.py) | Makes the `tests` directory a Python package so its helper modules can be imported. |
+
+These checks use public vectors and synthetic test data. The automated checks
+for Parts 4–6 use local test packets and in-memory oracle or service substitutes,
+so you do not need to start `lab02-target` to run them. Running the actual
+Parts 4–6 exercises still requires the target container described in Setup.
+
+The tests check individual functions rather than running each Part's complete
+command-line program or verifying its challenge flag. Use both the tests and
+the Part's README instructions to check your completed exercise. You do not
+need to edit the test files to complete the lab.

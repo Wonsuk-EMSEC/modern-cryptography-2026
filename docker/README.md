@@ -1,10 +1,12 @@
-# Course Docker environment
+**한국어** | [English](../en/docker/README.md)
 
-All labs use one student environment: `docker/Dockerfile` builds the
-`modern-cryptography-2026` image, and `docker/compose.yml` runs it as `course`.
-Keep the programming tools and Python dependencies for the labs in that
-Dockerfile. A Part that needs a separate server adds a target Dockerfile in
-its own subdirectory and a service in the same Compose file.
+# 수업용 Docker 환경
+
+모든 실습은 하나의 학생용 환경을 사용합니다. `docker/Dockerfile`이
+`modern-cryptography-2026` 이미지를 빌드하고, `docker/compose.yml`이 이를 `course`로
+실행합니다. 실습에 필요한 프로그래밍 도구와 Python 의존성은 이 Dockerfile에서 관리합니다.
+별도 서버가 필요한 Part는 자체 하위 디렉토리에 대상용 Dockerfile을 추가하고,
+동일한 Compose 파일에 서비스를 등록합니다.
 
 ```text
 docker/
@@ -19,9 +21,9 @@ docker/
     └── README.md
 ```
 
-## Build once and use for any lab
+## 한 번 빌드하여 모든 실습에서 사용하기
 
-Run Docker commands in the host terminal from the repository root:
+호스트 터미널의 저장소 루트에서 Docker 명령을 실행합니다.
 
 ```console
 docker compose -f docker/compose.yml build course
@@ -29,98 +31,92 @@ docker compose -f docker/compose.yml up -d course
 docker compose -f docker/compose.yml exec course bash
 ```
 
-Inside the shell, choose a lab, for example `cd /workspace/labs/lab02`.
-The repository is mounted at `/workspace`, so edits are saved on the host.
-Run `exit` to leave the shell; `course` continues running for the next session.
-Rebuild the common image when its Dockerfile changes, then run `up -d course`
-again to apply the updated image.
+셸 안에서 실습을 선택합니다. 예를 들어 `cd /workspace/labs/lab02`를 실행합니다.
+저장소가 `/workspace`에 마운트되므로 수정 사항은 호스트에 저장됩니다.
+`exit`로 셸에서 나와도 `course`는 다음 작업을 위해 계속 실행됩니다.
+공통 Dockerfile이 변경되면 이미지를 다시 빌드한 뒤 `up -d course`를 다시 실행하여
+갱신된 이미지를 적용합니다.
 
-## Use VS Code with the course container
+## VS Code를 수업용 컨테이너에 연결하기
 
-Follow the [common VS Code instructions](../README.md#use-vs-code-with-the-course-container):
-open the **repository root** and run **Dev Containers: Reopen in Container**.
-The repository's `.devcontainer/devcontainer.json` uses the same `course`
-service and `/workspace` mount. It installs the Python extensions in the
-container and sets `/opt/course-venv/bin/python3` as the default interpreter.
-Use this connected window for editing, Python run/debug, and integrated
-terminals across all labs. If VS Code already saved a different interpreter,
-follow the common guide to correct that selection once.
+[공통 VS Code 안내](../README.md#use-vs-code-with-the-course-container)에 따라
+**저장소 루트**를 열고 **Dev Containers: Reopen in Container**를 실행합니다.
+저장소의 `.devcontainer/devcontainer.json`은 동일한 `course` 서비스와 `/workspace`
+마운트를 사용합니다. 컨테이너에 Python 확장을 설치하고 기본 인터프리터를
+`/opt/course-venv/bin/python3`로 설정합니다. 모든 실습의 편집, Python 실행·디버깅,
+통합 터미널 작업은 이 연결된 창에서 진행하세요. VS Code에 다른 인터프리터가 이미 저장되어
+있다면 공통 안내에 따라 한 번 수정합니다.
 
-`docker compose ... exec course bash` opens only a shell. It does not connect
-a host VS Code window to the container. Dev Containers starts only `course`;
-start optional target services separately from a **host terminal** as below.
-Closing the VS Code window leaves the shared course container running.
+`docker compose ... exec course bash`는 셸만 엽니다. 호스트의 VS Code 창을 컨테이너에
+연결하지는 않습니다. Dev Containers는 `course`만 시작합니다. 선택적인 대상 서비스는
+아래와 같이 **호스트 터미널**에서 별도로 시작하세요.
+VS Code 창을 닫아도 공용 수업 컨테이너는 계속 실행됩니다.
 
-## Start an extra service only when needed
+## 필요할 때만 추가 서비스 시작하기
 
-The targets use Compose profiles and do not start with the plain course
-command. Run these commands on the host, using the same Compose file.
+대상 서비스는 Compose 프로필을 사용하므로 기본 수업 컨테이너 명령으로는 시작되지 않습니다.
+호스트에서 동일한 Compose 파일을 사용해 다음 명령을 실행합니다.
 
-For Lab01 Part 2, build and start the supplied SSH server:
+Lab01 Part 2에서는 제공된 SSH 서버를 빌드하고 시작합니다.
 
 ```console
 docker compose -f docker/compose.yml --profile lab01-ssh up -d --build --wait lab01-ssh-target
 ```
 
-See [lab01-ssh-target/README.md](lab01-ssh-target/README.md) for the target's
-build files, course-shell entry, and shutdown command.
+대상의 빌드 파일, 수업용 셸 진입, 종료 명령은
+[lab01-ssh-target/README.md](lab01-ssh-target/README.md)를 참고하세요.
 
-For Lab02 Parts 4–6, start the common course container and the prebuilt target:
+Lab02 Part 4–6에서는 공용 수업 컨테이너와 미리 빌드된 대상을 시작합니다.
 
 ```console
 docker compose -f docker/compose.yml --profile lab02 up -d --wait course lab02-target
 docker compose -f docker/compose.yml --profile lab02 ps
 ```
 
-Compose automatically pulls the public GHCR image
-`ghcr.io/wonsuk-emsec/modern-cryptography-2026-lab02-target:2026-lab02-v1`
-when needed. The first `up` may take longer while it downloads the image;
-no manual image download or registry login is needed. Students do not build
-this target locally. Use the Lab02 files and image from the same
-**`2026-lab02-v1`** release: Part 5's ciphertext must match the target image.
-The target should appear as `healthy` in `ps`.
+필요하면 Compose가 공개 GHCR 이미지
+`ghcr.io/wonsuk-emsec/modern-cryptography-2026-lab02-target:2026-lab02-v1`을 자동으로
+내려받습니다. 처음 `up`을 실행할 때는 이미지 다운로드로 시간이 더 걸릴 수 있습니다.
+수동 이미지 다운로드나 레지스트리 로그인은 필요하지 않습니다. 학생은 이 대상을 로컬에서
+빌드하지 않습니다. Lab02 파일과 이미지는 같은 **`2026-lab02-v1`** 릴리스를 사용하세요.
+Part 5의 암호문은 대상 이미지와 일치해야 합니다. `ps`에서 대상이 `healthy`로 표시되어야 합니다.
 
-Use the same `course` shell to run both labs. It can reach each target by its
-service name. Each target is on its own internal network, and neither target
-publishes a host port. Server runtime data lives in its target container.
+같은 `course` 셸로 두 실습을 모두 실행합니다. 각 대상에 서비스 이름으로 접근할 수 있습니다.
+각 대상은 자체 내부 네트워크에 있으며 호스트 포트를 공개하지 않습니다.
+서버 실행 데이터는 해당 대상 컨테이너에 저장됩니다.
 
-The Lab02 target's build recipe is public; its Python server and secret data
-are excluded from the student source release. The image contains the private
-implementation and secrets needed at runtime and can be inspected by anyone
-with local access to it. Solve the exercises through the supplied clients.
-See [lab02-target/README.md](lab02-target/README.md) for the staff image
-publication workflow.
+Lab02 대상의 빌드 방법은 공개되어 있지만 Python 서버와 비밀 데이터는 학생용 소스 배포에서
+제외됩니다. 이미지에는 실행에 필요한 비공개 구현과 비밀값이 포함되어 있으며,
+이미지에 로컬 접근 권한이 있는 사람은 이를 살펴볼 수 있습니다.
+실습은 제공된 클라이언트를 통해 해결하세요. 교직원의 이미지 게시 절차는
+[lab02-target/README.md](lab02-target/README.md)를 참고하세요.
 
-To stop just the Lab02 target while keeping the course shell and Lab01 server:
+수업용 셸과 Lab01 서버를 유지하면서 Lab02 대상만 중지하려면 다음을 실행합니다.
 
 ```console
 docker compose -f docker/compose.yml --profile lab02 stop lab02-target
 ```
 
-To finish a Lab02 session and remove its target, the course container, and
-their networks:
+Lab02 작업을 마치고 대상, 수업 컨테이너와 해당 네트워크를 제거하려면 다음을 실행합니다.
 
 ```console
 docker compose -f docker/compose.yml --profile lab02 down
 ```
 
-Use the target-only `stop` command above if you want to keep the course
-container available for other labs.
+다른 실습을 위해 수업 컨테이너를 유지하려면 위의 대상 전용 `stop` 명령을 사용합니다.
 
-When finished with **all** labs, remove the course container, both targets,
-and their networks:
+**모든** 실습을 마쳤다면 수업 컨테이너, 두 대상과 해당 네트워크를 제거합니다.
 
 ```console
 docker compose -f docker/compose.yml --profile lab01-ssh --profile lab02 down
 ```
 
-## Adding a future lab
+## 이후 실습 추가하기
 
-1. Add any student tools or libraries to the common `Dockerfile`.
-2. If a Part needs a server, add `labXX-target/Dockerfile` and the required
-   non-secret build files. Keep private source and values under `instructor/`.
-3. Add an optional target service and its internal network to `compose.yml`,
-   and attach `course` to that network. Use `build:` for student-buildable
-   targets or `image:` for targets supplied as prebuilt images.
-4. Document target startup and shutdown in the Part README. Check the new lab
-   and the existing labs in the common image.
+1. 학생에게 필요한 도구나 라이브러리를 공통 `Dockerfile`에 추가합니다.
+2. Part에 서버가 필요하면 `labXX-target/Dockerfile`과 비밀이 아닌 필수 빌드 파일을
+   추가합니다. 비공개 소스와 값은 `instructor/` 아래에 유지합니다.
+3. `compose.yml`에 선택적인 대상 서비스와 내부 네트워크를 추가하고 `course`를 그
+   네트워크에 연결합니다. 학생이 빌드할 수 있는 대상에는 `build:`를, 미리 빌드된 이미지로
+   제공하는 대상에는 `image:`를 사용합니다.
+4. Part README에 대상 시작 및 종료 방법을 설명합니다. 공통 이미지에서 새 실습과
+   기존 실습을 모두 검증합니다.

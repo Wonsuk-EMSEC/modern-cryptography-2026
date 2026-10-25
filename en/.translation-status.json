@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "documents": {
+    "CONTRIBUTING.md": {
+      "korean_sha256": "ef9b1579986c2e7bbe12a713fdbec39ce6915f4348d8f1b0fdd0b6ffb0008c1d",
+      "english_sha256": "f700f0302b05a9c20f1a472a561c6938a218478ac76b1a0ca268720b82b2acf2"
+    },
+    "README.md": {
+      "korean_sha256": "71ddaba77538197cf8883dd5f582cb95ac67d32067dd307878756377de3581af",
+      "english_sha256": "9aea8f0197cd94e22cd145cabb7a1ea3daebe8a189f50691b6e048a5ec2c45f8"
+    },
+    "docker/README.md": {
+      "korean_sha256": "884fae29900b7da2bb774ec2603b8fb0efd3f157ad8dd1e40943c1866d357c34",
+      "english_sha256": "93d3ae5288640cc71c170daf9f3da5801b6164b709ca597bb020cbf9ecfd4d3c"
+    },
+    "docker/lab01-ssh-target/README.md": {
+      "korean_sha256": "9bc6fd73c9fe06ddbf626c5c22ee5a71d014ee53a655a6e4c2220aa9fe3ae783",
+      "english_sha256": "a02417b9e5f4f94ea19810db5715038ad677ebbe3b8562bab41ac64e7800dea3"
+    },
+    "docker/lab02-target/README.md": {
+      "korean_sha256": "2f25caf9ba1be74d54d7624da1042e3cd00ce36537693ea9516a0dabc995b2ea",
+      "english_sha256": "df97b8afd733c93b1107747fc06a8a4a6a62f81588a6a0101be70a5c549f2a53"
+    },
+    "labs/lab01/README.md": {
+      "korean_sha256": "3e9243157151f385f03ac042e477cc6b6ed7e9b62ff362856c24b7dce7918582",
+      "english_sha256": "54e4ff56d246afaa0646cfb9160d2406f79b0875bf072943e1b9b943f2976dd1"
+    },
+    "labs/lab01/common/README.md": {
+      "korean_sha256": "e847882e70b1a7200d834c0184fa502184836e390ec04b9d894d2ff5e87978f9",
+      "english_sha256": "2e22b49de9471e34a11edba25bbef20b1404cd1f6654e3bffca3ac08fd820126"
+    },
+    "labs/lab01/part1_hashing/README.md": {
+      "korean_sha256": "a19cfed656e3bc16fe19864e0ae1c8c99706f56e7d48dea2623a8b0d0bac1327",
+      "english_sha256": "11d0776f5e87bed930a1c43e5478bad1eda6c9b9b4bd850916ba56842940a375"
+    },
+    "labs/lab01/part1_hashing/data/README.md": {
+      "korean_sha256": "ce54e6708fad8d21f7135eae31f060183b3273ac33786cf0f4be9bc037cb461e",
+      "english_sha256": "0580f5af8ce34614d4c636eeb73290f753fc49ed2a396d2a7bb5869a7892bf73"
+    },
+    "labs/lab01/part2_dictionary_attack/README.md": {
+      "korean_sha256": "466f80008bda5ab045b30d2baaca14631ac273b87621b15f76cbcf6e90b8b776",
+      "english_sha256": "18ca991cc0461fa0cbc1510dfbc4a988af579d53d50dafb5e60ec68f68589d4d"
+    },
+    "labs/lab01/part2_dictionary_attack/data/README.md": {
+      "korean_sha256": "4cc775bded3224bfdf0ad9a52a1fac2f248e981716d12cc61a1380d3744ed0cf",
+      "english_sha256": "396ac846b4b656c7411a77f784209092d882d5e9e362e61d486bcbfeb08e3ed9"
+    },
+    "labs/lab01/part3_password_kdfs/README.md": {
+      "korean_sha256": "363623f884fb390744ad0871d906a7f5c4eb6125d2dedf031733a978c4f09a09",
+      "english_sha256": "de2cc02dbcf63225201e8cb4ccee5831cd3646a1a198e3e3ae99a6570386e311"
+    },
+    "labs/lab01/part3_password_kdfs/data/README.md": {
+      "korean_sha256": "ba3bab0d85e50e797a62efaabcb11db42383432dd7c6c742fef9e0fbf0fc356d",
+      "english_sha256": "afa069f4e9daedf95940dbeeddd6017f916e7c90e2878e1c242ee80a6060c77e"
+    },
+    "labs/lab01/part4_system_hashes/README.md": {
+      "korean_sha256": "60de7a07dad0ffeb22fe271ea33ebf43975be8d6dfe4f485d3cbeb4b6efb4064",
+      "english_sha256": "1ae7ded555dc96dacab5bc3ff76e3683d6812f528a26c897d7cb6dbc0c8d77af"
+    },
+    "labs/lab01/part4_system_hashes/data/README.md": {
+      "korean_sha256": "10e031c0db9d370169cb40286d843eaa9e780ab2832df4c0f8480d3d7aeea1de",
+      "english_sha256": "589253436e695d9a39ed1ba075bba6865e24dd5545404281a870e8d9028777d9"
+    },
+    "labs/lab01/part5_wpa2/CAPTURE_WORKSHEET.md": {
+      "korean_sha256": "176ae3583836436a2b1cebf7737ec80188d79f26eed3b921e202a741db742179",
+      "english_sha256": "e80d6dfe12c73b72041185b7abd5b6467aeb09e7ad12ac4043d81c0898e8da28"
+    },
+    "labs/lab01/part5_wpa2/README.md": {
+      "korean_sha256": "b5d11a35927fce9be7da049265f44666f79a728d3ab918b87fbcb020cd639422",
+      "english_sha256": "6d3dc96286c8ae46346e8de0e72eda9abe0066c5e9984d7a8b6a5f2ec723d671"
+    },
+    "labs/lab01/part5_wpa2/data/README.md": {
+      "korean_sha256": "90dcc51c0e1d14a0c2bdc56a717bd373652cadd106b86cc68e408ce1d8c0174e",
+      "english_sha256": "60a484181c5357c01986fb4b295cd06bf7a230921c7ff15c44326ae4b5f43d69"
+    },
+    "labs/lab01/part5_wpa2/data/wpa2/PLACE_PCAP_HERE.md": {
+      "korean_sha256": "6998cb8c9fe6fc7b0a9e7301e8d36e2ab5a89c483d8f63aa7604566a69ef162e",
+      "english_sha256": "20308b8ef035338d29653ea46aa267dac81179a7556191b2eca2a5fd024d3d96"
+    },
+    "labs/lab02/README.md": {
+      "korean_sha256": "a169dfbee4a9326d27071f4e80136cbea800f23fabf7928341ea87b2a92a9ce9",
+      "english_sha256": "1aced863155c337a25cab8bda46d7958abe3f45469b75eb1c39baa20ff3cce15"
+    },
+    "labs/lab02/part1_des_bruteforce/README.md": {
+      "korean_sha256": "ed086cfad1bbdd1d0e420d110a042d3b5fb20969d343c16fd2bc4b98552535dc",
+      "english_sha256": "84783a1c17c390df546689f49fc6410ab5fae8167955b50541b885932b12ef07"
+    },
+    "labs/lab02/part2_double_des_mitm/README.md": {
+      "korean_sha256": "0bf15d18d315f6f2f87f2b3dc622f43bf8f528f097239e1c94b0a3ddf8394ed0",
+      "english_sha256": "6c342a2f2230ea61ec5de8ac64563383da96918211f42548b4dded24650d7dd7"
+    },
+    "labs/lab02/part3_aes_cbc_pkcs7/README.md": {
+      "korean_sha256": "fca0e138add0fec99ec65f7941ec4f0a20cc35f57b01b461439d7b7ceef1ff53",
+      "english_sha256": "bfbacab6c513b2c58d0322e58ddbd6f9fb152e3dea2daf3cb6fb8fcf681e51af"
+    },
+    "labs/lab02/part4_cbc_bit_flipping/README.md": {
+      "korean_sha256": "8719fe5939af02bce06746cda75e302e298f347eaf48cd6b5905916c3525f920",
+      "english_sha256": "80683d504176bc07795f98afa15495096a6d901e29d8a485e9fa221af4429233"
+    },
+    "labs/lab02/part5_padding_oracle/README.md": {
+      "korean_sha256": "c51550d1eaad2b82a755b78f4ed006556ea351f9d1282158f891e82a976fa900",
+      "english_sha256": "f126e47db68a4dc27ab2b08cbc7e804d52acf7ad273cf6b100b627ee26a20af0"
+    },
+    "labs/lab02/part6_mte_vs_etm/README.md": {
+      "korean_sha256": "50e13a39d291dd25cb61931d515e1dc9781abf08f51cf1174b0123f0842d4c44",
+      "english_sha256": "f649d100266326c354109ec2f8ab964c68480cc268d6717cc280aca187a1a964"
+    },
+    "labs/lab02/part7_aes_cpa/README.md": {
+      "korean_sha256": "d3ed43439929ec4d26ae921587330c4fc0f3ab996d2852bf2f68602d4069fdb2",
+      "english_sha256": "e8e4815cb84a7bb33b1f26ad9014761ae1a6f3d11f6bc47db3349b0188454c74"
+    }
+  }
+}
