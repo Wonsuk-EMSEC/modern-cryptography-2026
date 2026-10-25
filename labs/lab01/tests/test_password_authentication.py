@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).parents[1]
+PART1_IMPL = Path(os.environ.get("LAB01_PART1_IMPL", ROOT / "part1_hashing"))
 PART5_IMPL = Path(os.environ.get("LAB01_PART5_IMPL", ROOT / "part5_wpa2"))
 
 
@@ -14,29 +15,30 @@ def load(path):
     spec.loader.exec_module(module); return module
 
 
+@pytest.mark.skipif(not os.environ.get("LAB01_GRADE"), reason="implement the Part 1 functions first")
 def test_hash_and_salt():
-    h = load(ROOT / "part1_hashing/hash_password.py")
-    s = load(ROOT / "part1_hashing/salted_hash.py")
+    h = load(PART1_IMPL / "hash_password.py")
+    s = load(PART1_IMPL / "salted_hash.py")
     assert len(h.hash_password("fictional")) == 64
     assert s.salted_hash("fictional", b"a" * 16) != s.salted_hash("fictional", b"b" * 16)
 
 
 def test_register_verifier_success_and_failure():
-    auth = load(ROOT / "part3_password_kdfs/register_login_demo.py")
+    auth = load(ROOT / "part3_password_kdfs/samples/register_login_demo.py")
     verifier = auth.derive("fictional", b"0" * 16, 1000)
     assert verifier == auth.derive("fictional", b"0" * 16, 1000)
     assert verifier != auth.derive("incorrect", b"0" * 16, 1000)
 
 
 def test_shadow_parser():
-    parser = load(ROOT / "part4_system_hashes/analyze_shadow_hash.py")
-    row = parser.parse_record((ROOT / "data/linux_hashes.txt").read_text())
+    parser = load(ROOT / "part4_system_hashes/samples/analyze_shadow_hash.py")
+    row = parser.parse_record((ROOT / "part4_system_hashes/data/linux_hashes.txt").read_text())
     assert row["id"] == "6" and row["account"].startswith("student_")
 
 
-@pytest.mark.skipif(not os.environ.get("LAB01_GRADE"), reason="complete Part 5 TODOs first")
+@pytest.mark.skipif(not os.environ.get("LAB01_GRADE"), reason="implement the Part 5 functions first")
 def test_wpa2_fixture_has_one_dictionary_match():
     verifier = load(PART5_IMPL / "verify_candidate.py")
-    row = json.loads((ROOT / "data/wpa2_capture.json").read_text())
-    words = (ROOT / "data/lab01-small.txt").read_text().splitlines()
+    row = json.loads((ROOT / "part5_wpa2/data/wpa2_capture.json").read_text())
+    words = (ROOT / "part5_wpa2/data/wpa2_passwords.txt").read_text().splitlines()
     assert sum(verifier.verify(word, row) for word in words) == 1

@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 PART_DIR = Path(__file__).resolve().parent
-DATA_DIR = PART_DIR.parent / "data"
+DATA_DIR = PART_DIR / "data"
 IMPLEMENTATION_DIR = Path(os.environ.get("LAB01_PART5_IMPL", PART_DIR))
 COMPLETION_TESTS = bool(os.environ.get("LAB01_GRADE"))
 
@@ -32,7 +32,7 @@ def load_record() -> dict[str, str]:
 
 
 class SuppliedDataTests(unittest.TestCase):
-    """Checks that run before students complete any TODO."""
+    """Checks that run before students write the empty exercise file."""
 
     def test_metadata_has_required_lengths(self) -> None:
         record = load_record()
@@ -50,7 +50,7 @@ class SuppliedDataTests(unittest.TestCase):
         self.assertEqual(capture[:4], b"\xd4\xc3\xb2\xa1")
 
 
-@unittest.skipUnless(COMPLETION_TESTS, "set LAB01_GRADE=1 after completing the TODOs")
+@unittest.skipUnless(COMPLETION_TESTS, "set LAB01_GRADE=1 after writing the functions")
 class CompletedImplementationTests(unittest.TestCase):
     """Behavior checks enabled after the implementation is complete."""
 
@@ -102,7 +102,7 @@ class CompletedImplementationTests(unittest.TestCase):
         self.assertNotEqual(mic, changed)
 
     def test_dictionary_contains_exactly_one_match(self) -> None:
-        words = (DATA_DIR / "lab01-small.txt").read_text(encoding="utf-8").splitlines()
+        words = (DATA_DIR / "wpa2_passwords.txt").read_text(encoding="utf-8").splitlines()
         self.assertEqual(sum(self.verifier.verify(word, self.record) for word in words), 1)
 
 

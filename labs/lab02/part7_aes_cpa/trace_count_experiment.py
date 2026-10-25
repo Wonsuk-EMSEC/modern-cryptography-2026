@@ -8,18 +8,20 @@ from pathlib import Path
 
 import numpy as np
 
-try:
-    from .starter import recover_key_byte
-except ImportError:  # pragma: no cover - direct execution.
-    from starter import recover_key_byte
-
-
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--byte", type=int, default=0, dest="byte_index")
     parser.add_argument("--counts", type=int, nargs="+",
                         default=[10, 25, 50, 100, 200, 400, 550])
     args = parser.parse_args()
+    # Defer student-code imports so --help works before the exercise is written.
+    try:
+        if __package__:
+            from .aes_cpa import recover_key_byte
+        else:
+            from aes_cpa import recover_key_byte
+    except ImportError:
+        parser.error("implement recover_key_byte() in aes_cpa.py before running this experiment")
     data = Path(__file__).with_name("data")
     plaintexts = np.load(data / "plaintexts.npy", allow_pickle=False)
     traces = np.load(data / "traces.npy", allow_pickle=False)

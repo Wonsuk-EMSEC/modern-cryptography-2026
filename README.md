@@ -15,6 +15,8 @@ or third-party networks. Lab-specific restrictions appear in each lab README.
 - `labs/`: Hands-on laboratory exercises
 - `instructor/`: Instructor materials
 
+Lab instructions: [Lab 01](labs/lab01/README.md) · [Lab 02](labs/lab02/README.md)
+
 ## Environment
 
 All exercises are intended to run inside the provided Docker environment.
@@ -28,8 +30,8 @@ work in this Git repository.
 Every lab uses the same `docker/Dockerfile` and the `course` service in
 `docker/compose.yml`. Parts that need an extra server use a target Dockerfile
 under `docker/`, such as `lab01-ssh-target/` or `lab02-target/`. Start those
-services only when the Part requires them. See [the Docker layout and service
-commands](docker/README.md) for details; Lab02 uses an instructor-supplied
+services only when the Part requires them. See [the Docker layout and service commands](docker/README.md)
+for details; Lab02 uses an instructor-supplied
 target image that Compose automatically pulls from public GHCR; its server
 implementation and secrets are excluded from the student source release but
 are present in the locally inspectable runtime image.
@@ -185,7 +187,7 @@ environment as the course terminal. Complete steps 1–3 above first, then:
    configuration sets this as the default Python interpreter and puts the
    same environment first on the VS Code terminal's `PATH`.
 
-For a first check, open `labs/lab02/part1_des_bruteforce/des_demo.py` and
+For a first check, open `labs/lab02/part1_des_bruteforce/samples/des_roundtrip.py` and
 choose **Python: Run Python File in Terminal** from the Command Palette.
 It should print `Padding round-trip check: OK`. Use the Python extension's
 run command for these examples. For debugging, use **Python Debugger: Debug
@@ -293,22 +295,3 @@ running.
   container are lost when it is removed or recreated.
 - Normally, edit files in the host Git repository and use Docker to run and
   test them.
-
-### Direct local Python setup (alternative)
-
-Docker is the supported and reproducible course environment. If Docker cannot
-be used, Python 3.12 users may create a virtual environment and install the
-Lab 01 Python requirements locally:
-
-```console
-python3 -m venv .venv
-source .venv/bin/activate
-python3 -m pip install -r labs/lab01/requirements.txt
-cd labs/lab01
-pytest -q
-```
-
-In PowerShell, activate with `.venv\Scripts\Activate.ps1`. This alternative
-does not install optional system tools such as John the Ripper or aircrack-ng;
-do not install them unless the instructor explicitly requires those optional
-exercises.

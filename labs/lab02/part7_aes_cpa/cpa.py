@@ -1,24 +1,23 @@
 #!/usr/bin/env python3
-"""Compatibility entry point for the Part 7 CPA starter.
-
-The TODO implementation lives in :mod:`starter`, matching the other Lab02
-parts.  This filename is provided because the Part description calls the
-student attack program ``cpa.py``.
-"""
+"""Compatibility entry point for the student-written aes_cpa.py program."""
 
 from __future__ import annotations
 
-try:
-    from .starter import (decrypt_flag, hamming_weight, hypothesis_matrix,
-                          load_data, main, pearson_correlations,
-                          plot_sample_correlations,
-                          recover_full_key, recover_key_byte, save_plots)
-except ImportError:  # pragma: no cover - direct script execution.
-    from starter import (decrypt_flag, hamming_weight, hypothesis_matrix,
-                         load_data, main, pearson_correlations,
-                         plot_sample_correlations,
-                         recover_full_key, recover_key_byte, save_plots)
+from importlib import import_module
+
+
+def __getattr__(name: str):
+    """Resolve old imports only when completed student code is actually used."""
+    module = import_module(".aes_cpa", __package__) if __package__ else import_module("aes_cpa")
+    try:
+        return getattr(module, name)
+    except AttributeError:
+        raise AttributeError(f"implement {name} in aes_cpa.py first") from None
 
 
 if __name__ == "__main__":
+    try:
+        main = __getattr__("main")
+    except AttributeError as error:
+        raise SystemExit(str(error)) from None
     main()

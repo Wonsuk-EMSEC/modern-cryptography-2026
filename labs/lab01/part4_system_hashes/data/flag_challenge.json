@@ -1,0 +1,11 @@
+{
+  "algorithm": "AES-256-GCM",
+  "challenge": {
+    "proof_format": "canonical-account-json"
+  },
+  "ciphertext_hex": "e69083936e73e6d91281dd838ae8c9efe43f6c0d2599974129a77241cd12743ec4e6745d37fa936a7b8a2413e84a916c8771aceabd8dc5c817839120a8690e0a",
+  "nonce_hex": "1e016ac2c95d81f906c1ab8d",
+  "part": "part4_system_hashes",
+  "tag_hex": "dd564a92a25b29826efe489735e6c826",
+  "version": 1
+}

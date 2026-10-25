@@ -3,7 +3,7 @@
 Name:
 Date:
 
-Use only `../data/wpa2/lab01-handshake.pcap`. Complete this worksheet by reading
+Use only `data/wpa2/lab01-handshake.pcap`. Complete this worksheet by reading
 the Wireshark or TShark decoded packet tree. Do not use a Python parser or an
 automated field-export command. Do not record the recovered passphrase.
 

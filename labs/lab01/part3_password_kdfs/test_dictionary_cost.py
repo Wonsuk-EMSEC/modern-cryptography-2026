@@ -1,4 +1,4 @@
-"""Public tests for the Part 3 salted and unsalted cracking starters."""
+"""Fixture and opt-in behavior checks for the Part 3 student programs."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-LAB_ROOT = Path(__file__).resolve().parents[1]
+PART_DIR = Path(__file__).resolve().parent
 
 
 def load_implementation(name: str):
@@ -24,13 +24,9 @@ def load_implementation(name: str):
     return module
 
 
-crack_salted = load_implementation("crack_salted")
-crack_unsalted = load_implementation("crack_unsalted")
-
-
 class DictionaryFixtureTests(unittest.TestCase):
     def test_supplied_database_schemas(self) -> None:
-        data = LAB_ROOT / "data"
+        data = PART_DIR / "data"
         with (data / "unsalted_hashes.csv").open(newline="", encoding="utf-8") as stream:
             unsalted_fields = csv.DictReader(stream).fieldnames
         with (data / "salted_hashes.csv").open(newline="", encoding="utf-8") as stream:
@@ -39,7 +35,7 @@ class DictionaryFixtureTests(unittest.TestCase):
         self.assertEqual(salted_fields, ["account", "salt_hex", "sha256"])
 
 
-@unittest.skipUnless(os.environ.get("LAB01_GRADE"), "complete both crack() TODOs first")
+@unittest.skipUnless(os.environ.get("LAB01_GRADE"), "write both crack() functions first")
 class CompletedDictionaryTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory()
@@ -51,6 +47,7 @@ class CompletedDictionaryTests(unittest.TestCase):
         self.temporary.cleanup()
 
     def test_unsalted_attack_reuses_candidate_hashes(self) -> None:
+        crack_unsalted = load_implementation("crack_unsalted")
         targets = self.directory / "unsalted.csv"
         targets.write_text(
             "account,sha256\n"
@@ -64,6 +61,7 @@ class CompletedDictionaryTests(unittest.TestCase):
         self.assertGreater(elapsed, 0)
 
     def test_salted_attack_computes_for_each_account(self) -> None:
+        crack_salted = load_implementation("crack_salted")
         salt_one = b"fixture-salt-01"
         salt_two = b"fixture-salt-02"
         digest_one = hashlib.sha256(salt_one + b"beta").hexdigest()

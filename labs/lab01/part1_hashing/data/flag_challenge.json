@@ -1,0 +1,13 @@
+{
+  "algorithm": "AES-256-GCM",
+  "challenge": {
+    "input": "Cryptography class public challenge 2026",
+    "proof_format": "unsalted_hex:salted_hex",
+    "salt_hex": "6c616230312d7075626c696373616c7421"
+  },
+  "ciphertext_hex": "ff8ff005d7a7da69c2bf6e7ba3aa97ae6ad55d7205997066c8af735d29e2367131c6d0f049b99bc87f029156c477af654074862982a32e777c41",
+  "nonce_hex": "d629b2dcd3e890704224b383",
+  "part": "part1_hashing",
+  "tag_hex": "70dff9c72176c6c61d34a80b39f56ae8",
+  "version": 1
+}

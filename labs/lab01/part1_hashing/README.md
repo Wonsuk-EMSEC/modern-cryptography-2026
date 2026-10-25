@@ -1,154 +1,213 @@
 # Part 1: Hash and salt
 
-**Ethical and authorized use:** enter only fictional passwords made for this
-lab. Never place a real password in source code, shell history, or screenshots.
+Use only fictional classroom passwords. All commands below run inside the course
+Docker container. Raw SHA-256 and `SHA256(salt || password)` demonstrate mechanics;
+production password storage requires a password KDF, which Part 3 introduces.
 
-Run `python3 hash_password.py` twice with the same input, then run
-`python3 salted_hash.py` twice. SHA-256 is one-way hashing, not encryption:
-there is no decryption key. Observe that unsalted digests repeat, while random
-salts change the demonstration verifier.
+## Learning objectives and provided files
 
-These constructions teach mechanics only. Neither raw SHA-256 nor
-`SHA256(salt || password)` is appropriate production password storage.
+Learn to encode strings as UTF-8, distinguish hashing from encryption, recognize
+deterministic digests, and explain the role and limitations of public salts.
+Hashing has no decryption key. A salt prevents shared precomputation across
+accounts; it neither strengthens a weak password nor makes each guess slow.
 
-## Part 1 at a glance
+| File | Role |
+| --- | --- |
+| `samples/hash_bytes_demo.py` | Complete public message-hashing example |
+| `samples/salt_bytes_demo.py` | Complete public salt, hex, and byte-concatenation example |
+| `hash_password.py` | Empty student exercise file |
+| `salted_hash.py` | Empty student exercise file |
+| `test_hashing.py` | Baseline and opt-in implementation checks |
+| `data/` | Optional MD5 collision fixtures, separate from these tasks |
+| `samples/flag_unlock_demo.py` | Public helper-usage example; no Part answer |
+| `data/flag_challenge.json` | Encrypted completion flag, opened by the experiment result |
 
-```mermaid
-flowchart LR
-    P1[Same password] --> H1[SHA-256]
-    P1 --> H2[SHA-256]
-    H1 --> D1[Same digest]
-    H2 --> D1
+The exercise files contain no imports, functions, or execution code. Write all
+of them yourself. Keep executable work inside `main()` and call it only under
+`if __name__ == "__main__":`, so importing a function never prompts for input.
 
-    P2[Same password] --> S1[Combine with random salt A]
-    P2 --> S2[Combine with random salt B]
-    S1 --> V1[Different verifier A]
-    S2 --> V2[Different verifier B]
-
-    classDef input fill:#e8f1ff,stroke:#4676b8,color:#172b4d
-    classDef process fill:#fff3cd,stroke:#c69500,color:#4d3b00
-    classDef result fill:#e7f7ed,stroke:#3a8f5c,color:#153d26
-    class P1,P2 input
-    class H1,H2,S1,S2 process
-    class D1,V1,V2 result
-```
-
-## Purpose and learning objectives
-
-This part introduces the value a server can compare during login without
-keeping a plaintext password. It deliberately starts with fast SHA-256 so that
-the basic transformation is easy to observe. Part 3 later replaces this unsafe
-baseline with dedicated password KDFs.
-
-After completing this part, you should be able to:
-
-- describe the difference between plaintext storage, encryption, and hashing;
-- encode a Python string as UTF-8 before hashing it;
-- explain why the same unsalted input always has the same digest;
-- explain why a random, unique salt changes the verifier; and
-- state why salt plus fast SHA-256 is still not production password storage.
-
-## Background
-
-During registration, a service computes a verifier from a password and stores
-the verifier. During login, it repeats the computation with the submitted
-password and compares the results. Hashing is one-way: unlike encryption, it
-does not have a decryption key that recovers the original password.
-
-```text
-Unsalted demonstration:
-UTF8(password) -> SHA-256 -> 32-byte digest -> 64 hexadecimal characters
-
-Salted demonstration:
-random 16-byte salt || UTF8(password) -> SHA-256 -> digest
-store: salt + digest
-```
-
-The salt is public. Its job is to make identical passwords produce different
-stored values and to prevent one precomputed table from serving every account.
-It does not add entropy to a weak password and does not slow down each guess.
-
-## Tasks
-
-1. Run `hash_password.py` twice with the same fictional input and save both
-   digests.
-2. Run it once with a different input and compare the digest.
-3. Run `salted_hash.py` twice with the original fictional input and save both
-   salt/digest pairs.
-4. Identify which values remain equal and which change.
-5. Run `test_hashing.py` and explain what each assertion demonstrates.
-6. Record your observations and checkpoint answers in the lab report.
-
-## Python files and usage examples
-
-Start in this directory inside the course container:
+## 1. Run and inspect the samples
 
 ```console
 cd /workspace/labs/lab01/part1_hashing
-```
-
-### `hash_password.py`
-
-Hash the same fictional password twice. `getpass` deliberately does not
-display the password while you type it.
-
-```console
-python3 hash_password.py
-Educational demo only; SHA-256 alone is unsafe for password storage.
-Password:
-<64 hexadecimal characters>
-```
-
-Run the command again with the same input. The two digests should be identical
-because SHA-256 is deterministic.
-
-### `salted_hash.py`
-
-Run the salted demonstration twice with the same fictional password:
-
-```console
-python3 salted_hash.py
-Password:
-salt=<32 hexadecimal characters>
-digest=<64 hexadecimal characters>
-Educational demo only; use a password KDF in production.
-```
-
-The salt and digest should normally change on every run. The salt is stored
-alongside the verifier; it is unique, not secret.
-
-### `test_hashing.py`
-
-This file checks that plain hashing is deterministic and that two fixed salts
-produce different demonstration verifiers. Run it through pytest:
-
-```console
+python3 samples/hash_bytes_demo.py
+python3 samples/salt_bytes_demo.py
 pytest -q test_hashing.py
 ```
 
-Expected result: `2 passed`.
+The first sample prints `Input bytes: b'Public sample'`, input length 13,
+`Digest bytes: 32`, `Hex characters: 64`, a SHA-256 digest, and
+`Repeat matches: True`. The hexadecimal digest stays the same across runs.
+Study the optional `--input` argument to see how a complete program reads bytes.
 
-To run just one test function while debugging, use:
+The second sample prints `Salt bytes: 16`, a 32-character random salt hex,
+a 64-character verifier, and three `True` checks for salt decoding,
+reproducibility with the same salt, and the effect of a changed salt. The
+generated salt and verifier normally change on each run. No generated file is
+left behind. `bytes.fromhex(salt.hex())` reconstructs the original public salt.
+
+Before implementation, pytest reports one passed baseline check and two skipped
+implementation checks. Skips mean that the exercise is still to be written.
+
+### Public flag utility sample
 
 ```console
-pytest -q test_hashing.py::test_salts_change_digest
+python3 samples/flag_unlock_demo.py
 ```
 
-## Completion criteria and report evidence
+Expected output:
 
-You have completed Part 1 when:
+```text
+Wrong proof rejected: OK
+FLAG{public_demo_only}
+This public demo flag is not a Part completion flag.
+```
 
-- the same password produces the same unsalted digest twice;
-- the same password with two generated salts produces different digests;
-- both tests pass; and
-- you can explain why the salt must be stored with the verifier.
+The sample leaves no file behind. Inspect how the shared utility is imported,
+how authentication failure is handled, and how a successful return value is
+printed. Your final program will use its own experiment result, not this public
+demo proof.
 
-Include the commands, redacted or fictional inputs, resulting digests, test
-output, and a short comparison of hashing and encryption in your report.
+## 2. Write hash_password(), then check it
 
-## Checkpoint questions
+In `hash_password.py`, implement this interface before adding interactive code:
 
-1. Why is encryption, whose design permits decryption, the wrong default model
-   for password verification?
-2. Why do identical inputs produce identical unsalted SHA-256 digests?
-3. What does a unique salt change, and what does it not prevent?
+| Function | Input | Return |
+| --- | --- | --- |
+| `hash_password(password: str) -> str` | Fictional password text | Lowercase 64-character SHA-256 hex |
+
+Encode the string using UTF-8 and hash the resulting bytes. Do not strip,
+normalize, or otherwise change the supplied string. Add the imports you need.
+
+Immediately run this public-fixture check; it uses only this function:
+
+```console
+python3 - <<'PY'
+import hashlib
+from hash_password import hash_password
+for text in ("fictional", "한글-example", ""):
+    result = hash_password(text)
+    assert result == hashlib.sha256(text.encode("utf-8")).hexdigest()
+assert hash_password("fictional") != hash_password("different")
+print("Unsalted function check: OK")
+PY
+```
+
+Proceed only after `Unsalted function check: OK`. Repeated inputs must repeat
+their digest; changed inputs should change it.
+
+## 3. Write salted_hash(), then check it
+
+In `salted_hash.py`, implement:
+
+| Function | Input | Return |
+| --- | --- | --- |
+| `salted_hash(password: str, salt: bytes) -> str` | Password text and supplied salt bytes | Lowercase SHA-256 hex of `salt || UTF8(password)` |
+
+This function uses the caller's salt; it must not generate a replacement salt.
+Generating a new salt belongs in registration or the interactive program.
+
+```console
+python3 - <<'PY'
+import hashlib
+from salted_hash import salted_hash
+first, second = b"a" * 16, b"b" * 16
+value = salted_hash("fictional", first)
+assert value == hashlib.sha256(first + b"fictional").hexdigest()
+assert value == salted_hash("fictional", first)
+assert value != salted_hash("fictional", second)
+assert salted_hash("한글", first) == hashlib.sha256(first + "한글".encode("utf-8")).hexdigest()
+print("Salted function check: OK")
+PY
+```
+
+Proceed only after `Salted function check: OK`. A server stores both the salt
+and verifier so it can repeat the computation during login.
+
+## 4. Add the interactive programs
+
+Write a `main()` and execution guard in each file. Use `getpass.getpass()` so
+the fictional input is not displayed or placed in shell arguments.
+
+- `hash_password.py`: read one password and print its digest.
+- `salted_hash.py`: read one password, generate 16 random salt bytes with
+  `secrets.token_bytes()`, and print `salt=<hex>` and `digest=<hex>`.
+- Both programs should identify fast SHA-256 as an educational construction.
+
+Check that importing both files causes no prompt or output:
+
+```console
+python3 -c "import hash_password, salted_hash; print('Import check: OK')"
+```
+
+### Shared completion utility
+
+The whole main program is still yours to write. Resolve the envelope relative
+to your exercise file, rather than the shell's current directory. To import
+the provided shared utility from a numbered Part exercise file, use:
+
+```python
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from labs.lab01.common.flags import unlock_flag, canonical_account_proof
+```
+
+`unlock_flag(path, proof)` returns a `FLAG{...}` string after authenticating
+the encrypted envelope. An incorrect proof raises `ValueError`; inspect your
+implementation and proof format rather than changing the envelope.
+The public demo proof opens only the demo artifact and cannot open this Part's
+flag. Submit the computed Part flag through the instructor's designated channel.
+
+### Complete the public hash challenge
+
+After the random-salt demonstration, the final `salted_hash.py` program must
+open Part 1's completion flag. This challenge is public and requires both
+of your hashing functions; it is separate from the fictional password you
+entered and the random salt generated above.
+
+Read `data/flag_challenge.json` using `json.loads()`. Its `challenge`
+object supplies `input` and `salt_hex`. Compute the unsalted SHA-256 hex
+through your `hash_password()`, decode the fixed public salt, and compute
+the salted hex through your `salted_hash()`. The proof is:
+
+```text
+<unsalted lowercase hex>:<salted lowercase hex>
+```
+
+Use exactly one colon and no whitespace. Do not paste precomputed digests into
+your program. Call `unlock_flag(flag_path, proof)` and print the returned
+`FLAG{...}` as the final line. The fixed challenge salt does not replace the
+random-salt demonstration; keep both observations.
+
+## 5. Run the full exercise
+
+```console
+python3 hash_password.py
+python3 hash_password.py
+python3 salted_hash.py
+python3 salted_hash.py
+LAB01_GRADE=1 pytest -q test_hashing.py
+```
+
+Enter the same fictional password in all four runs. The unsalted outputs must
+be equal; the random salts and salted digests should differ. Then repeat with
+a different input. A digest is 64 hex characters; a salt is 32 hex characters.
+
+The enabled tests should report `3 passed`. The final `salted_hash.py` output
+includes a standalone `FLAG{...}` line after opening the public hash challenge.
+No files are generated by these interactive programs.
+
+## 6. Completion and report
+
+- [ ] Both initially empty files contain your functions, imports, and main programs.
+- [ ] Both small function checks and all enabled tests pass.
+- [ ] Identical inputs repeat the unsalted digest.
+- [ ] Random salts change the salted verifier.
+- [ ] Imports cause no interactive work.
+- [ ] The final program authenticates its own `data/flag_challenge.json` and prints the Part flag.
+
+Submit both Python files, commands and observed digests/salts using fictional
+inputs, test results, and a short explanation. Explain how hashing differs from
+encryption, why a salt must be stored, why salts are public, and why salt plus
+fast SHA-256 remains unsuitable for production password storage.

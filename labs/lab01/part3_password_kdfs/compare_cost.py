@@ -2,13 +2,14 @@
 """Run the two completed student attack implementations and compare work."""
 import argparse
 from pathlib import Path
-from crack_unsalted import crack as unsalted
-from crack_salted import crack as salted
 
 
 def main() -> None:
+    # Import only when the comparison is run, after students create crack().
+    from crack_unsalted import crack as unsalted
+    from crack_salted import crack as salted
     parser = argparse.ArgumentParser()
-    parser.add_argument("data", type=Path, nargs="?", default=Path("../data"))
+    parser.add_argument("data", type=Path, nargs="?", default=Path("data"))
     args = parser.parse_args()
     wordlist = args.data / "lab01-small.txt"
     rows = [

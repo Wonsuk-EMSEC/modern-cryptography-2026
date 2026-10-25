@@ -2,189 +2,193 @@
 
 **Estimated time:** 25 minutes. **Environment:** course Docker container.
 
-## Scenario
+Recover a reduced-space DES key from one known plaintext/ciphertext block,
+decrypt a separate record, and measure the cost of searching. Real DES has
+56 effective key bits; this exercise searches only the supplied **24-bit
+key-ID space** of **16,777,216 candidates**.
 
-An archival service encrypted a short record with DES, but its designers chose
-a deliberately small teaching key space. You have one known plaintext block,
-the corresponding ciphertext block, and a separate encrypted record. Your
-work stays entirely within the supplied local files.
+`des_bruteforce.py` is provided as a **zero-byte file**. Write your complete
+program there: imports, functions, file loading, output, and the entry point.
+The samples demonstrate the supplied APIs; they do not perform the search.
+Keep functions importable without starting the production search.
 
-## Objective
+## 1. Run and understand the samples
 
-Recover the reduced-space DES key identifier, use the recovered key to decrypt
-the encrypted record, and measure the cost of the search. This part shows why a
-small key space can make a sound block cipher impractical to use securely.
-
-The known relation is:
-
-```text
-C = E_K(P)
-```
-
-The exercise uses real DES, but only a bounded key-ID space. Do not attempt to
-search DES's full 56-bit effective key space.
-
-The supplied instance uses **24 key-ID bits**, giving **16,777,216 candidates**.
-This is 256 times the search space of a 16-bit instance. Budget roughly
-**1–3 minutes for one sequential Python search** in the course container;
-the time varies with your CPU, Docker resources, and implementation. The
-program stops at the first match, so it need not test the entire space.
-
-## Provided Files
-
-| File | Purpose |
-| --- | --- |
-| `des_demo.py` | Runnable DES encryption/decryption and padding example using the lab helpers |
-| `starter.py` | Functions to complete for search, measurement, and decryption |
-| `data/parameters.json` | Public reduced-space parameters, including `key_bits` |
-| `data/known_plaintext.bin` | One known DES plaintext block |
-| `data/known_ciphertext.bin` | Ciphertext for that known block |
-| `data/encrypted_flag.bin` | A separately encrypted, padded record |
-| `../common/des.py` | Bounded DES helpers, including `make_des_key()` |
-
-`make_des_key(key_id, key_bits)` is the required deterministic mapping from a
-candidate ID to an eight-byte DES key. It encodes DES parity bits so that the
-bounded candidate IDs remain distinct effective DES keys. Use this helper;
-do not invent a second key mapping.
-
-## Your Task
-
-**Before completing any TODOs, read `main()` in `starter.py` from beginning
-to end.** Trace the inputs, function calls, return values, and outputs so you
-understand the overall execution flow.
-
-Follow how `main()` loads the parameters and known pair, receives the key ID,
-candidate count, and elapsed time from `brute_force()`, reports the search
-rate, and passes the recovered ID to `decrypt_flag()`. Complete the TODOs
-below only after you understand how these steps fit together.
-
-1. Complete `brute_force()` in `starter.py`.
-2. Enumerate candidate IDs from `0` through `2**key_bits - 1`.
-3. For each ID, create its DES key with `make_des_key()` and encrypt the known
-   plaintext with `encrypt_block()`.
-4. Stop when the result equals the known ciphertext. Return the recovered ID,
-   the number of candidates tested, and elapsed time measured with
-   `time.perf_counter()`.
-5. Complete `decrypt_flag()` by reconstructing the recovered key, decrypting
-   all eight-byte blocks, and removing the supplied padding with `unpad8()`.
-6. Run the program and record the candidate count, elapsed time, and keys per
-   second for your report.
-
-Do not special-case a candidate ID or hard-code decrypted output. Your code
-must work from the public parameters and the supplied known pair.
-
-## How to Run
-
-### Try DES encryption and decryption first
-
-Start the course container as described in the Lab02 overview. Inside the
-container, run the demonstration before implementing the search:
+Prepare the [course container](../README.md#setup). All commands below run
+**inside that container**:
 
 ```console
 cd /workspace/labs/lab02/part1_des_bruteforce
-python3 des_demo.py
+python3 samples/des_roundtrip.py
+python3 samples/data_loading.py
 ```
 
-The sample runs immediately, without completing any TODOs. It uses the same
-helpers as `starter.py`, together with the padding and encryption helpers in
-`../common/des.py`:
-
-1. Call `make_des_key(key_id=17, key_bits=8)` to create an eight-byte DES key
-   from a public example ID in an **8-bit example space**.
-2. Call `pad8()` on `b'Hello, DES!'`. This plaintext has 11 bytes; five
-   padding bytes, each with value `0x05`, extend it to 16 bytes (two DES blocks).
-3. Call `encrypt_bytes()` to encrypt the padded plaintext using that key.
-4. Call `decrypt_bytes()` with the same key to recover the padded plaintext.
-   Decryption restores the padding bytes as well as the message.
-5. Call `unpad8()` to validate and remove the padding, then check that the
-   recovered plaintext equals the original `b'Hello, DES!'`.
-
-Among the displayed values, you should see:
+Read both samples from imports through `main()` and its execution guard.
+The round-trip sample constructs a key from public example ID `17` in an
+**8-bit example space**, pads `b"Hello, DES!"`, encrypts, decrypts, and
+removes padding. Look for:
 
 ```text
 Plaintext: b'Hello, DES!'
+Lengths: 11 bytes -> 16 padded bytes
 Recovered: b'Hello, DES!'
 Padding round-trip check: OK
 ```
 
-The script also displays the key and ciphertext in hexadecimal using
-`.hex()`, and the padded plaintext as bytes so you can see the padding.
-Hexadecimal is only an output representation; the key is constructed by
-`make_des_key()`, and the helpers operate on bytes.
-The script uses public example values independently of the task data. Keep
-the distinction between this 8-bit example space and the task's 24-bit space.
+DES processes eight-byte blocks. The five appended bytes are all `0x05`;
+decryption preserves them until `unpad8()` validates and removes them.
+The key and ciphertext are displayed in hexadecimal, but helpers operate on
+`bytes`. For an eight-byte plaintext, `pad8()` adds a full block of
+eight `0x08` bytes. Try that length and verify the round trip.
 
-DES processes **8-byte blocks** and accepts an **8-byte encoded key** with
-56 effective key bits and 8 parity bits. The byte helpers use ECB, which needs
-no IV, and require complete blocks; call `pad8()` before encryption and
-`unpad8()` after decryption. This is PKCS#7-style padding with an eight-byte
-block size. If the original length is already a multiple of eight, `pad8()`
-adds a full block of eight `0x08` bytes so that padding can still be removed
-unambiguously. DES is included for historical study.
+The data-loading sample reports `Key-ID bits: 24`, eight-byte known
+plaintext and ciphertext blocks, and an encrypted-record length divisible
+by eight. Its final line is `Public data shape check: OK`.
+`json.loads()` reads parameters; `read_bytes()` reads binary files.
+The known block is already exactly eight bytes: **do not pad it for candidate
+comparison**. The separate record is padded. Neither sample recovers its key.
 
-Try changing the example plaintext to `b'CRYPTO26'` (eight bytes) or a longer
-message. Compare the original and padded lengths, and verify that the
-recovered plaintext still matches after removing the padding.
+## 2. Write and check `brute_force()`
 
-### Run your brute-force implementation
+Implement this interface in `des_bruteforce.py`:
 
-After completing the TODOs, run from the same Part directory:
-
-```console
-python3 starter.py
+```python
+brute_force(plaintext: bytes, ciphertext: bytes, key_bits: int) -> tuple[int | None, int, float]
 ```
 
-The starter prints its result after the search finishes. A completed search
-loop may therefore run for a while without terminal output. Check your code
-first with the small, synthetic fixtures in the tests before running the
-supplied 24-bit instance. Do not insert delays or repeat matching candidates
-to increase the measured time; measure the actual candidate search.
+Use `make_des_key(key_id, key_bits)` from `common.des` for the required
+deterministic key mapping; an integer ID is not an encoded key.
+`encrypt_block(block, key)` accepts an eight-byte block and eight-byte key.
+The samples show how to import shared helpers; your exercise file is one
+directory above `samples/`, so adjust its path accordingly.
 
-After completing this part, run the Lab02 checks from the lab root:
+1. Reject `key_bits` outside `1..MAX_KEY_BITS` with `ValueError`;
+   `MAX_KEY_BITS` is 24.
+2. Test IDs from `0` through `2**key_bits - 1` in order, mapping each
+   ID and encrypting the known block.
+3. Stop at the first match and return `(key_id, tested, elapsed)`.
+   Count the matching candidate and measure seconds with `time.perf_counter()`.
+4. If none matches, return `(None, 2**key_bits, elapsed)`.
+
+Check this function now, using a small public fixture:
 
 ```console
+PYTHONPATH=.. python3 - <<'PY'
+from des_bruteforce import brute_force
+from common.des import encrypt_block, make_des_key
+block, bits, expected_id = b"CRYPTO26", 8, 17
+ciphertext = encrypt_block(block, make_des_key(expected_id, bits))
+found, tested, elapsed = brute_force(block, ciphertext, bits)
+assert found == expected_id
+assert tested == expected_id + 1
+assert elapsed >= 0
+try:
+    brute_force(block, ciphertext, 25)
+except ValueError:
+    pass
+else:
+    raise AssertionError("reject an excessive key space")
+print("brute_force small-fixture check: OK")
+PY
+```
+
+Expected: `brute_force small-fixture check: OK`. Resolve failures before
+moving on. The example ID is not the answer to the 24-bit task.
+
+## 3. Write and check `decrypt_flag()`
+
+Implement:
+
+```python
+decrypt_flag(encrypted: bytes, key_id: int, key_bits: int) -> bytes
+```
+
+Reconstruct the key, decrypt every block with `decrypt_bytes(data, key)`,
+and validate/remove padding with `unpad8()` once after assembling the
+complete plaintext. Return unpadded bytes.
+
+```console
+PYTHONPATH=.. python3 - <<'PY'
+from des_bruteforce import decrypt_flag
+from common.des import encrypt_bytes, make_des_key, pad8
+message, key_id, bits = b"public demo record", 17, 8
+encrypted = encrypt_bytes(pad8(message), make_des_key(key_id, bits))
+assert decrypt_flag(encrypted, key_id, bits) == message
+print("decrypt_flag small-fixture check: OK")
+PY
+```
+
+Expected: `decrypt_flag small-fixture check: OK`. This checks decryption
+independently of searching.
+
+## 4. Write `main()` and connect the files
+
+Implement `main() -> None` and call it only under
+`if __name__ == "__main__":`. Locate `data/` relative to `__file__`
+so the program works from the Part directory or Lab02 root.
+
+| Input | Read as | Use |
+| --- | --- | --- |
+| `data/parameters.json` | JSON | Its `key_bits` selects the space |
+| `data/known_plaintext.bin` | bytes | Known eight-byte plaintext |
+| `data/known_ciphertext.bin` | bytes | Ciphertext to compare |
+| `data/encrypted_flag.bin` | bytes | Record to decrypt after recovery |
+
+Call `brute_force()`, handle a missing match clearly, calculate keys per
+second as `tested / elapsed` with a zero-time guard, and call
+`decrypt_flag()`. Decode the record as ASCII. Print the recovered ID,
+candidate count, seconds, rate, and plaintext.
+
+```console
+python3 -c 'import des_bruteforce; print("Import check: OK")'
+```
+
+Expected: only `Import check: OK`, with no search starting on import.
+
+## 5. Run the supplied instance and finish
+
+```console
+python3 des_bruteforce.py
 cd /workspace/labs/lab02
-make grade
+make grade PART=1
 ```
-
-The search is intentionally bounded. Keep `parameters.json` and both
-ciphertext files from the same release. Increasing `key_bits` alone leaves
-the old key and ciphertext unchanged, so it does not necessarily make the
-search take longer. Use the supplied 24-bit data for your final measurement.
 
 ## Example Output
 
 A successful run has the following output format. Values are hidden in this
-example. Include your actual results in your report.
+example. Include your actual results in your report. Run from
+`/workspace/labs/lab02` inside the course container.
 
 ```console
-python3 starter.py
+python3 part1_des_bruteforce/des_bruteforce.py
 candidate=<key ID> tested=<candidate count> elapsed=<seconds>s rate=<keys per second> keys/s
 FLAG{<recovered value>}
 ```
 
-## Optional Hints
+A sequential search may take roughly 1–3 minutes, depending on CPU, Docker
+resources, and implementation, and may be quiet until it finishes. Measure
+the actual search without delays. Keep parameters and ciphertexts together;
+changing only `key_bits` does not change the hidden key. Use the original
+24-bit data for your final measurement.
 
-1. The candidate ID is not itself the DES key bytes. Pass it through
-   `make_des_key()` before each block encryption.
-2. Test a candidate against the known block before attempting to decrypt the
-   larger file.
-3. The encrypted record contains complete DES blocks. Remove padding only
-   after every block has been decrypted.
+Completion means the two function checks and import check pass, the
+recovered key verifies the known pair, the record decrypts to `FLAG{...}`,
+and the selected-Part grading checks pass. After completing all Parts,
+run `make grade` without `PART`.
 
 ## Checkpoint Questions
 
-1. Why does this exercise use a reduced key space instead of searching all of
-   DES's effective 56-bit key space?
-2. Based on your measured rate, estimate how long a sequential Python search
-   of `2**56` candidates would take. State the assumptions in your estimate.
-3. Why is a Python timing result not a realistic estimate for an optimized GPU,
-   FPGA, or ASIC search?
-4. What role do DES parity bits play in the mapping from candidate IDs to DES
-   keys, and why must different candidate IDs avoid collapsing to the same
-   effective key?
+Report candidate count, elapsed time, and measured rate, then answer:
+
+1. Why do we use a reduced space rather than all `2**56` effective keys?
+2. At your measured rate, how long would `2**56` checks take? State assumptions.
+3. Why does Python timing not predict GPU, FPGA, or ASIC speed?
+4. What role do parity bits play, and why must IDs map to distinct effective keys?
 5. Does this result show a mathematical weakness in every DES round function,
    or a practical limitation of its key-space size? Explain.
+
+Do not hard-code an ID or decrypted output. Submit the flag only through the
+designated course channel and keep it out of public code and sample output.
 
 ## Report Checklist
 

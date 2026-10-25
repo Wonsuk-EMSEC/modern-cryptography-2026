@@ -22,7 +22,7 @@ Thumbs.db
 *.log
 *.pcap
 *.pcapng
-!labs/lab01/data/wpa2/lab01-handshake.pcap
+!labs/lab01/part5_wpa2/data/wpa2/lab01-handshake.pcap
 *.hccapx
 *.hc22000
 *.vdi
@@ -32,6 +32,9 @@ auth_db.json
 benchmark-results.*
 labs/lab01/part4_system_hashes/generated/
 labs/lab02/part7_aes_cpa/plots/
+/labs/example_traces.png
+/labs/key_guess_scores_byte_*.png
+/labs/sample_correlations_byte_*.png
 lab02-target-image.tar.gz
 
 # Secrets

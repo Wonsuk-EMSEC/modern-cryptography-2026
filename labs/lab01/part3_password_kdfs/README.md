@@ -1,291 +1,302 @@
 # Part 3: Offline password cracking and password KDFs
 
-**Estimated time:** 40 minutes. **Environment:** course Docker container.
+**Estimated time:** 40 minutes. Run everything inside the course Docker container.
+Use only fictional course databases and local accounts. This experiment is
+offline: guesses are computed locally and never reach a login service.
 
-**Ethical and authorized use:** use only the fictional wordlist, CSV files, and
-local accounts supplied for this lab. Do not use leaked passwords or third-party
-verifiers. All guessing in Exercise A is local and offline.
+## Learning objectives and files
 
-Part 3 connects attack cost to defensive password storage. First, compare
-dictionary guessing against fast unsalted and salted SHA-256 records. Then
-benchmark deliberately slower password KDFs and use a local verifier-only login
-database. The goal is to understand what salt changes, what it does not change,
-and why password storage also needs an adjustable work factor.
+Compare the cost of unsalted and salted SHA-256 guessing, reuse work only when
+inputs permit it, and connect guessing cost to dedicated password KDFs.
+Learn CSV/hex handling, operation counting, timing, KDF parameters, and local
+storage of a verifier without a plaintext password.
 
-## Part 3 at a glance
+| File | Role |
+| --- | --- |
+| `samples/csv_hash_demo.py` | Complete single-candidate public CSV/hex/hash example |
+| `samples/benchmark_kdfs.py` | Complete benchmark of five mechanisms |
+| `samples/register_login_demo.py` | Complete local PBKDF2 registration/login example |
+| `crack_unsalted.py`, `crack_salted.py` | Empty student exercise files |
+| `compare_cost.py` | Provided comparison tool; run after both functions work |
+| `data/unsalted_hashes.csv` | Synthetic `account,sha256` records |
+| `data/salted_hashes.csv` | Synthetic `account,salt_hex,sha256` records |
+| `data/lab01-small.txt` | Fixed classroom wordlist |
+| `test_dictionary_cost.py` | Fixture and opt-in implementation checks |
+| `samples/flag_unlock_demo.py` | Public helper-usage example; no Part answer |
+| `data/flag_challenge.json` | Encrypted completion flag, opened by the experiment result |
 
-```mermaid
-flowchart TB
-    W[Select one candidate]
+Write imports, functions, CLI, and execution guards in both exercise files.
+Keep interactive/executable work out of imports. Do not hard-code classroom
+account names, passwords, target digests, or measured counts.
 
-    subgraph U[Unsalted: reuse is possible]
-        UH[Hash the candidate once]
-        UA[Compare with account A]
-        UB[Compare with account B]
-        UC[Compare with account C]
-        UH --> UA
-        UH --> UB
-        UH --> UC
-    end
-
-    subgraph S[Salted: per-account work is required]
-        SA[Candidate + account A salt → hash]
-        SB[Candidate + account B salt → hash]
-        SC[Candidate + account C salt → hash]
-    end
-
-    W --> UH
-    W --> SA
-    W --> SB
-    W --> SC
-    SA --> K[A slow password KDF also raises<br/>the cost of each computation]
-    SB --> K
-    SC --> K
-
-    classDef source fill:#e8f1ff,stroke:#4676b8,color:#172b4d
-    classDef compute fill:#fff3cd,stroke:#c69500,color:#4d3b00
-    classDef compare fill:#e7f7ed,stroke:#3a8f5c,color:#153d26
-    class W source
-    class UH,SA,SB,SC,K compute
-    class UA,UB,UC compare
-```
-
-## Learning objectives
-
-After completing this part, you should be able to:
-
-- implement transparent offline dictionary attacks using `hashlib` and `csv`;
-- reuse a candidate digest across unsalted accounts;
-- explain why a unique salt requires per-account candidate computation;
-- measure and compare hash-operation counts and elapsed time;
-- distinguish a fast general-purpose hash from a password KDF;
-- identify the principal parameters of PBKDF2, bcrypt, scrypt, and Argon2id;
-- report a median benchmark with its configuration and hardware context; and
-- inspect a stored authentication record and confirm it contains no plaintext.
-
-## Exercise A: fast-hash dictionary attacks
-
-Assume an authorized tester has already received two small synthetic password
-databases. No login server is contacted, so lockout, network latency, and
-server-side rate limiting do not apply.
-
-### Data model and attack logic
-
-`../data/unsalted_hashes.csv` has this schema:
-
-```text
-account,sha256
-```
-
-For each word, compute `SHA256(UTF8(word))` once and compare the digest with all
-target rows.
-
-`../data/salted_hashes.csv` has this schema:
-
-```text
-account,salt_hex,sha256
-```
-
-For each account and word, decode the public salt and compute
-`SHA256(salt || UTF8(word))`. A digest calculated with one account's salt cannot
-be reused for an account with a different salt.
-
-```text
-Unsalted work: approximately number_of_words hash operations
-Salted work:   up to number_of_accounts * number_of_words operations
-```
-
-The exact count can be lower if checking stops after a candidate is found.
-State your stopping rule when interpreting the measurements.
-
-### Tasks
-
-1. Inspect the wordlist and both CSV schemas without changing target values.
-2. Implement `crack()` in `crack_unsalted.py` using one hash per candidate.
-3. Implement `crack()` in `crack_salted.py`, decoding each hexadecimal salt.
-4. Return `(recovered, computation_count, elapsed_seconds)` from both functions.
-5. Run `compare_cost.py` and compare computation counts as well as wall time.
-6. Explain how each method scales to more accounts and a larger dictionary.
-7. Relate the offline behavior to the observable SSH requests from Part 2.
-
-Inspect the local inputs:
+## 1. Run and inspect the CSV sample
 
 ```console
 cd /workspace/labs/lab01/part3_password_kdfs
-head ../data/lab01-small.txt
-sed -n '1,5p' ../data/unsalted_hashes.csv
-sed -n '1,5p' ../data/salted_hashes.csv
-```
-
-### `crack_unsalted.py` usage
-
-This student starter accepts the unsalted database followed by the wordlist:
-
-```console
-python3 crack_unsalted.py ../data/unsalted_hashes.csv ../data/lab01-small.txt
-```
-
-Before implementation it stops at `NotImplementedError`. After completing
-`crack()`, output should have this shape:
-
-```text
-({'fictional_account': 'recovered_candidate'}, HASH_COUNT, ELAPSED_SECONDS)
-```
-
-Hash each candidate once and use the result as a lookup against all targets.
-
-### `crack_salted.py` usage
-
-```console
-python3 crack_salted.py ../data/salted_hashes.csv ../data/lab01-small.txt
-```
-
-It returns the same tuple shape. Compute a separate digest for each
-candidate/account-salt pair. Do not hard-code account names, candidates, counts,
-or digests in either starter.
-
-### `compare_cost.py` usage
-
-After both TODO implementations work, run:
-
-```console
-python3 compare_cost.py ../data
-```
-
-Expected output format; values depend on the implementation and machine:
-
-```text
-experiment   found   hashes    seconds     hashes/s
-unsalted         N        N   0.000000            N
-salted           N        N   0.000000            N
-```
-
-### `test_dictionary_cost.py` usage
-
-Run fixture checks before implementation:
-
-```console
+python3 samples/csv_hash_demo.py
 python3 -m unittest test_dictionary_cost.py -v
 ```
 
-After completing both `crack()` functions, enable implementation checks:
+The sample creates a temporary public record, reads it with `csv.DictReader`,
+decodes its salt, checks one public candidate, and removes the temporary file.
+
+```text
+CSV fields: account, salt_hex, sha256
+Account: example
+Salt bytes: 11
+Single candidate matches: True
+Hash computations: 1
+Elapsed: <seconds> seconds
+```
+
+All values except time are fixed. Study `Path`, CSV field access, UTF-8
+encoding, `bytes.fromhex()`, and the boundary around the timed operation.
+This is a one-candidate API example; your program must perform the bounded
+dictionary search itself. The baseline suite reports one passed fixture check
+and two skipped implementation checks.
+
+### Public flag utility sample
 
 ```console
+python3 samples/flag_unlock_demo.py
+```
+
+Expected output:
+
+```text
+Wrong proof rejected: OK
+FLAG{public_demo_only}
+This public demo flag is not a Part completion flag.
+```
+
+The sample leaves no file behind. Inspect how the shared utility is imported,
+how authentication failure is handled, and how a successful return value is
+printed. Your final program will use its own experiment result, not this public
+demo proof.
+
+## 2. Write unsalted crack(), then check it
+
+In `crack_unsalted.py`, implement:
+
+```text
+crack(target_csv: Path, wordlist: Path) -> tuple[dict[str, str], int, float]
+```
+
+Return `(recovered_accounts, hash_computations, elapsed_seconds)`.
+The first value maps account names to matching candidates.
+
+Read `account,sha256` CSV rows and nonempty stripped UTF-8 wordlist lines.
+For each candidate compute `SHA256(UTF8(candidate))` **once**, then compare
+the digest against all account targets. Recover every matching account,
+including accounts with equal target digests. Process the entire wordlist
+even if all accounts have already matched, so the unsalted count is exactly
+the number of nonempty candidate lines. Treat target hex case consistently.
+Use `time.perf_counter()` around the candidate computations.
+
+Run this public three-word fixture immediately:
+
+```console
+python3 - <<'PY'
+import hashlib
+import tempfile
+from pathlib import Path
+from crack_unsalted import crack
+with tempfile.TemporaryDirectory() as directory:
+    base = Path(directory)
+    words, targets = base / "words.txt", base / "targets.csv"
+    words.write_text("alpha\nbeta\ngamma\n", encoding="utf-8")
+    targets.write_text("account,sha256\n"
+        + "example_a," + hashlib.sha256(b"beta").hexdigest() + "\n"
+        + "example_b," + hashlib.sha256(b"gamma").hexdigest() + "\n", encoding="utf-8")
+    found, count, elapsed = crack(targets, words)
+    assert found == {"example_a": "beta", "example_b": "gamma"}
+    assert count == 3 and elapsed > 0
+print("Unsalted search check: OK")
+PY
+```
+
+Proceed after `Unsalted search check: OK`. Three candidate hashes can serve
+both accounts because no account-specific input changes the digest.
+
+## 3. Write salted crack(), then check it
+
+In `crack_salted.py`, implement the same function signature and tuple shape.
+Read `account,salt_hex,sha256`; decode each account's public salt.
+For each account, try candidates in wordlist order and compute
+`SHA256(salt || UTF8(candidate))`. Stop that account's search at its first
+match, then continue with the next account. Count every digest computation,
+including successful comparisons. Accounts without matches are omitted from
+the recovered mapping.
+
+```console
+python3 - <<'PY'
+import hashlib
+import tempfile
+from pathlib import Path
+from crack_salted import crack
+with tempfile.TemporaryDirectory() as directory:
+    base = Path(directory)
+    words, targets = base / "words.txt", base / "targets.csv"
+    words.write_text("alpha\nbeta\ngamma\n", encoding="utf-8")
+    salts = [b"fixture-salt-01", b"fixture-salt-02"]
+    rows = ["account,salt_hex,sha256"]
+    for account, salt, word in zip(["example_a", "example_b"], salts, [b"beta", b"gamma"]):
+        rows.append(f"{account},{salt.hex()},{hashlib.sha256(salt + word).hexdigest()}")
+    targets.write_text("\n".join(rows) + "\n", encoding="utf-8")
+    found, count, elapsed = crack(targets, words)
+    assert found == {"example_a": "beta", "example_b": "gamma"}
+    assert count == 5 and elapsed > 0
+print("Salted search check: OK")
+PY
+```
+
+Proceed after `Salted search check: OK`. The count is five because the first
+account needs two candidates and the second needs three. This check imports
+only the salted implementation.
+
+## 4. Write the two main programs
+
+Add `argparse`, `main()`, and execution guards. Each program accepts two local
+positional arguments: the appropriate target CSV, then the wordlist.
+Call its `crack()` and print recovered **count**, hash count, elapsed seconds,
+and hashes per second. Avoid printing recovered course candidates; retain them
+only in the function's returned mapping.
+
+```console
+python3 -c "import crack_unsalted, crack_salted; print('Import check: OK')"
 LAB01_GRADE=1 python3 -m unittest test_dictionary_cost.py -v
 ```
 
-The tests use temporary fictional inputs and do not reveal the supplied
-database candidates.
+The import check must not perform an attack. All three enabled tests must pass.
 
-## Exercise B: slow password hashing
+### Shared completion utility
 
-Fast SHA-256 makes Exercise A inexpensive. A password KDF intentionally raises
-the cost of every legitimate verification and every attacker guess. Modern
-designs may impose both CPU and memory cost. Salt still provides uniqueness;
-the work factor provides deliberate cost. Neither mechanism creates entropy for
-a weak password.
+The whole main program is still yours to write. Resolve the envelope relative
+to your exercise file, rather than the shell's current directory. To import
+the provided shared utility from a numbered Part exercise file, use:
 
-### Mechanisms being compared
+```python
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from labs.lab01.common.flags import unlock_flag, canonical_account_proof
+```
 
-| Mechanism | Main classroom parameter | Intended observation |
+`unlock_flag(path, proof)` returns a `FLAG{...}` string after authenticating
+the encrypted envelope. An incorrect proof raises `ValueError`; inspect your
+implementation and proof format rather than changing the envelope.
+The public demo proof opens only the demo artifact and cannot open this Part's
+flag. Submit the computed Part flag through the instructor's designated channel.
+
+### Connect both results to the completion flag
+
+Extend your `crack_salted.py` main after its own metrics: import the
+`crack()` function from your completed `crack_unsalted.py`, and run it on
+`unsalted_hashes.csv` beside the selected salted CSV, using the same wordlist.
+Keep each script's own `crack()` return contract unchanged.
+
+Require the two recovered account mappings to be identical and require all
+account names in both input CSVs to have been recovered. A partial mapping
+or disagreement is an incomplete experiment. Once those conditions hold, call
+`canonical_account_proof(recovered)` and use its result as the proof for
+`data/flag_challenge.json`. Print the returned `FLAG{...}` as the final
+line of `crack_salted.py`.
+
+The canonical encoding is JSON with lexicographically sorted account keys,
+no extra whitespace, and Unicode preserved as text:
+`json.dumps(mapping, sort_keys=True, separators=(',', ':'), ensure_ascii=False)`.
+For the public mapping `{"b": "public-two", "a": "public-one"}`, the exact
+proof text is `{"a":"public-one","b":"public-two"}`. Use the shared encoder;
+never print the actual recovered mapping or its proof.
+
+`compare_cost.py` remains the supplied metrics comparison. Both of your
+search implementations and the measured comparison are required even after
+the flag opens.
+
+## 5. Run the KDF sample and interpret the timings
+
+A password KDF deliberately raises the cost of every verification and guess.
+Salt provides uniqueness; a work factor provides CPU or memory cost. Neither
+adds entropy to a weak password.
+
+```console
+python3 samples/benchmark_kdfs.py --trials 3
+python3 samples/benchmark_kdfs.py --trials 5
+```
+
+Each run prints median milliseconds for all five mechanisms:
+
+| Row | Configuration | Observe |
 | --- | --- | --- |
-| SHA-256 | none | Very fast; unsafe baseline for passwords |
-| PBKDF2-HMAC-SHA-256 | iterations | Repeats a pseudorandom function |
-| bcrypt | logarithmic cost | Purpose-built and deliberately CPU-expensive |
-| scrypt | `n`, `r`, `p` | Adds configurable memory cost |
-| Argon2id | time, memory, parallelism | Modern memory-hard password hashing |
+| `SHA-256 (unsafe)` | No work factor | Fast baseline |
+| `PBKDF2-100k` | HMAC-SHA-256, 100,000 iterations | Repeated computation |
+| `bcrypt-cost-10` | Logarithmic cost 10 | CPU cost |
+| `scrypt-N=2^14` | `n=2**14, r=8, p=1` | Memory/CPU cost |
+| `Argon2id-32MiB` | Time 2, 32,768 KiB, parallelism 1 | Memory cost |
 
-The benchmark uses one deterministic salt only to make timing repeatable. Real
-registration must generate a fresh random salt per password, as
-`register_login_demo.py` does. Production parameters must be tuned on the
-deployment hardware and threat model.
+The script warms up each operation before measuring. Exact times and ordering
+can vary by host. Record parameters, medians, trial counts, and hardware
+context. A fast result is not a desirable password-storage goal. The fixed
+salt in this benchmark is for repeatable experiments, not registration.
 
-### Tasks
+## 6. Run the registration sample and inspect its record
 
-1. Run the three-trial benchmark and record every parameter and median time.
-2. Repeat with five trials and compare stability and ordering.
-3. Explain why the fastest result is not best for password storage.
-4. Register a fictional local account and inspect `auth_db.json`.
-5. Verify once with the chosen fictional password and once with another input.
-6. Identify the algorithm, iterations, salt, and verifier stored in JSON.
-7. Relate increased legitimate-login cost to increased offline-guessing cost.
-
-### `benchmark_kdfs.py` usage
+Choose a fictional password and enter it interactively:
 
 ```console
-python3 benchmark_kdfs.py --trials 3
-```
-
-Output has this shape; timings will differ:
-
-```text
-SHA-256 (unsafe)             ... ms
-PBKDF2-100k                  ... ms
-bcrypt-cost-10               ... ms
-scrypt-N=2^14                ... ms
-Argon2id-32MiB               ... ms
-Results are machine-specific; tune parameters for each deployment.
-```
-
-Repeat with more trials:
-
-```console
-python3 benchmark_kdfs.py --trials 5
-```
-
-The script performs one warm-up before collecting samples and reports their
-median. Record the algorithm parameters and container host context with results.
-
-### `register_login_demo.py` usage
-
-Use a fictional password that you can enter again, but do not place it on the
-command line:
-
-```console
-python3 register_login_demo.py register student01
-Password:
-registered
-
-python3 register_login_demo.py verify student01
-Password:
-verified
-```
-
-A different input should produce `authentication failed`. Inspect the generated
-database:
-
-```console
+python3 samples/register_login_demo.py register student01
+python3 samples/register_login_demo.py verify student01
+python3 samples/register_login_demo.py verify student01
 python3 -m json.tool auth_db.json
 ```
 
-Confirm that it stores algorithm metadata, iterations, salt, and verifier, but
-no plaintext password. `auth_db.json` is ignored by Git. To isolate an
-experiment, choose a file under `/tmp`:
+The first command prints `registered`; the correct input prints `verified`;
+a different input prints `authentication failed`. Inspect the JSON record for
+algorithm `pbkdf2-sha256`, 200,000 iterations, a random 16-byte salt encoded
+as hex, and a verifier. No plaintext password should be present. This generated
+`auth_db.json` is ignored by Git.
+
+For independent experiments, pass `--db /tmp/lab01-auth.json` to both commands.
+Do not put passwords in shell arguments. Production KDF parameters must be
+tuned on deployment hardware; these are classroom settings.
+
+## 7. Run the course data and compare cost
 
 ```console
-python3 register_login_demo.py register student02 --db /tmp/lab01-auth.json
-python3 register_login_demo.py verify student02 --db /tmp/lab01-auth.json
+python3 crack_unsalted.py data/unsalted_hashes.csv data/lab01-small.txt
+python3 crack_salted.py data/salted_hashes.csv data/lab01-small.txt
+python3 compare_cost.py data
 ```
 
-These commands remain interactive; do not put passwords in shell arguments.
+Your two programs should report their computed metrics; `crack_salted.py` also
+prints the Part flag after the combined-result check. The provided comparison
+tool prints:
 
-## Completion criteria
+```text
+experiment   found   hashes    seconds     hashes/s
+unsalted         <N>     <N>   <seconds>    <rate>
+salted           <N>     <N>   <seconds>    <rate>
+```
 
-You have completed Part 3 when both cracking starters run without
-`NotImplementedError`, the comparison prints two rows, all enabled tests pass,
-the benchmark reports all five mechanisms, local registration and verification
-work, and no plaintext password appears in JSON. Report computation counts,
-timings, KDF parameters, hardware context, and explanations—but do not publish
-recovered candidates or authentication passwords.
+Both methods should recover the supplied fictional records. Record counts and
+times; do not publish recovered passwords. Unsalted work is one hash per word;
+salted work is up to `accounts × words`, with per-account early stopping.
+Timing depends on the host and is noisy for small inputs, so discuss operation
+counts alongside elapsed time. No output files are required for this comparison.
 
-## Checkpoint questions
+## 8. Completion and report
 
-1. Why can one unsalted candidate digest serve all accounts?
-2. Why must records with distinct salts be checked separately?
-3. What protection does salt provide, and what does it not provide?
-4. Why is SHA-256 timing a useful baseline but unsuitable for password storage?
-5. How does raising a work factor affect legitimate verification and offline
-   guessing?
-6. Which demonstrated password KDFs are designed to consume significant memory?
-7. Why must KDF parameters be tuned on deployment hardware?
-8. Why is an offline attacker unaffected by server-side login rate limiting?
+- [ ] Both empty exercise files now contain complete CLI programs.
+- [ ] Both public search checks and all enabled tests pass.
+- [ ] Both course-data searches and the comparison succeed.
+- [ ] Five KDF medians and configurations are recorded.
+- [ ] Correct and incorrect local login outcomes are observed.
+- [ ] The stored JSON contains no plaintext password.
+- [ ] The final program authenticates its own `data/flag_challenge.json` and prints the Part flag.
+
+Submit the two exercise files, metric outputs, test results, and analysis.
+Explain why unsalted candidate work is reusable, why distinct salts need
+separate work, how stopping rules affect counts, why a KDF is needed in addition
+to salt, which mechanisms consume memory, and why server rate limiting affects
+Part 2 but cannot observe these offline guesses. Do not submit recovered
+candidates or local authentication passwords in public reports.

@@ -225,23 +225,29 @@ service name `lab02-target`; you do not need to enter an address.
 
 ## Working through the Parts
 
-Read each Part README before opening its starter file. Complete the TODOs,
-run the supplied command, and record both the recovered flag and your answers
-to the analysis questions. Do not look for flags in filenames or source code:
-the supplied artifacts are designed so the intended cryptographic work reveals
-them.
+Follow each Part README in order. First run the independent examples in its
+`samples/` directory and inspect the documented output. Then implement one
+function in the provided empty exercise file and run the small check directly
+below its requirements. Continue only when that check passes. After checking
+the individual functions, write `main()` and the execution guard, connect the
+file inputs and outputs, and run the supplied challenge. Record the recovered
+flag, measurements, and answers to the analysis questions.
 
-After completing each Part's TODOs, run its command **inside the course
+Exercise files are initially zero bytes: write the imports, functions, input
+handling, and program entry point yourself. Samples demonstrate library and
+client use with public examples; they run before any exercise is implemented.
+
+After completing each Part's local checks and program entry point, run its command **inside the course
 container** at `/workspace/labs/lab02`:
 
 ```console
-python3 part1_des_bruteforce/starter.py
-python3 part2_double_des_mitm/starter.py
-python3 part3_aes_cbc_pkcs7/starter.py
-python3 part4_cbc_bit_flipping/starter.py
-python3 part5_padding_oracle/starter.py
-python3 part6_mte_vs_etm/starter.py
-python3 part7_aes_cpa/starter.py --all
+python3 part1_des_bruteforce/des_bruteforce.py
+python3 part2_double_des_mitm/double_des_mitm.py
+python3 part3_aes_cbc_pkcs7/aes_cbc_pkcs7.py
+python3 part4_cbc_bit_flipping/cbc_bit_flipping.py
+python3 part5_padding_oracle/padding_oracle.py
+python3 part6_mte_vs_etm/mte_vs_etm.py
+python3 part7_aes_cpa/aes_cpa.py --all
 ```
 
 The Part 6 command first probes the two services. Follow that Part's README
@@ -334,13 +340,40 @@ Run the lightweight public checks inside the course container at
 make test
 ```
 
-After completing the TODOs, run the implementation checks with the supplied
-reference-free test fixtures:
+After completing one Part, select only that Part's implementation checks. For
+example, after Part 1:
+
+```console
+make grade PART=1
+```
+
+Use `PART=1` through `PART=7`. This does not require implementing later Parts.
+After completing all seven Parts, run all implementation checks:
 
 ```console
 make grade
 ```
 
-`make test` remains useful while TODOs are unfinished; implementation checks
+`make test` remains useful while exercise files are empty; implementation checks
 are skipped in that mode. `make grade` exercises the completed Part 1–7
 functions with obvious test-only values and does not reveal the lab flags.
+
+The files in `tests/` provide these checks and their supporting code:
+
+| File | Role |
+| --- | --- |
+| [`test_des_primitives.py`](tests/test_des_primitives.py) | Checks shared DES key generation, odd parity, encryption/decryption, and invalid input handling. |
+| [`test_service_interface.py`](tests/test_service_interface.py) | Checks the configured target service name and port without connecting to a server. |
+| [`test_exercises.py`](tests/test_exercises.py) | Checks the functions implemented in Parts 1–7 when you run `make grade`. |
+| [`_load_impl.py`](tests/_load_impl.py) | Loads the selected Part's student implementation for testing; instructors can also select a private reference implementation. |
+| [`__init__.py`](tests/__init__.py) | Makes the `tests` directory a Python package so its helper modules can be imported. |
+
+These checks use public vectors and synthetic test data. The automated checks
+for Parts 4–6 use local test packets and in-memory oracle or service substitutes,
+so you do not need to start `lab02-target` to run them. Running the actual
+Parts 4–6 exercises still requires the target container described in Setup.
+
+The tests check individual functions rather than running each Part's complete
+command-line program or verifying its challenge flag. Use both the tests and
+the Part's README instructions to check your completed exercise. You do not
+need to edit the test files to complete the lab.

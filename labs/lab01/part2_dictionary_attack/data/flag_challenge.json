@@ -1,0 +1,11 @@
+{
+  "algorithm": "AES-256-GCM",
+  "challenge": {
+    "proof_format": "recovered-candidate"
+  },
+  "ciphertext_hex": "c8e8f0c1bc63d4a3cc94da7fcc7f8c9b8bb1e1c659853205d328d8856809cb05e56e9df75d5fd259069b1bf10fa8a2d70dd27065e43b0deefc64f9305e26e7f6685491b7",
+  "nonce_hex": "50cf8bac18fd2ab456296171",
+  "part": "part2_dictionary_attack",
+  "tag_hex": "18f6f0b2071bad97a280ade7e4e2771b",
+  "version": 1
+}

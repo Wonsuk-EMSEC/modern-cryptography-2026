@@ -1,174 +1,172 @@
 # Part 4: CBC Bit-Flipping Attack
 
-**Estimated time:** 25 minutes. **Environment:** the Lab02 Docker services.
+**Environment:** course Docker container. Use only the supplied local target.
 
-## Scenario
+CBC encryption does not authenticate a packet. In this Part, write a program
+that changes the meaning of a course token and compares the original and
+modified verification results. The final successful response contains a flag.
 
-A local application issues encrypted session tokens for ordinary users.  The
-application can later verify a submitted token, but its encryption key and
-internal implementation remain outside the student workspace.  Your account
-is issued as a normal user; find out whether the encrypted token can be
-altered so that the application treats it as an administrator.
+The provided `cbc_bit_flipping.py` is empty. Write its imports, function,
+`main()`, and execution guard yourself. The functions must be importable
+without making network requests.
 
-## Objective
+## 1. Run the offline Sample
 
-Demonstrate that AES-CBC encryption alone does not protect a token from
-modification.  Produce a modified token that is accepted with administrator
-privileges and recover the displayed flag.
+Prepare the [course container](../README.md#setup), then run inside it:
 
-CBC decryption relates adjacent packet blocks as follows:
+```console
+cd /workspace/labs/lab02/part4_cbc_bit_flipping
+python3 samples/cbc_token_demo.py
+```
+
+Read the Sample's input, encryption, packet encoding, decoding, and output.
+It uses public demonstration values independent of the course target.
+
+```text
+message: b'Sample token'
+packet: 32 bytes = 16 IV + 16 ciphertext
+base64 round-trip: True
+recovered: b'Sample token'
+CBC round-trip: OK
+```
+
+Confirm that the binary packet contains the 16-byte IV followed by complete
+ciphertext blocks. Base64 is a representation of those bytes. The recovered
+message matches the original after padding removal.
+
+## 2. Implement and immediately check token modification
+
+Implement this interface in `cbc_bit_flipping.py`:
+
+```python
+forge_admin_token(normal_token: str) -> str
+```
+
+The input and return value are Base64 strings encoding `IV || ciphertext`.
+The course token contains the ASCII field `admin=0;` in its first plaintext
+block. Return a modified packet whose decrypted field is `admin=1;`.
+Preserve the packet's encoding and block layout. Use the CBC relation:
 
 ```text
 P_i = D_K(C_i) XOR C_(i-1)
+C_0 = IV
 ```
 
-For the first plaintext block, the IV fills the role of `C_(i-1)`.
+Determine how changing the preceding block changes a selected plaintext
+byte. The service's encryption key is unavailable to your function. Your
+method must work on newly issued tokens with different IVs.
 
-## Provided Files
+Before adding service calls, run this public local fixture. The fixture's
+key is used only by the test to create and inspect a packet:
 
-| File | Purpose |
-| --- | --- |
-| `client.py` | Command-line interface for issuing and verifying tokens. |
-| `starter.py` | A function to complete and a small verification workflow. |
-| `../common/service_client.py` | Shared connection helper for the local lab service. |
+```console
+python3 - <<'PY'
+import base64
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+from cbc_bit_flipping import forge_admin_token
 
-The token is encoded for transport.  Treat it as a sequence of bytes after
-decoding it; do not attempt to guess the encryption key.
-
-## Your Task
-
-**Before completing any TODOs, read `main()` in `starter.py` from beginning to end.**
-Trace the inputs, function calls, return values, and outputs so you understand
-the overall execution flow.
-
-Here, `main()` requests a normal token, verifies it, passes it to
-`forge_admin_token()`, and verifies the returned token. Follow how both
-verification results are printed, then complete the TODO only after you
-understand this flow.
-
-1. Start the supplied Lab02 target on your computer and obtain a normal token.
-2. Inspect the starter and determine how a controlled change to a preceding
-   CBC input affects the decrypted token fields.
-3. Complete `forge_admin_token()` in `starter.py` so that it returns an
-   encoded modified token.
-4. Verify the original and modified tokens through `client.py`.
-5. Record the flag only after the modified token is accepted as an
-   administrator.
-
-Do not modify the shared client or attempt to access the implementation of the
-local service.  Your method should work on a newly issued token, whose IV may
-change between runs.
-
-## How to Run
-
-As in Lab01 Part 2, you start a target container on your own computer and run
-the client from a course container. Parts 4–6 share this target. The instructor
-publishes its prebuilt image on GitHub Container Registry (GHCR); students do
-not build the target locally. The server implementation and secret files are
-excluded from the student source release, but the image contains them at
-runtime and can be inspected locally. See the
-[Lab02 setup instructions](../README.md#setup) for the one-time course-image
-preparation.
-
-### Step 1: start the target
-
-Compose automatically pulls this public image when needed, without a manual
-download or registry login:
-
-```text
-ghcr.io/wonsuk-emsec/modern-cryptography-2026-lab02-target:2026-lab02-v1
+key = bytes(range(16))
+for iv in (bytes(range(16, 32)), bytes([7]) * 16):
+    message = b"admin=0;userid=1042"
+    packet = iv + AES.new(key, AES.MODE_CBC, iv).encrypt(pad(message, 16))
+    original = base64.b64encode(packet).decode("ascii")
+    modified = base64.b64decode(forge_admin_token(original), validate=True)
+    recovered = unpad(AES.new(key, AES.MODE_CBC, modified[:16]).decrypt(modified[16:]), 16)
+    assert len(modified) == len(packet)
+    assert b"admin=1;" in recovered
+    assert b"userid=1042" in recovered
+print("Local token check: OK")
+PY
 ```
 
-Use the Lab02 files and image from the same **`2026-lab02-v1`** release;
-Part 5's supplied ciphertext must match the target image. In a **host
-terminal**, from the repository root, start the common course container and
-target, then check their status:
+Proceed only when `Local token check: OK` appears for the two IVs.
+
+## 3. Observe the target client
+
+From a **host terminal** at the repository root, start the local target:
 
 ```console
 docker compose -f docker/compose.yml --profile lab02 up -d --wait course lab02-target
 docker compose -f docker/compose.yml --profile lab02 ps
 ```
 
-The first `up` may take longer while Docker downloads the image. The target
-should be `healthy`. Docker creates the internal lab network
-automatically; you do not need to create a network or configure a server address.
-
-### Step 2: enter the course container
-
-From the same **host terminal**:
+The target must be healthy. Back in the Part directory inside the course
+container, run:
 
 ```console
-docker compose -f docker/compose.yml exec course bash
+python3 samples/cbc_token_demo.py --target
 ```
 
-Inside the container, change to the Lab02 directory:
+In addition to the offline output, the Sample reports a block-aligned target
+packet and the normal verification response. An ordinary token should not
+grant administrator privileges. Observe the response without modifying
+`client.py`.
+
+Read the Sample's target branch. The provided `client.issue()` returns a
+Base64 token; `client.verify(token)` returns the service's response string.
+Both functions manage their connections.
+
+## 4. Write the program entry point
+
+Now write `main()` and the execution guard in `cbc_bit_flipping.py`:
+
+1. Request a fresh normal token with the provided client.
+2. Verify that original token and print its response.
+3. Call your tested `forge_admin_token()` function.
+4. Verify the returned token and print its response.
+
+Keep network requests inside the entry point. Derive the modified packet
+from the issued token on every run.
+
+## 5. Run the complete exercise
+
+```console
+python3 cbc_bit_flipping.py
+```
+
+Record the original response and the modified response. Successful modified
+verification grants administrator privileges and includes `FLAG{...}`.
+Random IVs and token strings may differ between runs.
+
+## Example Output
+
+A successful run has the following output format. Values are hidden in this
+example. Include your actual results in your report. Run from
+`/workspace/labs/lab02` inside the course container.
+
+```console
+python3 part4_cbc_bit_flipping/cbc_bit_flipping.py
+normal: <original token response>
+modified: <administrator response> FLAG{<recovered value>}
+```
+
+Run only this Part's implementation checks:
 
 ```console
 cd /workspace/labs/lab02
+make grade PART=4
 ```
 
-Run the following Python commands **inside this container**.
+## 6. Completion and report
 
-Issue and verify a normal token:
+- [ ] The local fixture passes with both IVs.
+- [ ] The program requests and verifies a fresh normal token.
+- [ ] Modified verification grants administrator privileges and returns a flag.
+- [ ] Part 4 implementation checks pass.
+- [ ] The report explains how CBC's preceding block affects the plaintext.
+- [ ] The report explains why encryption alone did not detect the modification.
 
-```console
-python3 part4_cbc_bit_flipping/client.py issue
-python3 part4_cbc_bit_flipping/client.py verify TOKEN_VALUE
-```
-
-Replace `TOKEN_VALUE` with the token printed by `issue`.  After completing the
-TODO, run the full workflow:
-
-```console
-python3 part4_cbc_bit_flipping/starter.py
-```
-
-### Step 3: finish or continue to Part 5
-
-Keep the target and course shell running if you are continuing to Part 5.
-When you are finished, leave the course shell:
-
-```console
-exit
-```
-
-Exiting the shell leaves both containers running. Stop the Lab02 target from
-the **host terminal**:
+Submit your program, verification observations, and explanation. Submit the
+flag through the instructor's designated channel. Keep the target running
+if continuing to Part 5. When finished with the target, run from the host:
 
 ```console
 docker compose -f docker/compose.yml --profile lab02 stop lab02-target
 ```
 
-The common course container remains available for other labs. To remove the
-course container, Lab02 target, and their networks when this session is
-finished, run:
-
-```console
-docker compose -f docker/compose.yml --profile lab02 down
-```
-
-See the [Lab02 session instructions](../README.md#finish-or-restart-a-session)
-for cleanup when you have also started the Lab01 target.
-
-## Example Output
-
-A successful run has the following output format. Values are hidden in this
-example. Include your actual results in your report.
-
-Run from `/workspace/labs/lab02` inside the course container.
-
-```console
-python3 part4_cbc_bit_flipping/starter.py
-normal: <original token response>
-modified: <administrator response> FLAG{<recovered value>}
-```
-
-## Optional Hints
-
-1. CBC supplies the previous ciphertext block as an XOR input during
-   decryption.
-2. The difference between two known byte values can be expressed with XOR.
-3. Preserve the packet's encoding when returning it from your function.
+The shared course container remains available. See the
+[session instructions](../README.md#finish-or-restart-a-session) for cleanup.
 
 ## Checkpoint Questions
 

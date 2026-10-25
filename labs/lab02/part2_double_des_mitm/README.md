@@ -2,102 +2,28 @@
 
 **Estimated time:** 35 minutes. **Environment:** course Docker container.
 
-## Scenario
+Two independent reduced-space keys protect a record using
+`C = E_K2(E_K1(P))`. Recover both key IDs with a meet-in-the-middle
+(MITM) search and two known pairs, then decrypt the record.
 
-After seeing that one short DES key space is weak, an archival system added a
-second DES encryption layer. Both layer keys come from independent, deliberately
-bounded teaching spaces. Two known plaintext/ciphertext pairs are available,
-along with a separately encrypted record.
+`double_des_mitm.py` is provided as a **zero-byte file**. Write your complete
+program there, including imports and `main()`. The samples show construction
+and file formats without searching. Keep functions importable.
 
-## Objective
+## 1. Run and understand the samples
 
-Recover both reduced-space DES key identifiers with a meet-in-the-middle (MITM)
-search, verify the result with an independent known pair, and decrypt the
-encrypted record. Compare the method with the cost of a naive two-key search.
-
-The construction is:
-
-```text
-C = E_K2(E_K1(P))
-```
-
-For the first known pair, a correct key pair has the same intermediate value on
-both sides:
-
-```text
-E_K1(P1) = D_K2(C1)
-```
-
-## Provided Files
-
-| File | Purpose |
-| --- | --- |
-| `double_des_demo.py` | Runnable Double-DES encryption/decryption example using the lab helpers |
-| `starter.py` | Functions to complete for MITM recovery and decryption |
-| `data/known_pairs.json` | Two public known plaintext/ciphertext pairs and `key_bits` |
-| `data/encrypted_flag.bin` | A separately encrypted, padded record |
-| `../common/des.py` | Bounded DES block, padding, and key-mapping helpers |
-
-The two known pairs have different roles. Use the first to find possible
-intermediate-value matches, and use the second to reject accidental matches.
-
-## Your Task
-
-**Before completing any TODOs, read `main()` in `starter.py` from beginning
-to end.** Trace the inputs, function calls, return values, and outputs so you
-understand the overall execution flow.
-
-Follow how `main()` loads and decodes the known pairs, times `recover_keys()`,
-checks that exactly one key pair was returned, and passes that pair to
-`decrypt_flag()`. Complete the TODOs below only after you understand how
-these steps fit together.
-
-1. Read the two pairs and the bounded `key_bits` value in `known_pairs.json`.
-2. Complete `recover_keys()` in `starter.py`.
-3. For every possible `K1` ID, compute `E_K1(P1)` and store the result in a
-   table that maps each intermediate value to a **list** of candidate IDs.
-4. For every possible `K2` ID, compute `D_K2(C1)` and look for that value in
-   the table.
-5. For every matched pair, encrypt `P2` through both layers and compare it to
-   `C2`. Return only the verified candidate pairs.
-6. Complete `decrypt_flag()` by reversing the two DES layers for each block,
-   then removing the final padding.
-7. Run the program and record runtime, the expected forward-table size
-   (`2**key_bits` entries before collisions), and the number of verified pairs.
-
-Do not implement the default search as a nested loop over every possible `K1`
-and `K2` pair. That approach grows approximately as `2**(2 * key_bits)` and is
-included here only as a complexity comparison.
-
-## How to Run
-
-### Try Double-DES encryption and decryption first
-
-Start the course container as described in the Lab02 overview. Inside the
-container, run the demonstration before implementing the search:
+Prepare the [course container](../README.md#setup), then run inside it:
 
 ```console
 cd /workspace/labs/lab02/part2_double_des_mitm
-python3 double_des_demo.py
+python3 samples/double_des_roundtrip.py
+python3 samples/data_loading.py
 ```
 
-The sample runs immediately, without completing any TODOs. It uses the same
-key-mapping and decryption helpers as `starter.py`, together with the padding
-and encryption helpers in `../common/des.py`:
-
-1. Call `make_des_key()` with the public example IDs `17` and `93`, using
-   `key_bits=8` for each, to create `key1` and `key2`.
-2. Call `pad8()` on `b'Hello, Double DES!'`. This plaintext has 18 bytes; six
-   padding bytes, each with value `0x06`, extend it to 24 bytes (three DES blocks).
-3. Call `encrypt_bytes(padded_plaintext, key1)` to obtain the intermediate
-   value, then `encrypt_bytes(intermediate, key2)` to obtain the ciphertext.
-4. Reverse the layer order: call `decrypt_bytes(ciphertext, key2)`, check that
-   the result equals the intermediate value, then decrypt that result with
-   `key1` to recover the padded plaintext.
-5. Call `unpad8()` to validate and remove the padding, then check that the
-   recovered plaintext equals the original `b'Hello, Double DES!'`.
-
-Among the displayed values, you should see:
+Read the round-trip sample in execution order. Public example key IDs
+`17` and `93` each use an eight-bit space. The 18-byte plaintext receives
+six `0x06` bytes, making 24 bytes or three DES blocks. Encryption applies
+`key1` then `key2`; decryption reverses the order. Look for:
 
 ```text
 Plaintext: b'Hello, Double DES!'
@@ -106,76 +32,205 @@ Intermediate-value check: OK
 Double-DES round-trip check: OK
 ```
 
-The script displays the keys and both encryption layers so you can follow
-`P → E_K1(P) → E_K2(E_K1(P))` and the reverse path. In these demonstration
-labels, `P` means the 24-byte padded plaintext, processed one eight-byte block
-at a time. The intermediate-value check illustrates why
-`E_K1(P) = D_K2(C)` for the correct keys.
+The intermediate check compares the first encryption result to the first
+decryption result. For correct keys, `E_K1(P) = D_K2(C)`; this motivates
+the search table. **Pad once before both layers and unpad once after both
+layers.** Intermediate data already consists of complete blocks.
 
-The byte helpers process complete eight-byte blocks using ECB. **Pad once
-before the first encryption layer and unpad once after both decryption
-layers.** The intermediate value already consists of complete blocks, so no
-additional padding belongs between the layers.
+The data-loading sample reports `Bits per key ID: 16`, `Known pairs: 2`,
+eight-byte blocks for each pair, and `Public data shape check: OK`.
+The task uses **16 bits per key**, distinct from the sample's eight bits.
+JSON pair strings need `bytes.fromhex()`; the encrypted record is binary
+and needs `read_bytes()`.
 
-The script uses public example values independently of the task files. Each
-example key ID belongs to an **8-bit space**, while the supplied MITM task uses
-**16 bits per key ID**. The demonstration performs no brute-force or MITM
-search and does not read the task's known pairs or encrypted record.
+## 2. Write and check `double_encrypt()`
 
-Try changing the example plaintext and compare the original and padded
-lengths. Confirm that both checks still pass after reversing the layers and
-removing the padding.
+Implement this interface in `double_des_mitm.py`:
 
-### Run your meet-in-the-middle implementation
-
-After completing the TODOs, run from the same Part directory:
-
-```console
-python3 starter.py
+```python
+double_encrypt(block: bytes, key1: bytes, key2: bytes) -> bytes
 ```
 
-Run the Lab02 checks after completing the required functions:
+It accepts one eight-byte block and two encoded DES keys. Use
+`encrypt_block()` from `common.des` in the construction's order.
+Do not pad or unpad the block.
+
+The sample demonstrates shared-helper imports; your exercise file is one
+directory above `samples/`, so adjust its path.
+
+Check this function before adding decryption:
 
 ```console
+PYTHONPATH=.. python3 - <<'PY'
+from double_des_mitm import double_encrypt
+from common.des import encrypt_bytes, make_des_key
+block = b"CRYPTO26"
+key1, key2 = make_des_key(7, 8), make_des_key(91, 8)
+expected = encrypt_bytes(encrypt_bytes(block, key1), key2)
+assert double_encrypt(block, key1, key2) == expected
+print("Double-DES encryption check: OK")
+PY
+```
+
+Expected: `Double-DES encryption check: OK`. These known example keys are
+independent of the task.
+
+## 3. Write and check `double_decrypt()`
+
+Implement the corresponding one-block interface:
+
+```python
+double_decrypt(block: bytes, key1: bytes, key2: bytes) -> bytes
+```
+
+Use `decrypt_block()` twice in reverse key order. Do not pad or unpad.
+Run this check using the function completed in Step 2:
+
+```console
+PYTHONPATH=.. python3 - <<'PY'
+from double_des_mitm import double_encrypt, double_decrypt
+from common.des import make_des_key
+block = b"CRYPTO26"
+key1, key2 = make_des_key(7, 8), make_des_key(91, 8)
+assert double_decrypt(double_encrypt(block, key1, key2), key1, key2) == block
+print("Double-DES decryption check: OK")
+PY
+```
+
+Proceed after `Double-DES decryption check: OK`.
+
+## 4. Write and check `recover_keys()`
+
+Implement:
+
+```python
+recover_keys(pairs: list[tuple[bytes, bytes]], key_bits: int) -> list[tuple[int, int]]
+```
+
+Each input tuple contains `(plaintext, ciphertext)`. Return a list of
+verified `(key1_id, key2_id)` tuples, not encoded key bytes.
+
+1. Reject fewer than two pairs or `key_bits` outside `1..20`
+   with `ValueError`.
+2. For each first-key ID, compute the intermediate value for the first
+   plaintext. Map intermediate bytes to a **list** of IDs, preserving collisions.
+3. Walk all second-key IDs backward from the first ciphertext and find
+   matching intermediate values.
+4. Verify candidates against the remaining pair(s) and return only verified pairs.
+
+Use `make_des_key()` for both mappings. Do not use a nested exhaustive
+search over all first-key and second-key combinations as the default method.
+
+```console
+PYTHONPATH=.. python3 - <<'PY'
+from double_des_mitm import double_encrypt, recover_keys
+from common.des import make_des_key
+bits, id1, id2 = 8, 7, 91
+key1, key2 = make_des_key(id1, bits), make_des_key(id2, bits)
+pairs = [(block, double_encrypt(block, key1, key2))
+         for block in (b"CRYPTO26", b"BLOCK-02")]
+assert recover_keys(pairs, bits) == [(id1, id2)]
+for bad_pairs, bad_bits in ((pairs[:1], bits), (pairs, 21)):
+    try:
+        recover_keys(bad_pairs, bad_bits)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("reject invalid search parameters")
+print("MITM small-fixture check: OK")
+PY
+```
+
+Expected: `MITM small-fixture check: OK`. Resolve failures while each key
+space has only 256 candidates.
+
+## 5. Write and check `decrypt_flag()`
+
+Implement:
+
+```python
+decrypt_flag(encrypted: bytes, key1_id: int, key2_id: int, key_bits: int) -> bytes
+```
+
+Map the IDs to keys, reverse both encryption layers for every block,
+assemble the padded message, and call `unpad8()` once. You may use
+`decrypt_bytes()`. Return unpadded bytes.
+
+```console
+PYTHONPATH=.. python3 - <<'PY'
+from double_des_mitm import decrypt_flag
+from common.des import encrypt_bytes, make_des_key, pad8
+message, bits, id1, id2 = b"public Double-DES demo", 8, 7, 91
+key1, key2 = make_des_key(id1, bits), make_des_key(id2, bits)
+encrypted = encrypt_bytes(encrypt_bytes(pad8(message), key1), key2)
+assert decrypt_flag(encrypted, id1, id2, bits) == message
+print("Double-DES record check: OK")
+PY
+```
+
+Expected: `Double-DES record check: OK`. This checks multiple blocks,
+layer order, and final padding removal without searching.
+
+## 6. Write `main()` and connect the files
+
+Implement `main() -> None` with a guarded entry point. Locate `data/`
+relative to `__file__` so execution works from the Part or Lab02 directory.
+
+Read `data/known_pairs.json` as JSON. Its `key_bits` selects the space
+for each key; each `pairs` entry has hexadecimal `plaintext` and
+`ciphertext`. Convert them to blocks as shown in the data-loading sample.
+
+Measure `recover_keys()` using `time.perf_counter()` and print seconds
+and verified-pair count. The supplied instance should yield exactly one pair;
+handle zero or multiple pairs clearly. Print both recovered IDs, read
+`data/encrypted_flag.bin`, call `decrypt_flag()`, and print its ASCII result.
+
+```console
+python3 -c 'import double_des_mitm; print("Import check: OK")'
+```
+
+Expected: only `Import check: OK`, with no search starting on import.
+
+## 7. Run the supplied instance and finish
+
+```console
+python3 double_des_mitm.py
 cd /workspace/labs/lab02
-make grade
+make grade PART=2
 ```
-
-The public key-space limit is intentional. Keep the supplied parameters for
-the required run so that the exercise remains reproducible.
 
 ## Example Output
 
 A successful run has the following output format. Values are hidden in this
-example. Include your actual results in your report.
+example. Include your actual results in your report. Run from
+`/workspace/labs/lab02` inside the course container.
 
 ```console
-python3 starter.py
+python3 part2_double_des_mitm/double_des_mitm.py
 verified_pairs=<verified pair count> elapsed=<seconds>s
+key1_id=<recovered first ID> key2_id=<recovered second ID>
 FLAG{<recovered value>}
 ```
 
-## Optional Hints
-
-1. Build the forward table from the first plaintext, then walk backward from
-   the first ciphertext.
-2. One intermediate value can map to more than one `K1` ID. Preserve every ID
-   rather than overwriting an earlier entry.
-3. An intermediate-value match is only a candidate. The second known pair is
-   what verifies it.
+Completion means the three function checks and import check pass, both known
+pairs verify the recovered pair, the record decrypts, and selected-Part
+grading passes. Keep the supplied 16-bit parameters. After completing all
+Parts, run `make grade` without `PART`.
 
 ## Checkpoint Questions
 
-1. Why would a naive search over two `n`-bit reduced key spaces require about
-   `2**(2*n)` block-cipher operations?
-2. How does the MITM search change the expected work, and what memory does it
-   require?
-3. Why must the forward table retain a list of key IDs for each intermediate
-   value?
-4. Why does the second known pair matter even if the first pair gives one
-   apparent match in a particular run?
-5. Why does adding a second cipher invocation not automatically provide the
-   security one might expect from simply doubling a key length?
+Report elapsed time, verified-pair count, forward-table candidate count,
+and number of distinct intermediate values. There are `2**key_bits`
+candidate IDs; collisions can reduce distinct dictionary keys. Explain:
+
+1. Why does a naive search require approximately `2**(2*n)` operations?
+2. How does MITM change work and memory requirements?
+3. Why retain a list of IDs per table entry?
+4. Why verify a match with another pair?
+5. Why does invoking a cipher twice not automatically double security?
+
+Do not hard-code keys or plaintext. Submit the flag through the designated
+course channel and keep it out of public code and sample output.
 
 ## Report Checklist
 
@@ -183,4 +238,4 @@ FLAG{<recovered value>}
 - [ ] Main code changes and an explanation of how they work
 - [ ] Execution screenshots and the recovered FLAG
 - [ ] Verified pair count and elapsed time (visible in the screenshot)
-- [ ] Expected forward-table size
+- [ ] Expected forward-table size, actual candidate count, and distinct intermediate-value count

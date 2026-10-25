@@ -1,152 +1,222 @@
 # Part 5: Padding Oracle Attack
 
-**Estimated time:** 50 minutes. **Environment:** the Lab02 Docker services.
+**Environment:** course Docker container and the supplied local Lab02 target.
 
-## Scenario
+The local oracle reports only whether a modified AES-CBC packet has valid
+PKCS#7 padding. Recover the protected plaintext by using that Boolean
+response. The recovered message contains `FLAG{...}`.
 
-A local application holds an encrypted record.  It will accept modified
-packets and reveal only whether the resulting CBC plaintext has valid PKCS#7
-padding.  It never returns the decrypted record.  Treat this one-bit response
-as the only information available to your program.
+The provided `padding_oracle.py` is a zero-byte student file. Write its
+imports, functions, `main()`, and execution guard. Keep recovery functions
+importable without connecting to the target. The provided
+`oracle_client.py` handles the local protocol and counts requests.
 
-## Objective
+## 1. Run and understand the Sample
 
-Recover the hidden plaintext one byte at a time by using CBC packet
-modifications and the padding-validity response.  The recovered plaintext
-contains the flag.
+Follow the [Lab02 setup](../README.md#setup), enter the course container,
+then run:
 
-## Provided Files
+```console
+cd /workspace/labs/lab02/part5_padding_oracle
+python3 samples/padding_demo.py
+```
 
-| File | Purpose |
-| --- | --- |
-| `data/ciphertext.hex` | The supplied IV-and-ciphertext packet in hexadecimal form. |
-| `oracle_client.py` | Boolean-only query interface for the local lab service. |
-| `starter.py` | Block and full-packet recovery functions to complete. |
-| `../common/service_client.py` | Shared connection helper for the local lab service. |
+The Sample uses a public message and standard PKCS#7 functions. It prints:
 
-`OracleClient.query(ciphertext)` returns `True` for valid padding and `False`
-for invalid padding.  It does not return plaintext or padding bytes.  The
-service enforces a per-run query limit to help you detect an unintended loop.
+```text
+message: b'Sample record'
+padded: b'Sample record\x03\x03\x03'
+length: 13 -> 16 bytes
+valid suffix: True
+damaged suffix: rejected
+```
 
-## Your Task
+Observe that the padding suffix must agree with the final padding byte.
+Changing a byte inside that suffix makes padding invalid even if the final
+byte remains unchanged. Read the Sample's `local_example()` and `main()` to
+follow bytes, exception handling, and output.
 
-**Before completing any TODOs, read `main()` in `starter.py` from beginning to end.**
-Trace the inputs, function calls, return values, and outputs so you understand
-the overall execution flow.
+The course packet is `IV || C_1 || C_2 || ...`, with 16-byte blocks.
+`OracleClient.query(packet)` returns `True` or `False`. It reveals no
+plaintext. Keep the target's per-run query limit in mind while developing.
 
-Here, `main()` reads the hexadecimal packet and opens an `OracleClient`
-context. It converts the packet to bytes, passes it and the `oracle.query`
-callback to `recover_plaintext()`, then prints the returned message and query
-count. Complete the TODOs only after you understand this flow.
+## 2. Implement one-block recovery and check it
 
-1. Read the supplied packet as `IV || C_1 || C_2 || ...`, using AES's
-   16-byte block size.
-2. Complete `recover_block()` so it uses only the Boolean query result to
-   recover one plaintext block.  Work from the rightmost byte toward the
-   leftmost byte.
-3. Handle the ambiguity that can occur when testing padding length one.
-4. Complete `recover_plaintext()` to recover every plaintext block and remove
-   validated PKCS#7 padding.
-5. Run your program and retain the recovered flag.
+Implement in `padding_oracle.py`:
 
-Do not decode or inspect a local implementation of the oracle.  Your recovery
-code must derive every plaintext byte from packet modifications and the
-provided query interface.
+```python
+recover_block(previous: bytes, target: bytes, query: Callable[[bytes], bool]) -> bytes
+```
 
-## How to Run
+`previous` is the IV or the preceding ciphertext block; `target` is the
+ciphertext block being recovered. Both are 16 bytes. Return the 16-byte
+plaintext block, including any padding bytes. Use only the Boolean result
+from `query`. Recover from right to left, and resolve the possible
+one-byte-padding ambiguity before accepting a candidate.
 
-Use the same local target as Part 4. If you have not prepared the Lab02
-environment yet, follow the [Lab02 setup instructions](../README.md#setup).
-Compose automatically pulls the prebuilt target image from GHCR when needed.
-Use this Part's ciphertext and the target image from the same `2026-lab02-v1`
-release. The oracle source and keys are excluded from the student source
-release.
+Check against a small in-memory oracle that uses only public test values.
+Your recovery function receives only the callback, blocks, and Boolean
+responses; the key exists in this test fixture to create responses:
 
-### Step 1: start the target and enter the course container
+```console
+python3 - <<'PY'
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+from padding_oracle import recover_block
 
-In a **host terminal**, from the repository root:
+key, iv = bytes(range(16)), bytes(range(16, 32))
+message = b"Sample record"
+padded = pad(message, 16)
+target = AES.new(key, AES.MODE_CBC, iv).encrypt(padded)
+
+def query(packet: bytes) -> bool:
+    if len(packet) < 32 or len(packet) % 16:
+        return False
+    candidate_iv, candidate_ciphertext = packet[:16], packet[16:]
+    clear = AES.new(key, AES.MODE_CBC, candidate_iv).decrypt(candidate_ciphertext)
+    try:
+        unpad(clear, 16)
+        return True
+    except ValueError:
+        return False
+
+assert recover_block(iv, target, query) == padded
+print("One-block recovery: OK")
+PY
+```
+
+Proceed when the recovered block matches the public padded message.
+
+## 3. Implement full-packet recovery and check it
+
+Implement:
+
+```python
+recover_plaintext(packet: bytes, query: Callable[[bytes], bool]) -> bytes
+```
+
+Split the packet into its IV and ciphertext blocks. Reuse your tested
+`recover_block()` for each block, concatenate the recovered blocks, validate
+the final PKCS#7 suffix, and return the plaintext without padding. Handle
+packets that contain multiple ciphertext blocks.
+
+Use this public two-block fixture. The callback has the same Boolean-only
+interface as the local target:
+
+```console
+python3 - <<'PY'
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+from padding_oracle import recover_plaintext
+
+key, iv = bytes(range(16)), bytes(range(16, 32))
+message = b"Sample message across two blocks"
+packet = iv + AES.new(key, AES.MODE_CBC, iv).encrypt(pad(message, 16))
+
+def query(candidate: bytes) -> bool:
+    if len(candidate) < 32 or len(candidate) % 16:
+        return False
+    clear = AES.new(key, AES.MODE_CBC, candidate[:16]).decrypt(candidate[16:])
+    try:
+        unpad(clear, 16)
+        return True
+    except ValueError:
+        return False
+
+assert recover_plaintext(packet, query) == message
+print("Full-packet recovery: OK")
+PY
+```
+
+Proceed only when `Full-packet recovery: OK` appears.
+
+## 4. Observe the supplied target interface
+
+Start the local target in a **host terminal** at the repository root:
 
 ```console
 docker compose -f docker/compose.yml --profile lab02 up -d --wait course lab02-target
 docker compose -f docker/compose.yml --profile lab02 ps
-docker compose -f docker/compose.yml exec course bash
 ```
 
-The target should be `healthy`. The last command opens the common course
-shell. **Inside the container**, change to the lab directory:
+When it is healthy, run from the Part directory inside the course container:
+
+```console
+python3 samples/padding_demo.py --target
+```
+
+The offline output is followed by the number of ciphertext blocks, the
+original packet's padding-valid result, and a query count of `1`. The normal
+packet should be valid. The Sample reads `data/ciphertext.hex` and submits
+that packet unchanged. It performs no recovery.
+
+## 5. Write the program entry point
+
+Write `main()` and the execution guard in `padding_oracle.py`:
+
+1. Read `data/ciphertext.hex` and convert its hexadecimal text to bytes.
+2. Open `OracleClient()` with a `with` block.
+3. Pass the packet and `oracle.query` to `recover_plaintext()`.
+4. Print the recovered message and `oracle.queries`.
+
+Follow the Sample's path handling so the program can run from the Part
+directory. Keep the recovery functions independent of the client and data
+file.
+
+## 6. Run the complete exercise
+
+```console
+python3 padding_oracle.py
+```
+
+The output should contain the recovered message in the form `FLAG{...}`
+and the number of oracle queries. Query counts may vary with your
+implementation. Each plaintext byte must come from packet modifications
+and the Boolean query interface.
+
+## Example Output
+
+A successful run has the following output format. Values are hidden in this
+example. Include your actual results in your report. Run from
+`/workspace/labs/lab02` inside the course container.
+
+```console
+python3 part5_padding_oracle/padding_oracle.py
+FLAG{<recovered value>}
+oracle queries: <query count>
+```
+
+Run the Part-specific implementation checks from the Lab02 directory:
 
 ```console
 cd /workspace/labs/lab02
+make grade PART=5
 ```
 
-If your target and course shell are still running from Part 4, continue in
-that shell without starting another one.
-
-### Step 2: run your recovery code
-
-Run the starter **inside the course container** after completing its TODOs:
-
-```console
-python3 part5_padding_oracle/starter.py
-```
-
-To try a small query while developing, start Python from the Part 5 directory
-in the same course shell and use `OracleClient` from there:
-
-```console
-cd /workspace/labs/lab02/part5_padding_oracle
-python3
-```
-
-Use `exit()` to leave Python, then `cd /workspace/labs/lab02` to return to the
-lab directory.
-
-### Step 3: reset or stop the target
-
-If you reach the query limit while debugging, check your loop, then reset your
-local target from a **second host terminal** at the repository root:
+If you reach the target's query limit, inspect the loop, then reset the
+target in the host terminal and wait until it is healthy:
 
 ```console
 docker compose -f docker/compose.yml --profile lab02 restart lab02-target
 docker compose -f docker/compose.yml --profile lab02 ps
 ```
 
-Wait until the target is `healthy`, then rerun your program. Restarting the
-target resets query counts for Parts 5 and 6.
+## 7. Completion and report
 
-Keep the target running if you are continuing to Part 6. When finished, run
-`exit` in the course shell. This leaves both containers running. Stop the
-Lab02 target from the **host terminal**:
+- [ ] One-block and full-packet public checks pass.
+- [ ] The final program reads the supplied packet and uses only oracle responses.
+- [ ] It recovers every plaintext block, validates padding, and prints `FLAG{...}`.
+- [ ] It prints the number of queries; the Part 5 implementation checks pass.
+- [ ] The report explains what the Boolean response reveals and how the
+      previous block affects a target plaintext block.
+
+Submit the student program, query count, and explanation. Submit the flag
+through the instructor's designated channel. Keep the target running for
+Part 6, or stop it from the host terminal:
 
 ```console
 docker compose -f docker/compose.yml --profile lab02 stop lab02-target
 ```
-
-The common course container remains available for other labs. See the
-[Lab02 session instructions](../README.md#finish-or-restart-a-session) to
-remove all course containers when you are finished with them.
-
-## Example Output
-
-A successful run has the following output format. Values are hidden in this
-example. Include your actual results in your report.
-
-Run from `/workspace/labs/lab02` inside the course container.
-
-```console
-python3 part5_padding_oracle/starter.py
-FLAG{<recovered value>}
-oracle queries: <query count>
-```
-
-## Optional Hints
-
-1. To recover `P_i`, preserve `C_i` and construct variants of the preceding
-   block.
-2. First force a valid one-byte padding value, then extend the forced suffix
-   one byte at a time.
-3. A second perturbation can distinguish a genuine one-byte result from a
-   longer valid padding suffix.
 
 ## Checkpoint Questions
 

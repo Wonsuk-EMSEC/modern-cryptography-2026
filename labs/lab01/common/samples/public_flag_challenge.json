@@ -1,0 +1,11 @@
+{
+  "algorithm": "AES-256-GCM",
+  "challenge": {
+    "proof_format": "public-demo-proof"
+  },
+  "ciphertext_hex": "9cffff2b2d4d82c1639af13ac2ebe56ea823083a3849",
+  "nonce_hex": "b48e78818bb7e9a955cc37d5",
+  "part": "public_demo",
+  "tag_hex": "971df90bb18e94359cdbf470080765dc",
+  "version": 1
+}

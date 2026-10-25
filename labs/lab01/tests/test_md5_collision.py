@@ -1,24 +1,21 @@
+"""Check the supplied collision fixtures without a student implementation."""
+
+import hashlib
 import unittest
-import os
 from pathlib import Path
 
-try:
-    from ._load_impl import LAB_ROOT, load
-except ImportError:  # unittest discovery adds this directory directly to sys.path
-    from _load_impl import LAB_ROOT, load
-
-impl = load("md5_collision")
+LAB_ROOT = Path(__file__).resolve().parents[1]
 
 
-@unittest.skipUnless(os.environ.get("LAB01_GRADE"), "complete the student starter first")
 class MD5CollisionTests(unittest.TestCase):
     def test_supplied_files_are_a_collision(self):
-        first = LAB_ROOT / "data" / "md5_collision_a.bin"
-        second = LAB_ROOT / "data" / "md5_collision_b.bin"
-        self.assertTrue(impl.files_are_distinct(first, second))
-        self.assertEqual(impl.digest_file(first, "md5"), impl.digest_file(second, "md5"))
+        data = LAB_ROOT / "part1_hashing" / "data"
+        first = (data / "md5_collision_a.bin").read_bytes()
+        second = (data / "md5_collision_b.bin").read_bytes()
+        self.assertNotEqual(first, second)
+        self.assertEqual(hashlib.md5(first).digest(), hashlib.md5(second).digest())
         self.assertNotEqual(
-            impl.digest_file(first, "sha256"), impl.digest_file(second, "sha256")
+            hashlib.sha256(first).digest(), hashlib.sha256(second).digest()
         )
 
 
