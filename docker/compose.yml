@@ -17,6 +17,7 @@ services:
       - default
       - lab01-ssh-internal
       - lab02-internal
+      - lab03-internal
     stdin_open: true
     tty: true
 
@@ -62,8 +63,35 @@ services:
       timeout: 2s
       retries: 10
 
+  lab03-target:
+    profiles:
+      - lab03
+    # Staff build and validate this version before publishing it to GHCR.
+    # Runtime practice keys are distinct from instructor-hosted grading keys.
+    image: ghcr.io/wonsuk-emsec/modern-cryptography-2026-lab03-target:2026-lab03-v1
+    hostname: lab03-target
+    expose:
+      - "8080"
+    networks:
+      - lab03-internal
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=2).read()"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
 networks:
   lab01-ssh-internal:
     internal: true
   lab02-internal:
+    internal: true
+  lab03-internal:
     internal: true

@@ -1,0 +1,15 @@
+{
+  "service": "lab03-target",
+  "part": 6,
+  "base_url_environment": "LAB03_TARGET_URL",
+  "default_base_url": "http://lab03-target:8080",
+  "integer_encoding": "canonical nonnegative decimal strings less than n",
+  "session": "32 lowercase hexadecimal characters; valid for 1800 seconds",
+  "challenge": "GET /part06/challenge; fresh runtime public_key={n,e}, ciphertext, session, multiplier, oaep_amount, oaep, expires_in",
+  "transfer": "POST /part06/transfer; exact JSON fields session,ciphertext",
+  "oaep_transfer": "POST /part06/oaep/transfer; exact JSON fields session,ciphertext,stage; stage=normal|tampered",
+  "result": "GET /part06/result?session=SESSION; complete,checks; flag only when complete",
+  "oaep": {"bits": 2048, "hash": "SHA-256", "mgf1_hash": "SHA-256", "label": "", "plaintext_encoding": "ASCII decimal amount"},
+  "limits": {"request_bytes": 16384, "timeout_seconds": 5, "sessions": 512},
+  "note": "Public challenge values are issued at runtime; this file contains no target private key or grading flag."
+}

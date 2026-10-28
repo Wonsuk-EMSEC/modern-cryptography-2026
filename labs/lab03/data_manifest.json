@@ -1,0 +1,17 @@
+{
+  "version": "2026-lab03-v1",
+  "sha256": {
+    "part01/data/challenge.json": "c5a8fc0beb5a242a16b6020d9bf658974852eee03fa0ea8d9a5f17fa5c535a72",
+    "part02/data/challenge.json": "2d056949cfbf9f967980e2a96c473370bffed5578e9aea42ba47a32bf3be78eb",
+    "part02/data/confidential_report.enc": "fb929684548136bfab390344b225907239f46b8cae78369e1310142136e5238f",
+    "part03/data/primes2048.txt": "49b2ef9b3bc064dc36cb7a9526b1c857b14026490ba196809a45470ad4aaf1ab",
+    "part03/data/primes3072.txt": "0f6401ec43b9b7bcbfd0f97b72a7db09962900395e541804a238f7db9cc49efd",
+    "part04/data/challenge.json": "ea8445c36eecb1c756df608d60082ac1e7eb43c84bf6a767339346898e8dc75a",
+    "part05/data/challenge.json": "2072ef16dee22ba618d30fdeec59a591df443f4828300fe2a39cce0a32544b93",
+    "part06/data/protocol.json": "3ce0bae38e9813067bceaa97cf9b3dbb39a3b9a74607df9608da5c3e92c8fedc",
+    "part07/data/trusted_public.pem": "a2b3a453c312407dfd8b4ca97c17d94c31034c17c8b71b595221dc536060be26",
+    "part07/data/update.bin": "1229a87e278bce2ca85346628b93c0afcc0ee70b0f3ff3d1369e2b5bae15c9c2",
+    "part07/data/update.sig": "7fdd62ef7bf131e0b19b23d5b889a8a28abdfcb770bcad17933839e11c32aacf",
+    "part08/data/protocol.json": "520980742299112eb8c28fdbb4b6cf727ae983898058176f0c42dd1d50ae03f3"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "service": "lab03-target",
+  "part": 8,
+  "base_url_environment": "LAB03_TARGET_URL",
+  "default_base_url": "http://lab03-target:8080",
+  "integer_encoding": "canonical nonnegative decimal strings less than n",
+  "session": "32 lowercase hexadecimal characters; valid for 1800 seconds",
+  "challenge": "GET /part08/challenge; fresh runtime public_key={n,e}, mu, session, primitive, expires_in",
+  "sign": "POST /part08/sign; exact JSON fields session; returns faulty_signature and fresh unpredictable mu2",
+  "verify": "POST /part08/verify; exact JSON fields session,signature; verifies the signature of mu2",
+  "secure_sign": "POST /part08/secure-sign; exact JSON fields session,fault; fault must be a JSON boolean; signs original mu only",
+  "result": "GET /part08/result?session=SESSION; complete,checks; flag only when complete",
+  "primitive": "raw RSA integer representatives; distinct from Part07 RSA-PSS",
+  "limits": {"request_bytes": 16384, "timeout_seconds": 5, "sessions": 512},
+  "note": "Public challenge values are issued at runtime; this file contains no target private key or grading flag."
+}

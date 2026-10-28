@@ -1,0 +1,8 @@
+{
+  "format": "LAB03E1\\n || IV[16] || AES-128-CBC-PKCS7 ciphertext",
+  "libc": "glibc srand/rand",
+  "timezone": "Asia/Seoul (UTC+09:00)",
+  "start_epoch": 1791334800,
+  "end_epoch": 1791341999,
+  "sha256": "dd1b6392aa19300705d148eef37c0edff4f260ff9ce17c23eb3d88c4686bb143"
+}

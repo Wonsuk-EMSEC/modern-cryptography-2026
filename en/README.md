@@ -18,7 +18,7 @@ or third-party networks. Lab-specific restrictions appear in each lab README.
 - `en/`: English documentation with the same directory structure
 - `instructor/`: Instructor materials
 
-Lab instructions: [Lab 01](labs/lab01/README.md) · [Lab 02](labs/lab02/README.md)
+Lab instructions: [Lab 01](labs/lab01/README.md) · [Lab 02](labs/lab02/README.md) · [Lab 03](labs/lab03/README.md)
 
 Both languages use the same lab code, data, and Docker environment. Even when
 reading the English documentation, run exercises under `/workspace/labs/...`.
@@ -130,7 +130,7 @@ When you are finished with all labs, stop and remove the course container,
 optional targets, and their networks with:
 
 ```console
-docker compose -f docker/compose.yml --profile lab01-ssh --profile lab02 down
+docker compose -f docker/compose.yml --profile lab01-ssh --profile lab02 --profile lab03 down
 ```
 
 

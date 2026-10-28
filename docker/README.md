@@ -16,8 +16,11 @@ docker/
 │   ├── Dockerfile                # Lab01 Part 2 SSH server
 │   ├── README.md
 │   └── sshd_config
-└── lab02-target/
+├── lab02-target/
     ├── Dockerfile                # Lab02 Parts 4–6 server; staff build
+    └── README.md
+└── lab03-target/
+    ├── Dockerfile                # Lab03 Parts 06/08 server; staff build
     └── README.md
 ```
 
@@ -104,11 +107,30 @@ docker compose -f docker/compose.yml --profile lab02 down
 
 다른 실습을 위해 수업 컨테이너를 유지하려면 위의 대상 전용 `stop` 명령을 사용합니다.
 
-**모든** 실습을 마쳤다면 수업 컨테이너, 두 대상과 해당 네트워크를 제거합니다.
+**모든** 실습을 마쳤다면 수업 컨테이너, 세 대상과 해당 네트워크를 제거합니다.
 
 ```console
-docker compose -f docker/compose.yml --profile lab01-ssh --profile lab02 down
+docker compose -f docker/compose.yml --profile lab01-ssh --profile lab02 --profile lab03 down
 ```
+
+## Lab03 대상
+
+Part06과 Part08은 같은 `course` 셸에서 `lab03-target:8080`에 접근합니다.
+`lab03` 프로필은 별도 내부 네트워크를 사용하며 호스트 포트를 공개하지 않습니다.
+공통 Dockerfile의 기존 의존성으로 실행하므로 추가 설치는 필요 없습니다.
+
+```console
+docker compose -f docker/compose.yml --profile lab03 up -d --wait course lab03-target
+docker compose -f docker/compose.yml --profile lab03 ps
+docker compose -f docker/compose.yml --profile lab03 logs --tail 30 lab03-target
+docker compose -f docker/compose.yml --profile lab03 stop lab03-target
+```
+
+`ps`에서 대상이 `healthy`인지 확인하세요. 강의 이미지와 대상은
+[Lab03 빌드 안내](lab03-target/README.md)에 따라 교수자가 먼저 검증합니다.
+대상 이미지는 GHCR의 `2026-lab03-v1` 태그를 사용하며, 게시 여부는 별도 확인해야
+합니다. 로컬 대상은 연습용입니다. 실제 평가용 비밀은 교수자 관리 서버에서 사용하고,
+학생 클라이언트는 `LAB03_TARGET_URL`로 관리 서버에 연결할 수 있습니다.
 
 ## 이후 실습 추가하기
 

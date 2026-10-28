@@ -16,8 +16,11 @@ docker/
 │   ├── Dockerfile                # Lab01 Part 2 SSH server
 │   ├── README.md
 │   └── sshd_config
-└── lab02-target/
+├── lab02-target/
     ├── Dockerfile                # Lab02 Parts 4–6 server; staff build
+    └── README.md
+└── lab03-target/
+    ├── Dockerfile                # Lab03 Parts 06/08 server; staff build
     └── README.md
 ```
 
@@ -109,12 +112,32 @@ docker compose -f docker/compose.yml --profile lab02 down
 Use the target-only `stop` command above if you want to keep the course
 container available for other labs.
 
-When finished with **all** labs, remove the course container, both targets,
+When finished with **all** labs, remove the course container, all three targets,
 and their networks:
 
 ```console
-docker compose -f docker/compose.yml --profile lab01-ssh --profile lab02 down
+docker compose -f docker/compose.yml --profile lab01-ssh --profile lab02 --profile lab03 down
 ```
+
+## Lab03 target
+
+Parts06 and08 use the same `course` shell to access `lab03-target:8080`.
+The `lab03` profile uses a separate internal network and exposes no host ports.
+Existing dependencies in the shared Dockerfile are sufficient; no extra installation
+is needed.
+
+```console
+docker compose -f docker/compose.yml --profile lab03 up -d --wait course lab03-target
+docker compose -f docker/compose.yml --profile lab03 ps
+docker compose -f docker/compose.yml --profile lab03 logs --tail 30 lab03-target
+docker compose -f docker/compose.yml --profile lab03 stop lab03-target
+```
+
+Check that the target is `healthy` in `ps`. Staff must validate the course and target
+images using the [Lab03 build guide](lab03-target/README.md). The target uses GHCR
+tag `2026-lab03-v1`; publication must be verified separately. Local targets are for
+practice. Real grading secrets belong on instructor-hosted targets; students can
+select the hosted service with `LAB03_TARGET_URL`.
 
 ## Adding a future lab
 

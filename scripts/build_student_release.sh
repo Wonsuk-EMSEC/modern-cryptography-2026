@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build the Lab01 and Lab02 student source archive. The Lab02 target is pulled from GHCR.
+# Build the Lab01–Lab03 student archive. Target images are distributed separately.
 set -euo pipefail
 
 usage() {
@@ -37,11 +37,17 @@ required_files=(
     labs/lab02/part7_aes_cpa/data/plaintexts.npy
     labs/lab02/part7_aes_cpa/data/traces.npy
     labs/lab02/part7_aes_cpa/data/secret_ciphertext.bin
+    labs/lab03/data_manifest.json
+    labs/lab03/part02/data/confidential_report.enc
+    labs/lab03/part03/data/primes2048.txt
+    labs/lab03/part03/data/primes3072.txt
+    labs/lab03/part07/data/trusted_public.pem
+    labs/lab03/part07/data/update.sig
 )
 for required_file in "${required_files[@]}"; do
     if [[ ! -f "$repo_root/$required_file" ]]; then
         echo "missing course data file: $required_file" >&2
-        echo "check the instructor Lab01/Lab02 preparation steps before packaging" >&2
+        echo "check the instructor Lab01/Lab02/Lab03 preparation steps before packaging" >&2
         exit 2
     fi
 done
@@ -227,6 +233,75 @@ student_paths=(
     labs/lab02/tests/test_exercises.py
     labs/lab02/tests/test_des_primitives.py
     labs/lab02/tests/test_service_interface.py
+    docker/lab03-target/Dockerfile
+    docker/lab03-target/README.md
+    en/docker/lab03-target/README.md
+    en/labs/lab03/README.md
+    en/labs/lab03/REPORT_TEMPLATE.md
+    en/labs/lab03/part01/README.md
+    en/labs/lab03/part02/README.md
+    en/labs/lab03/part03/README.md
+    en/labs/lab03/part04/README.md
+    en/labs/lab03/part05/README.md
+    en/labs/lab03/part06/README.md
+    en/labs/lab03/part07/README.md
+    en/labs/lab03/part08/README.md
+    labs/lab03/Makefile
+    labs/lab03/README.md
+    labs/lab03/REPORT_TEMPLATE.md
+    labs/lab03/__init__.py
+    labs/lab03/check.py
+    labs/lab03/common/__init__.py
+    labs/lab03/common/service_client.py
+    labs/lab03/data_manifest.json
+    labs/lab03/part01/README.md
+    labs/lab03/part01/data/challenge.json
+    labs/lab03/part01/starter/math_challenges.py
+    labs/lab03/part01/starter/prime64.py
+    labs/lab03/part01/tests/check.py
+    labs/lab03/part02/README.md
+    labs/lab03/part02/data/challenge.json
+    labs/lab03/part02/data/confidential_report.enc
+    labs/lab03/part02/starter/pdf_encryption.c
+    labs/lab03/part02/starter/recover.py
+    labs/lab03/part02/starter/secure_random.c
+    labs/lab03/part02/tests/check.py
+    labs/lab03/part02/tests/rng_driver.c
+    labs/lab03/part03/README.md
+    labs/lab03/part03/data/primes2048.txt
+    labs/lab03/part03/data/primes3072.txt
+    labs/lab03/part03/starter/rsa_engine.c
+    labs/lab03/part03/starter/rsa_engine.h
+    labs/lab03/part03/starter/rsa_io.c
+    labs/lab03/part03/tests/check.py
+    labs/lab03/part03/tests/driver.c
+    labs/lab03/part04/README.md
+    labs/lab03/part04/data/challenge.json
+    labs/lab03/part04/starter/recover.py
+    labs/lab03/part04/tests/check.py
+    labs/lab03/part05/README.md
+    labs/lab03/part05/data/challenge.json
+    labs/lab03/part05/starter/recover.py
+    labs/lab03/part05/tests/check.py
+    labs/lab03/part06/README.md
+    labs/lab03/part06/data/protocol.json
+    labs/lab03/part06/starter/attack.py
+    labs/lab03/part06/tests/check.py
+    labs/lab03/part07/README.md
+    labs/lab03/part07/data/trusted_public.pem
+    labs/lab03/part07/data/update.bin
+    labs/lab03/part07/data/update.sig
+    labs/lab03/part07/starter/pss.c
+    labs/lab03/part07/starter/pss.h
+    labs/lab03/part07/starter/update.c
+    labs/lab03/part07/starter/update_vulnerable.c
+    labs/lab03/part07/tests/check.py
+    labs/lab03/part07/tests/driver.c
+    labs/lab03/part08/README.md
+    labs/lab03/part08/data/protocol.json
+    labs/lab03/part08/starter/attack.py
+    labs/lab03/part08/tests/check.py
+    labs/lab03/tests/test_materials.py
 )
 for student_path in "${student_paths[@]}"; do
     if [[ ! -e "$repo_root/$student_path" ]]; then

@@ -6,12 +6,12 @@
       "english_sha256": "f700f0302b05a9c20f1a472a561c6938a218478ac76b1a0ca268720b82b2acf2"
     },
     "README.md": {
-      "korean_sha256": "71ddaba77538197cf8883dd5f582cb95ac67d32067dd307878756377de3581af",
-      "english_sha256": "9aea8f0197cd94e22cd145cabb7a1ea3daebe8a189f50691b6e048a5ec2c45f8"
+      "korean_sha256": "89d966a1ced5c7a65bfe5f72986334ff82888ce8bbab978d299d9bc63c39e4b6",
+      "english_sha256": "0a4b67a7fc70d44c214c8763a65709d7c3eb49c31fb41a3f0c43b709771252d1"
     },
     "docker/README.md": {
-      "korean_sha256": "884fae29900b7da2bb774ec2603b8fb0efd3f157ad8dd1e40943c1866d357c34",
-      "english_sha256": "93d3ae5288640cc71c170daf9f3da5801b6164b709ca597bb020cbf9ecfd4d3c"
+      "korean_sha256": "1dd76d1d5de739fabebf1d02d81bfd17c1a143f4f57779af2c632aaa47ff501f",
+      "english_sha256": "4b69b7776ca72ef76665c97e7520f8808308766a5041a5b02fc26e4b6f36932e"
     },
     "docker/lab01-ssh-target/README.md": {
       "korean_sha256": "9bc6fd73c9fe06ddbf626c5c22ee5a71d014ee53a655a6e4c2220aa9fe3ae783",
@@ -20,6 +20,10 @@
     "docker/lab02-target/README.md": {
       "korean_sha256": "2f25caf9ba1be74d54d7624da1042e3cd00ce36537693ea9516a0dabc995b2ea",
       "english_sha256": "df97b8afd733c93b1107747fc06a8a4a6a62f81588a6a0101be70a5c549f2a53"
+    },
+    "docker/lab03-target/README.md": {
+      "korean_sha256": "c1418ff68b5c1bbb93339050cfd6724b1d844257895cb106293b8ce3b180d7de",
+      "english_sha256": "d539833b07e41b6440b403d1998e9b4bc3cb4186eec83736c311418442b1915b"
     },
     "labs/lab01/README.md": {
       "korean_sha256": "3e9243157151f385f03ac042e477cc6b6ed7e9b62ff362856c24b7dce7918582",
@@ -108,6 +112,46 @@
     "labs/lab02/part7_aes_cpa/README.md": {
       "korean_sha256": "d3ed43439929ec4d26ae921587330c4fc0f3ab996d2852bf2f68602d4069fdb2",
       "english_sha256": "e8e4815cb84a7bb33b1f26ad9014761ae1a6f3d11f6bc47db3349b0188454c74"
+    },
+    "labs/lab03/README.md": {
+      "korean_sha256": "14b9ced58d7052d354659c765c4e517c658dedef2efaf99adf19a3c648a55e87",
+      "english_sha256": "f1dce696331832f0d619b182a4ac731c7f04dbb46add9b26b8a0f11309305dfe"
+    },
+    "labs/lab03/REPORT_TEMPLATE.md": {
+      "korean_sha256": "fa1ee93a2e444452c97967826e4de1fde9200e50d9ed1408a73a71c60bc0fa7f",
+      "english_sha256": "8f788510a5dd5bbcb1b80e1853d68aae2e4e33270d5e6ddf508c28b8ed24eb97"
+    },
+    "labs/lab03/part01/README.md": {
+      "korean_sha256": "bf8816e4813c68fab47411a65592fe5ca0b86a4fd57bd3bfe732535efd7a1e8a",
+      "english_sha256": "f18c9e6dd96e94eabc45746fff086e42212b07b68fe8f5e46aeeff3ee8b7f38f"
+    },
+    "labs/lab03/part02/README.md": {
+      "korean_sha256": "f6df16a3bbda68b2ccf07fbad93851e80eebdb75119cd61a1a8d4ef63a0fe4b2",
+      "english_sha256": "bca10055b87041400c973006b1150bf16498578a86b49485e01c54d50a75c3e5"
+    },
+    "labs/lab03/part03/README.md": {
+      "korean_sha256": "34e6419d655f1ed0212206c6cffbe0318b6fdb2bbd44f7cb00ab7512edc0364e",
+      "english_sha256": "c4628a1aec98b6a1e6e0086a8ebed85cd804cb303ee674a5c40c18eaca9ce2d0"
+    },
+    "labs/lab03/part04/README.md": {
+      "korean_sha256": "5c7d61e05cfe808ef195af69ce96c5b5921749b15670da40cc575ef094d3dcd5",
+      "english_sha256": "48079873b3e0e6cd946fcf13f01d1d9f446df15e3c9c9cc39b0dec915a752783"
+    },
+    "labs/lab03/part05/README.md": {
+      "korean_sha256": "f2984f33af3f541fdcdad208b35e6c401f7069b923881146c5da711f490daffd",
+      "english_sha256": "95b9f8659b4d0d25a4c7fe5adbf06b197bf1c837531e0e9a2d9c9d15bfc07470"
+    },
+    "labs/lab03/part06/README.md": {
+      "korean_sha256": "01dbe01c1d996d4eb485f07dce4251e262729eee4c77e18b686aa4b60a16d110",
+      "english_sha256": "d4b9f759307297e126e7168845148eba4580478e49e47085aa9a4e6653f755d1"
+    },
+    "labs/lab03/part07/README.md": {
+      "korean_sha256": "9a534d3eca506cf2e6daec6ef27e96365f8564569b0c5f461fb8f3baf517b6d6",
+      "english_sha256": "a944d7583b343964034fd2877de921f6bb4171f99589942efe3f6c553cf202b1"
+    },
+    "labs/lab03/part08/README.md": {
+      "korean_sha256": "553e1458dda33ffebdc9b1b17a01ad4c24dbaab4818e5e8f7679efe41547de37",
+      "english_sha256": "b55a162c70d78738dc2a30179a616babfca8d11a797df34d4983a454759c21b8"
     }
   }
 }

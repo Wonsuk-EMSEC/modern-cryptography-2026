@@ -41,6 +41,7 @@ lab02-target-image.tar.gz
 .env
 *.key
 *.pem
+!labs/lab03/part07/data/trusted_public.pem
 
 # Instructor private material, if desired
 instructor/
