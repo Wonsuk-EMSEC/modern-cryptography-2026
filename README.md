@@ -16,7 +16,6 @@
 - `docker/`: Docker 기반 공통 실습 환경
 - `labs/`: 한국어 실습 안내와 공통 코드·데이터
 - `en/`: 동일한 구조의 영어 안내 문서
-- `instructor/`: 교수자용 자료
 
 실습 안내: [Lab 01](labs/lab01/README.md) · [Lab 02](labs/lab02/README.md) · [Lab 03](labs/lab03/README.md)
 

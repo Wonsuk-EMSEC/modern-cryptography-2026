@@ -16,7 +16,6 @@ or third-party networks. Lab-specific restrictions appear in each lab README.
 - `docker/`: Docker-based course environment
 - `labs/`: Korean lab instructions and shared code/data
 - `en/`: English documentation with the same directory structure
-- `instructor/`: Instructor materials
 
 Lab instructions: [Lab 01](labs/lab01/README.md) · [Lab 02](labs/lab02/README.md) · [Lab 03](labs/lab03/README.md)
 
