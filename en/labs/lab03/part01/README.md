@@ -2,106 +2,187 @@
 
 [한국어](../../../../labs/lab03/part01/README.md) | **English**
 
+You are reviewing a primality-testing program intended for RSA key generation.
+Its developer claims that any number passing the Fermat test can be used as a prime.
+Can you trust that claim?
+
+First, implement the exponentiation needed by the test, then compare trial division
+and the Fermat test for results and speed. Finally, find a 128-bit composite that
+passes the Fermat test to evaluate the developer's claim. Do not use the composite
+for actual RSA key generation.
+
 ## 1. Learning Objectives
 
-Implement MSB-first Square-and-Multiply and evaluate correctness, operation
-counts, and relative runtime. Compare trial division through the square-root
-bound with a Fermat screen, and construct a 128-bit composite passing base 2.
+This Part has three stages:
 
-## 2. Challenge Scenario
+1. **Exponentiation:** implement and compare a slow and a fast method for the same result.
+2. **Primality tests:** compare exact testing with a fast screening method.
+3. **Find a counterexample:** find a 128-bit composite that passes the Fermat test.
 
-Develop exponentiation and prime screening for a constrained cryptographic device.
-A correct implementation that is too slow fails the performance challenge.
-As an attacker, construct a structured composite that fools the screen. Never
-use this composite as an RSA prime in subsequent Parts.
+## 2. Provided Materials
 
-## 3. Provided Materials
+- [starter/math_challenges.py](../../../../labs/lab03/part01/starter/math_challenges.py): implement five function TODOs.
+- [starter/prime64.py](../../../../labs/lab03/part01/starter/prime64.py): `is_prime64()` checks the smaller factors in stage 3.
+- [data/challenge.json](../../../../labs/lab03/part01/data/challenge.json): primality comparison inputs and composite search intervals.
+- [tests/check.py](../../../../labs/lab03/part01/tests/check.py): implementation checks and timing.
 
-- [starter/math_challenges.py](../../../../labs/lab03/part01/starter/math_challenges.py): five function contracts and TODOs.
-- [starter/prime64.py](../../../../labs/lab03/part01/starter/prime64.py): exact primality helper for `0 <= n < 2**64`.
-  Use it to validate Challenge 3 factors; it does not replace your trial division.
-- [data/challenge.json](../../../../labs/lab03/part01/data/challenge.json): prevalidated 16-, 20-, 24-, 28-, and 32-bit inputs,
-  and four disjoint, solvable search intervals of at most 100,001 candidates each.
-- [tests/check.py](../../../../labs/lab03/part01/tests/check.py): public feedback that checks actual returned values.
+`challenge.json` contains 16-, 20-, 24-, 28-, and 32-bit comparison inputs and four
+solvable search intervals. Each interval contains at most 100,001 candidate t values.
 
-## 4. Tasks
+## 3. Tasks
 
-1. Implement `naive_modular_exponentiation(base, exponent, modulus)` and
-   `modular_exponentiation(...)`. Raise `ValueError` for negative exponents or
-   nonpositive moduli. Handle exponent zero, modulus one, and negative bases.
-2. The fast function processes every exponent bit, including the leading bit,
-   from MSB to LSB. Square for each bit, multiply by the base for a one bit,
-   and reduce immediately after every multiplication. Do not substitute `pow`,
-   `**`, or an external exponentiation helper for your implementation.
-3. Implement `is_prime_exact(n)` by trial division through the square-root bound.
-   `fermat_test(n, base)` must call your fast exponentiation function. Return
-   false for `n < 2` or a base not coprime to n. Compare equal-sized primes,
-   composites with small factors, and composites without small factors.
-4. Actually search the supplied inclusive interval in `generate_pseudoprime(t_min, t_max)`.
-   If `p1=6t+1`, `p2=12t+1`, `p3=18t+1` are prime, test their product n and return
-   `{'t': t, 'factors': [p1,p2,p3], 'n': n}`. Require exactly 128 bits and a
-   passing base-2 Fermat test. Raise `ValueError` if no candidate exists.
-   Do not trial-divide the entire 128-bit number.
-5. Report multiplication counts and times for all three exponentiation methods,
-   and primality results by input type. Explain exact versus probable primality.
+### Stage 1: Compute the same power in two ways
 
-## 5. How to Run
+Implement the following two functions in `starter/math_challenges.py` and compare multiplication counts and execution times.
 
-Start the shared `course` container using [Lab03 setup](../README.md#setup).
-Run the following inside its `/workspace`; no additional installation is needed.
+> **Calculation goal**
+>
+> $$r = b^e \bmod m$$
+>
+> Example:
+>
+> $$3^5 \bmod 7 = 243 \bmod 7 = 5$$
+>
+> Here, `b = base`, `e = exponent`, and `m = modulus`.
+
+- **`naive_modular_exponentiation(base, exponent, modulus)`: repeated multiplication**
+
+    Start with `1 % modulus`, multiply by the base `exponent` times, and reduce after each multiplication.
+    Raise `ValueError` for negative exponents or nonpositive moduli.
+    For exponent zero, return the initial value without multiplying; also handle modulus one and negative bases.
+    Do not replace repeated multiplication with `pow`, `**`, or external exponentiation helpers.
+
+- **`modular_exponentiation(base, exponent, modulus)`: Square-and-Multiply**
+
+    Start with `1 % modulus` and process the exponent's binary representation from its leading bit (MSB-first).
+    Square the current result for every bit, including the leading bit; for a one bit, also multiply by the base.
+    Reduce after each multiplication. For example, exponent 13 is `1101`, requiring four squares and three additional multiplications.
+    Raise `ValueError` for negative exponents or nonpositive moduli; handle exponent zero, modulus one, and negative bases.
+    Do not replace your implementation with `pow`, `**`, or external exponentiation helpers.
+
+- **Compare results and speed**
+
+    Check that both functions agree with built-in `pow(base, exponent, modulus)`.
+    Compare multiplication counts for your two functions and timings for both functions and built-in `pow`.
+    Use built-in `pow` only for correctness checks and timing comparisons.
+
+### Stage 2: Compare two primality tests
+
+Implement the next two functions in the same file. Both return `True` or `False`,
+but **`True` has a different meaning in each test**.
+
+- **`is_prime_exact(n)`: exact testing by trial division**
+
+    Check for divisors from 2 through the square-root bound, including the boundary.
+    Return `False` if a divisor exists and `True` otherwise. Return `False` for `n < 2`.
+    Implement this directly; do not substitute the supplied `is_prime64()`.
+
+- **`fermat_test(n, base)`: screen prime candidates with the Fermat test**
+
+    When `base` and n are coprime, test `base^(n-1) mod n == 1`.
+    Call **your `modular_exponentiation()` from stage 1** for exponentiation.
+    Return `False` for `n < 2` or when the greatest common divisor is not 1.
+    Here, `True` means the number passed the test, not that it is guaranteed to be prime.
+
+- **Compare results and speed**
+
+    Use `prime_sets` in `data/challenge.json`. Each group's `values` contain an equal-bit-length
+    prime, a composite with small factors, and a composite without small factors.
+    Compare both functions' return values and timings, using 2 as the Fermat `base`.
+
+### Stage 3: Find a composite that passes the Fermat test
+
+- **`generate_pseudoprime(t_min, t_max)`: find a composite that passes the Fermat test**
+
+    Implement this in the same file. Vary t within the interval, including both endpoints, to construct:
+
+    $$p_1=6t+1,\quad p_2=12t+1,\quad p_3=18t+1,\quad n=p_1p_2p_3$$
+
+    Use the supplied `prime64.is_prime64()` to check that all three factors are prime.
+    Each factor fits within the function's supported range, `0 <= n < 2**64`.
+    The product n must be exactly 128 bits and pass the base-2 Fermat test.
+    Check bit length with `n.bit_length()`. **Do not trial-divide the 128-bit n.**
+
+    Return `{'t': t, 'factors': [p1, p2, p3], 'n': n}` when you find a candidate,
+    or raise `ValueError` if none exists. Actually search the supplied interval;
+    do not hardcode an answer or start the search when the module is imported.
+
+The checker passes each of the four intervals in `search_windows` in `data/challenge.json` separately.
+
+## 4. How to Run
+
+Complete [Lab03 setup](../README.md#setup), then run in the **course container terminal**.
+No additional installation or separate server is needed.
 
 ```console
 cd /workspace/labs/lab03/part01
 python3 tests/check.py
 ```
 
-Actual incomplete-starter output, with exit code 1:
+The incomplete starter is expected to produce the following error. The checker stops at the first failure;
+implement or fix the relevant function, then run the same command again.
 
 ```text
 FAIL: NotImplementedError: implement MSB-first square-and-multiply
 ```
 
-After implementation, summarize the result using the following command. This
-success output was verified with the instructor reference. Full JSON includes
-operation counts and timings measured in your current environment.
+When all checks pass, the JSON output includes these values (excerpt):
 
-```console
-python3 tests/check.py | python3 -c 'import json,sys; r=json.load(sys.stdin); print(r["status"]); print(r["receipt"])'
+```json
+{
+  "status": "PASS",
+  "receipt": "LAB03{part01_local_checks_passed}"
+}
 ```
 
-```text
-PASS
-LAB03{part01_local_checks_passed}
-```
+`LAB03{part01_local_checks_passed}` is not secret, so you may disclose it in your report.
 
-The checker has a 30-second limit. Reduce competing CPU work and rerun inside
-the same container if relative measurements fluctuate. Use `--solution PATH`
-and `--data PATH` for alternate submission files and inputs. Importing the
-submission must not start a search automatically.
+<details>
+<summary>Reading results and additional options</summary>
 
-## 6. Success Conditions
+| JSON field | Contents |
+| --- | --- |
+| `performance` | Exponentiation times, operation counts, and relative speed |
+| `primality` | Trial-division and Fermat timings by input |
+| `proof` | t, three factors, and n found in each interval |
 
-Pass random and edge cases, MSB processing checks, and exactly
-`L+popcount(exponent)` multiplications for an L-bit exponent. The naive method
-must multiply exponent times. For exponents 75,001, 125,003, and 200,003,
-compare repeated medians after warm-up, excluding startup and file I/O.
-The required speedup is calibrated from this runtime's naive/built-in-pow gap:
-`min(10, max(2, naive_time / pow_time / 20))`. There is no fixed millisecond
-threshold. Staff separately confirm final performance records in course Docker.
+`naive_ns` times the checker's reference implementation. Record your own naive function's timing
+and primality return values separately. The internal multiplication count of built-in `pow` is not provided.
 
-Pass both primality methods and Fermat counterexamples such as 561. For distinct
-answers in every search interval, the verifier checks prime factors, structure,
-factor product, compositeness, 128-bit length, and base 2. The public
-`LAB03{part01_local_checks_passed}` receipt is nonsecret local feedback. Final
-grading executes source on new inputs and intervals; printing a receipt is insufficient.
+The checker has a 30-second limit. If performance fluctuates, reduce competing CPU work and rerun in the
+same container. Use `--solution PATH` and `--data PATH` to check alternate implementation files and inputs.
 
-## 7. Submission Requirements
+</details>
 
-Submit completed `math_challenges.py`, t/three factors/n for each interval,
-operation-count and median-timing tables, environment and commands, and the
-[report](../REPORT_TEMPLATE.md). Functions must be importable.
+## 5. Success Conditions
 
-## 8. Analysis Questions
+- **Stage 1:** both functions return correct results, including edge cases, and follow the specified operation
+  order and multiplication counts. The fast function must also meet the speedup requirement over the reference naive implementation.
+- **Stage 2:** both primality tests behave as defined, including Fermat passes for composites such as 561.
+- **Stage 3:** find a distinct candidate in each of the four intervals, satisfying prime-factor, structure,
+  product, 128-bit length, and base-2 checks.
+
+<details>
+<summary>Operation counts and performance criteria</summary>
+
+The naive function must multiply exponent times. The fast function must use
+`L + popcount(exponent)` multiplications for a positive L-bit exponent.
+`popcount` is the number of one bits in its binary representation.
+
+Performance comparisons use exponents 75,001, 125,003, and 200,003, with repeated medians after warm-up.
+Process startup and file I/O are excluded. The required speedup is calibrated to the environment as
+`min(10, max(2, naive_time / pow_time / 20))`.
+`naive_time` measures the checker's reference implementation and `pow_time` measures built-in `pow`;
+there is no fixed millisecond threshold. Staff separately confirm final performance records in course Docker.
+
+</details>
+
+## 6. Submission Requirements
+
+Submit your completed `math_challenges.py` and the Part01 section of the
+[report template](../REPORT_TEMPLATE.md). Include answers to every Checkpoint Question below.
+
+## 7. Checkpoint Questions
 
 1. How do the two implementations scale when the exponent grows by a factor k?
 2. Which primality method is faster on composites with small factors, and why?

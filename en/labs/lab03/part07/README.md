@@ -2,119 +2,156 @@
 
 [한국어](../../../../labs/lab03/part07/README.md) | **English**
 
+A software updater is accepting packages with invalid signatures.
+Implement signing and verification, then change the updater to **accept only successfully verified updates**.
+Update processing is simulated by printing `ACCEPT`; no package code is executed.
+
 ## 1. Learning Objectives
 
-Implement RSA-PSS signing and verification with OpenSSL EVP APIs. Fix a fail-open
-control flow that accepts invalid signatures, testing both valid and invalid inputs.
+1. **Signing:** generate RSA-PSS signatures with OpenSSL EVP APIs.
+2. **Verification:** distinguish valid signatures, invalid signatures, and API errors.
+3. **Update policy:** fix fail-open behavior that continues processing after verification fails.
 
-## 2. Challenge Scenario
+You do not need to complete Part06 first, and no separate server is required.
 
-A software-update tool processes packages even after signature verification
-fails. Its trusted public key is provisioned beforehand and cannot be replaced
-by a package. Demonstrate the vulnerable local policy and allow processing only
-after successful verification. Update processing is an inert `ACCEPT` output;
-package contents are never executed. CA and certificate validation are outside
-this Part's scope.
+## 2. Provided Materials
 
-## 3. Provided Materials
+- [starter/pss.c](../../../../labs/lab03/part07/starter/pss.c), [starter/pss.h](../../../../labs/lab03/part07/starter/pss.h): signing/verification TODOs and interfaces
+- [starter/update.c](../../../../labs/lab03/part07/starter/update.c): update policy to fix
+- [starter/update_vulnerable.c](../../../../labs/lab03/part07/starter/update_vulnerable.c): vulnerable update policy to analyze
+- [data/trusted_public.pem](../../../../labs/lab03/part07/data/trusted_public.pem): pretrusted RSA-2048 public key
+- [data/update.bin](../../../../labs/lab03/part07/data/update.bin), [data/update.sig](../../../../labs/lab03/part07/data/update.sig): valid update and signature
+- [tests/check.py](../../../../labs/lab03/part07/tests/check.py), [tests/driver.c](../../../../labs/lab03/part07/tests/driver.c): compilation, signing, verification, and error checks
 
-| File | Purpose |
-| --- | --- |
-| `data/trusted_public.pem` | Pretrusted RSA-2048 public key |
-| `data/update.bin`, `data/update.sig` | Valid update and RSA-PSS signature |
-| `starter/pss.h`, `starter/pss.c` | Function interfaces and signing/verification TODOs |
-| `starter/update_vulnerable.c` | Deliberately vulnerable update policy |
-| `starter/update.c` | Update-policy TODO |
-| `tests/driver.c`, `tests/check.py` | Bounded file I/O and independent checks |
+**Edit `starter/pss.c` and `starter/update.c`.**
+No private key is supplied; the checker generates two fresh key pairs and messages to test signing as well.
+The public key is a trust input that the update package cannot replace. Certificate/CA validation is outside this Part.
 
-No private key is provided. The checker creates two fresh independent key pairs
-and a fresh message on every run. Required parameters are **RSA-2048, SHA-256,
-MGF1-SHA-256, exactly 32 salt bytes**.
+## 3. Tasks
 
-Common files: [PSS starter](../../../../labs/lab03/part07/starter/pss.c),
-[vulnerable policy](../../../../labs/lab03/part07/starter/update_vulnerable.c),
-[update starter](../../../../labs/lab03/part07/starter/update.c).
+### Stage 1: Implement signing and verification
 
-## 4. Tasks
+> **Signature settings**
+>
+> RSA-2048 · RSA-PSS · SHA-256 · MGF1-SHA-256 · 32-byte salt
+>
+> Explicitly configure the same settings for signing and verification.
 
-1. Implement `sign_message()` with EVP DigestSign APIs. Query the signature size
-   before allocating its buffer, and manage ownership on failure. Return 1 for
-   success and 0 for failure.
-2. Implement `verify_message()` with EVP DigestVerify APIs. Explicitly configure
-   PSS padding, MGF1 digest, and salt length. Return 1 for valid, 0 for invalid,
-   and -1 for API/input errors.
-3. Test modified messages, modified signatures, and incorrect public keys.
-   Reject both invalid signatures and errors. Reject other padding, MGF1 hashes,
-   and salt lengths as well.
-4. Trace the result-0 path in `update_vulnerable.c`. Implement `update.c` so that
-   it processes an update **only when the verification result is exactly 1**.
-5. Pass both injected verification-API errors and normal-input checks. Accepting
-   everything or rejecting everything cannot satisfy the challenge.
+- **`sign_message()`: generate an RSA-PSS signature**
 
-## 5. How to Run
+    Implement this in `starter/pss.c` using EVP DigestSign APIs.
+    Query the required signature size, allocate a buffer, then sign.
+    On success, return the signature buffer and length through the output parameters and return 1.
+    Use a buffer the caller can release with `OPENSSL_free()`.
+    On API or allocation failure, clean up resources and return 0.
 
-Follow the [Lab03 setup](../README.md). From the repository root on the host:
+- **`verify_message()`: verify a signature**
 
-```console
-docker compose -f docker/compose.yml run --rm course
-```
+    Implement this in the same file using EVP DigestVerify APIs. Explicitly set PSS padding,
+    SHA-256, the MGF1 hash, and salt length, and distinguish the return values below.
+    Reject signatures using other padding, MGF1 hashes, or salt lengths.
 
-Docker startup output varies with installation state. Independently check the
-public fixture inside the container:
+    | Return value | Meaning |
+    | --- | --- |
+    | `1` | Valid signature |
+    | `0` | Invalid signature |
+    | `-1` | API or input error |
+
+### Stage 2: Accept updates only after successful verification
+
+First, read `starter/update_vulnerable.c` and trace what happens when verification returns 0.
+
+- **`process_update()`: decide whether to accept an update**
+
+    Call `verify_message()` in `starter/update.c`.
+    **Return 1 only when the result is exactly 1**; return 0 for invalid signatures or errors.
+    The driver prints these decisions as `ACCEPT` and `REJECT`, respectively.
+    Rejecting every input is not a correct fix: valid signatures must be accepted.
+
+- **Compare valid, modified, and error cases**
+
+    Confirm that valid updates are accepted while modified messages/signatures and wrong public keys are rejected.
+    The checker also injects a negative error return from `EVP_DigestVerifyFinal()`.
+
+## 4. How to Run
+
+Complete [Lab03 setup](../README.md#setup), then run in the **course container terminal**.
+No additional installation or separate server is needed.
+
+First, use OpenSSL to verify the supplied signature. This works before implementing the TODOs.
 
 ```console
 cd /workspace/labs/lab03/part07
-openssl dgst -sha256 -verify data/trusted_public.pem -signature data/update.sig -sigopt rsa_padding_mode:pss -sigopt rsa_pss_saltlen:32 -sigopt rsa_mgf1_md:sha256 data/update.bin
+openssl dgst -sha256 -verify data/trusted_public.pem -signature data/update.sig \
+  -sigopt rsa_padding_mode:pss -sigopt rsa_pss_saltlen:32 \
+  -sigopt rsa_mgf1_md:sha256 data/update.bin
 ```
 
-Observed output:
-
-```text
-Verified OK
-```
-
-After completing the TODOs, build and run. GCC is silent on success.
+Expect `Verified OK`. After implementing the three functions, run the checker in the same directory.
+It compiles the C source automatically. Failure is expected while TODOs remain.
 
 ```console
-gcc -std=c11 -O2 -Wall -Wextra -Werror -I starter starter/pss.c starter/update.c tests/driver.c -Wl,--wrap=EVP_DigestVerifyFinal -lcrypto -o /tmp/lab03-pss
-/tmp/lab03-pss update data/trusted_public.pem data/update.bin data/update.sig
 python3 tests/check.py
 ```
 
-The update output observed with the reference implementation is `ACCEPT`.
-The checker then prints:
+Successful output:
 
 ```text
 Part07: fresh RSA-PSS signing, trusted verification, tampering, wrong key, malformed input, EVP error: OK
 LAB03{part07_local_checks_passed}
 ```
 
-The incomplete starter intentionally fails. Check alternative files with
-`python3 tests/check.py --pss /path/pss.c --update /path/update.c`. To compare the
-vulnerable policy, replace `starter/update.c` with `starter/update_vulnerable.c`
-in the build command. For a modified message with the original signature, the
-vulnerable policy should print `ACCEPT` and the corrected policy `REJECT`.
-If OpenSSL headers are missing, check that you are inside the course container.
-Students do not need to install packages manually.
+`LAB03{part07_local_checks_passed}` is not secret, so you may disclose it in your report.
 
-## 6. Success Conditions
+<details>
+<summary>Compare the vulnerable and fixed versions directly</summary>
 
-Freshly generated signatures must pass independent OpenSSL verification, and
-valid updates must be processed. Reject modified messages/signatures, another
-public key, short/empty signatures, malformed key files, other signature
-parameters, and negative `EVP_DigestVerifyFinal()` errors. The public receipt is
-nonsecret feedback. Final evaluation runs submitted source with fresh instances
-in an isolated environment and awards the instructor result only after both
-positive and negative behavior pass.
+After implementing `pss.c` and `update.c`, run in the same container terminal and directory.
+Keep the original message and create a modified copy in `/tmp`.
 
-## 7. Submission Requirements
+```console
+cp data/update.bin /tmp/lab03-update-modified.bin
+printf '\nmodified\n' >> /tmp/lab03-update-modified.bin
+gcc -std=c11 -O2 -Wall -Wextra -Werror -I starter \
+  starter/pss.c starter/update_vulnerable.c tests/driver.c \
+  -Wl,--wrap=EVP_DigestVerifyFinal -lcrypto -o /tmp/lab03-pss-vulnerable
+gcc -std=c11 -O2 -Wall -Wextra -Werror -I starter \
+  starter/pss.c starter/update.c tests/driver.c \
+  -Wl,--wrap=EVP_DigestVerifyFinal -lcrypto -o /tmp/lab03-pss-fixed
+/tmp/lab03-pss-vulnerable update data/trusted_public.pem /tmp/lab03-update-modified.bin data/update.sig
+/tmp/lab03-pss-fixed update data/trusted_public.pem /tmp/lab03-update-modified.bin data/update.sig
+/tmp/lab03-pss-fixed update data/trusted_public.pem data/update.bin data/update.sig
+```
 
-Submit `pss.c`, `update.c`, an explanation of the vulnerability and correction,
-valid/tampered/error test logs, the local receipt, and analysis answers. Keep
-private keys out of submitted source and student-release artifacts. Printing
-fixed signatures or success strings cannot pass these checks.
+Expected output, in order: `ACCEPT`, `REJECT`, `ACCEPT`.
 
-## 8. Analysis Questions
+</details>
+
+<details>
+<summary>Check alternate implementation files</summary>
+
+```console
+python3 tests/check.py --pss /path/pss.c --update /path/update.c
+```
+
+If OpenSSL headers cannot be found, check that you are running inside `course`.
+
+</details>
+
+## 5. Success Conditions
+
+- **Signing:** signatures on fresh messages pass independent OpenSSL verification.
+- **Valid inputs:** updates with valid signatures produce `ACCEPT`.
+- **Invalid inputs:** reject modified messages/signatures, wrong public keys, short or empty signatures, malformed key files, and different signature settings.
+- **API errors:** a negative `EVP_DigestVerifyFinal()` result also produces `REJECT`.
+
+## 6. Submission Requirements
+
+Submit completed `pss.c`, `update.c`, and Part07 of the [report template](../REPORT_TEMPLATE.md).
+Include the vulnerability cause and fix, valid/modified/error test logs, the local completion marker,
+and answers to every Checkpoint Question below. Do not submit private keys.
+
+## 7. Checkpoint Questions
 
 1. What do verification return values 1, 0, and a negative value mean?
 2. Why does the original control flow accept an invalid signature?

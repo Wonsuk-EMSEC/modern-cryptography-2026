@@ -2,20 +2,27 @@
 
 [한국어](../../../../labs/lab03/part06/README.md) | **English**
 
+A transfer service encrypts integer amounts with textbook RSA. Modify a ciphertext to make
+it process **twice the amount**, without knowing the original amount. Apply the same modification
+to RSA-OAEP and compare the results.
+
 ## 1. Learning Objectives
 
-Explain the multiplicative relation in textbook RSA and its effect on application inputs.
-Compare the same modification with RSA-OAEP using RSA-2048, SHA-256,
-MGF1-SHA-256, and an empty label.
+1. **Modify ciphertext:** use textbook RSA's multiplicative relation.
+2. **Compare OAEP:** confirm acceptance of a normal ciphertext and rejection of its modification.
+3. **Check server results:** complete all experiments in one session and inspect the server's decision.
 
-## 2. Challenge Scenario
+```mermaid
+flowchart LR
+    C["course container<br/>attack.py · HTTP client"]
+    S["Lab server<br/>lab03-target or instructor-hosted server"]
+    C -->|HTTP / JSON request| S
+    S -->|HTTP / JSON response| C
+```
 
-A transfer service encrypts integer amounts with textbook RSA. Using only an intercepted
-ciphertext and the public key, make the service process **twice** the original amount.
-The server never returns the decrypted amount and accepts only the specified modification
-of the ciphertext issued for that session.
+Use one lab server. Follow the [shared server setup](../README.md#server-setup) for its address and connection check.
 
-## 3. Provided Materials
+## 2. Provided Materials
 
 - [starter/attack.py](../../../../labs/lab03/part06/starter/attack.py): TODOs for modification, OAEP encryption, and requests.
 - [data/protocol.json](../../../../labs/lab03/part06/data/protocol.json): public protocol and limits.
@@ -23,20 +30,52 @@ of the ciphertext issued for that session.
 - [Shared HTTP client](../../../../labs/lab03/common/service_client.py): `TargetClient.request(method, path, payload=None)`.
 - `GET /part06/challenge`: issues fresh public challenge data and the public key at runtime.
 
+**Edit `starter/attack.py`.** Public challenge values are issued by the server at runtime.
+
+## 3. Tasks
+
+### Stage 1: Implement ciphertext modification and OAEP encryption
+
+> **Ciphertext modification**
+>
+> $$c'=c\cdot r^e\bmod n$$
+>
+> Decryption yields r times the original plaintext (mod n). This lab uses r=2.
+
+- **`modify_ciphertext(ciphertext, multiplier, n, e)`: multiplicative modification**
+
+    Implement this in `starter/attack.py`. Apply the relation above and return an integer in `[0,n)`.
+    You do not need to recover the original amount or private key.
+
+- **`encrypt_oaep(amount, n, e)`: generate a valid OAEP ciphertext**
+
+    Implement this in the same file. Encrypt the **ASCII bytes** of `amount` using public key n/e,
+    then return the ciphertext as a big-endian integer. For example, encrypt the string `"100"` as `b"100"`.
+    Use **RSA-2048, SHA-256, MGF1-SHA-256, and an empty label**. Explicitly configure the hash, MGF1, and label.
+
+### Stage 2: Send requests and check results
+
+- **`attack(client, challenge)`: perform three experiments**
+
+    The checker passes a fresh session and public data in `challenge`.
+    Read `public_key.n`, `public_key.e`, `ciphertext`, `multiplier`, and `oaep_amount` as in the starter.
+    Use `client.request(method, path, payload)` for these requests in the same session:
+
+    1. Submit the modified textbook RSA ciphertext to `/part06/transfer`.
+    2. Submit the valid OAEP ciphertext to `/part06/oaep/transfer` with `stage:"normal"`.
+    3. Modify **that exact OAEP ciphertext** by the same multiplier and submit with `stage:"tampered"`.
+
+    The normal OAEP request must succeed before the modified request. Do not encrypt a new ciphertext
+    for modification or substitute arbitrary broken ciphertext. Check each response's `accepted` and `status`.
+    The function need not return a value; the checker then queries `/part06/result` for completion.
+    Do not contact the server when the module is imported.
+
+<details>
+<summary>Request/response fields and limits</summary>
+
 Public integers are decimal strings without leading zeroes and must satisfy `0 <= value < n`.
 Sessions are 32 lowercase hexadecimal characters and expire after 30 minutes. JSON requests
 are limited to 16 KiB. The original amount, private key, and instructor grading flag are not provided.
-
-## 4. Tasks
-
-1. Read `public_key.n`, `public_key.e`, `ciphertext`, and `multiplier` from a fresh challenge.
-   Analyze how the RSA relation `c' = c · r^e mod n` affects the amount.
-2. Complete `modify_ciphertext()` and the textbook RSA step in `attack(client, challenge)`.
-3. Implement `encrypt_oaep()` to encrypt the **ASCII bytes** of the public `oaep_amount`,
-   rather than an integer's binary representation. Explicitly configure the hash, MGF1, and label.
-4. Successfully submit a normal OAEP transfer first. Apply the same multiplier to **that
-   exact ciphertext** and confirm rejection. Submitting arbitrary broken ciphertext is insufficient.
-5. Check every response and query the result endpoint for the server's completion decision.
 
 Request and response schemas follow. Extra JSON fields are rejected. The common response
 field `ok` describes request processing; `accepted` describes application acceptance.
@@ -53,84 +92,55 @@ HTTP errors have `{ok:false,error:...}`. Invalid input returns 400, unknown or e
 404, replayed completed steps or incorrect ordering 409, and oversized requests 413. Start a
 fresh session on each run. The service provides no arbitrary plaintext decryption interface.
 
-## 5. How to Run
+</details>
 
-Follow the [Lab03 setup](../README.md) first. The instructor must build or publish the local
-target image; do not assume the GHCR tag has already been published. From the repository root
-in the **host terminal**:
+## 4. How to Run
 
-```console
-docker compose -f docker/compose.yml --profile lab03 up -d --wait course lab03-target
-docker compose -f docker/compose.yml --profile lab03 ps
-docker compose -f docker/compose.yml exec course bash
-```
-
-The expected `ps` state for `lab03-target` is `healthy`; Docker output varies by environment.
-Inside the course container, check health:
+Complete the [shared server setup](../README.md#server-setup), then run in the **course container terminal**.
+If the server is already connected, continue here.
 
 ```console
-cd /workspace
-python3 -c 'from labs.lab03.common.service_client import TargetClient; print(TargetClient().request("GET", "/health"))'
+cd /workspace/labs/lab03/part06
+python3 tests/check.py
 ```
 
-Response verified in an actual HTTP test:
+Failure is expected while TODOs remain: the output starts with `Part06 incomplete:` and includes error details.
+With a working server connection, the incomplete starter fails at a `NotImplementedError`.
+Implement or fix the functions, then run the same command again. Each run obtains a new session.
 
-```text
-{'ok': True, 'service': 'lab03-target'}
-```
-
-Run the incomplete starter:
-
-```console
-python3 labs/lab03/part06/tests/check.py
-```
-
-Actual incomplete-starter output, exit status 1:
-
-```text
-Part06 incomplete: TODO: implement textbook RSA ciphertext modification
-```
-
-After completing the TODOs, repeat that command. You can also run:
-
-```console
-python3 labs/lab03/part06/starter/attack.py
-```
-
-The completed checker prints this first line, followed by a runtime server-issued `LAB03{...}`
-value. This first line was verified with the instructor reference implementation.
+On success, the first line is:
 
 ```text
 Part06 complete: target verified all objectives
 ```
 
-Use `--solution /workspace/path/attack.py` to check another file. Select an instructor-hosted
-target with `--url https://instructor-provided-address` or `LAB03_TARGET_URL`. On connection
-errors, check service health, execution inside the course container, and the URL. Request a
-fresh session if one has expired. Inspect logs or stop the target from the host:
+The next line contains the server-issued `LAB03{...}` flag. Submit it through the instructor's designated channel.
 
-```console
-docker compose -f docker/compose.yml --profile lab03 logs --tail=30 lab03-target
-docker compose -f docker/compose.yml --profile lab03 stop lab03-target
-```
+<details>
+<summary>Additional options and troubleshooting</summary>
 
-## 6. Success Conditions
+`python3 starter/attack.py` runs the same checks. Use `--solution PATH` for another implementation.
+Select an instructor-hosted server with `--url URL` or `LAB03_TARGET_URL`.
+The submitted client has a 60-second limit. For connection errors, logs, or shutdown, follow the
+[shared guide](../README.md#server-setup).
 
-The server must verify **all three** objectives in one session: the specified textbook RSA
-modification, a valid OAEP transfer, and rejection of its multiplicatively modified ciphertext.
-Only then does it return the flag. Printing a success string, reusing another session's result,
-or submitting arbitrary ciphertext does not satisfy these checks.
+</details>
 
-Local Docker is for practice. A user controlling Docker can inspect images, processes, and
-memory. Local secret concealment is not grading security. Hidden evaluation uses a trusted
-instructor-hosted server with separate keys and flags.
+## 5. Success Conditions
 
-## 7. Submission Requirements
+- The server accepts the specified modification of the session's textbook RSA ciphertext.
+- The normal OAEP transfer succeeds.
+- The server rejects the specified multiplicative modification of that same OAEP ciphertext.
 
-Submit the completed `attack.py`, request/response records for each step, the server flag,
-and answers below. No private key is needed. Submit flags through the instructor's channel.
+All three conditions must hold in the same session for a flag. OAEP rejection does not establish sender authentication or transfer authorization.
 
-## 8. Analysis Questions
+## 6. Submission Requirements
+
+Submit completed `attack.py` and Part06 of the [report template](../REPORT_TEMPLATE.md).
+Include each stage's request/response records, the server flag, and answers to every Checkpoint Question below.
+No private key is needed. Submit the flag through the instructor's designated channel.
+
+## 7. Checkpoint Questions
 
 1. Why can you double an unknown amount? Why are amounts bounded to avoid modular wraparound?
 2. Why must normal OAEP operation succeed before testing modification?

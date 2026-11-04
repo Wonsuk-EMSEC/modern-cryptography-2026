@@ -2,92 +2,121 @@
 
 [한국어](../../../../labs/lab03/part05/README.md) | **English**
 
+Analyze a program encrypting short messages with RSA, public exponent e=3, and no encoding.
+If the message is small enough, you can recover it without factoring n or finding the private key.
+Use the ciphertext's cube root to recover the message and distinguish inputs where this method does not apply.
+
 ## 1. Learning Objectives
 
-Exploit the absence of modular reduction when textbook RSA uses e=3 and
-`m^3<n`. Implement exact integer cube roots without floating point, and
-distinguish inputs to which this direct-root attack does not apply.
+1. **Integer cube roots:** compute cube roots of large integers without floating point.
+2. **Plaintext recovery:** check attack conditions and recover a message from an exact root.
+3. **Scope:** return `None` instead of incorrect plaintext when the attack does not apply.
 
-## 2. Challenge Scenario
+## 2. Provided Materials
 
-Analyze an application encrypting short messages with public exponent 3 and no
-encoding. Recover the message using only the public key and ciphertext.
-Factoring n is unnecessary.
+- [starter/recover.py](../../../../labs/lab03/part05/starter/recover.py): two function TODOs
+- [data/challenge.json](../../../../labs/lab03/part05/data/challenge.json): positive/negative cases and message hash
+- [tests/check.py](../../../../labs/lab03/part05/tests/check.py): integer-root, recovery, and boundary checks
 
-## 3. Provided Materials
+| Input field | Meaning |
+| --- | --- |
+| `positive` | n, e, c (decimal strings) for a case satisfying m³<n |
+| `negative` | n, e, c for a case with modular reduction where the direct cube-root attack does not apply |
+| `message_sha256` | SHA-256 of the message to recover from positive |
 
-- [data/challenge.json](../../../../labs/lab03/part05/data/challenge.json): decimal-string n/e/c for
-  `positive` and `negative`, and the actual message's SHA-256. The positive case
-  satisfies `m^3<n`; the negative case undergoes modular reduction and does not
-  permit the direct-root attack.
-- [starter/recover.py](../../../../labs/lab03/part05/starter/recover.py): exact-root and recovery TODOs.
-- [tests/check.py](../../../../labs/lab03/part05/tests/check.py): re-encryption, negative cases, and large-integer boundaries.
+## 3. Tasks
 
-## 4. Tasks
+> **Attack condition**
+>
+> $$e=3,\quad m^3<n\quad\Longrightarrow\quad c=m^3\bmod n=m^3\quad\Longrightarrow\quad m=\sqrt[3]{c}$$
+>
+> Example: n=55 and m=3 give c=27, whose cube root 3 recovers the plaintext.
 
-1. Implement `integer_cube_root(value)` returning
-   `(floor(cuberoot(value)), is_exact)` for nonnegative integers. Raise
-   `ValueError` for negatives. Binary search or integer Newton iteration is
-   suitable. Do not rely on `float`, `value ** (1/3)`, or rounding.
-2. In `recover(challenge)`, obtain an exact cube root, verify `m^3<n` and
-   `pow(m,e,n)==c`, and return the integer. Return `None` if e is not 3, c lies
-   outside `[0,n)`, or the direct-root attack does not apply.
-3. Convert the recovered integer to minimal-length big-endian bytes and check
-   the message and SHA-256. The recovered message contains this Part's flag.
-4. Confirm that the negative case is rejected rather than treating a rounded-down
-   root as plaintext. Do not expand the task to other low-exponent attacks or factoring.
+### Stage 1: Compute an exact integer cube root
 
-## 5. How to Run
+- **`integer_cube_root(value)`: return an integer root and exactness flag**
 
-Use the shared `course` container from [Lab03 setup](../README.md#setup).
+    Implement this in `starter/recover.py`. For a nonnegative integer, return `(root, is_exact)`.
+    `root` is the floor of the cube root, and `is_exact` is a bool indicating whether `root³ == value`.
+    For example, return `(3, True)` for 27 and `(3, False)` for 28.
+
+    Use binary search or integer Newton iteration. Do not depend on floating-point rounding,
+    such as `float` or `value ** (1/3)`. Handle 0 and 1, and raise `ValueError` for negative inputs.
+
+### Stage 2: Recover plaintext and check applicability
+
+- **`recover(challenge)`: return plaintext only when the attack applies**
+
+    Implement this in the same file. `challenge` contains n, e, c from **one positive or negative case**.
+    Convert the three values to integers and compute c's cube root with `integer_cube_root()`.
+
+    For an exact root m, verify `m³<n` and `pow(m,e,n)==c`, then return **integer m**.
+    Return `None` if e is not 3, c is outside `[0,n)`, or the root is not exact.
+    Do not accept a rounded-down root as plaintext or extend the task to other low-exponent attacks or factorization.
+
+- **Check the message**
+
+    Convert the recovered integer to minimal-length big-endian bytes and compare its SHA-256
+    with `message_sha256` in `challenge.json`. The message contains this Part's flag.
+    Distinguish this from Part04's fixed-length byte conversion.
+
+## 4. How to Run
+
+Complete [Lab03 setup](../README.md#setup), then run in the **course container terminal**.
+No additional installation or separate server is needed.
 
 ```console
 cd /workspace/labs/lab03/part05
 python3 tests/check.py
 ```
 
-Actual incomplete-starter output, exit code 1:
+The incomplete starter is expected to produce this error.
+Implement or fix both functions, then run the same command again.
 
 ```text
 FAIL: AssertionError: submission failed: NotImplementedError: implement an exact integer cube root
 ```
 
-After implementation, run the following command. This output was verified using
-the instructor reference. Full JSON includes the recovered integer as evidence,
-which the parent checker independently validates.
+Successful JSON output includes these values (excerpt):
 
-```console
-python3 tests/check.py | python3 -c 'import json,sys; r=json.load(sys.stdin); print(r["status"]); print(r["receipt"])'
+```json
+{
+  "status": "PASS",
+  "receipt": "LAB03{part05_local_checks_passed}"
+}
 ```
 
-```text
-PASS
-LAB03{part05_local_checks_passed}
-```
+`proof.m` is the recovered integer; `proof.negative_rejected` indicates rejection of the negative case.
+The checker does not print the message text, so convert the recovered integer to bytes to inspect it.
+`LAB03{part05_local_checks_passed}` is not secret, so you may disclose it in your report.
+This completion marker is separate from the flag inside the recovered message.
 
-Use `--solution PATH` and `--data PATH` for alternate files and inputs. The
-timeout is 10 seconds. If only large values fail, check floating-point
-conversions, search bounds, and values adjacent to perfect cubes. The public
-completion receipt is nonsecret local feedback, separate from the encrypted
-challenge flag inside the message.
+<details>
+<summary>Additional options and troubleshooting</summary>
 
-## 6. Success Conditions
+Use `--solution PATH` for another implementation or `--data PATH` for another JSON input.
+The whole checker has a 10-second limit; the subprocess executing your functions has an 8-second limit.
+If only large integers fail, check floating-point use, search bounds, and values adjacent to perfect cubes.
 
-For random large integers, perfect cubes, and their immediate neighbors,
-require `root^3 <= value < (root+1)^3` and the correct exactness indicator.
-Pass exact-root, range, re-encryption, and message-hash checks for the positive
-case, and reject the negative case. Fresh integers and ciphertexts are tested
-beyond the public fixture. Final grading uses independently generated messages
-and moduli; printing a fixed flag cannot pass. Rejecting this negative case
-does not establish security against every other attack.
+</details>
 
-## 7. Submission Requirements
+## 5. Success Conditions
 
-Submit completed `recover.py`, recovered integer/message, re-encryption and
-hash results, explanation of negative-case rejection, and the
-[report](../REPORT_TEMPLATE.md).
+- **Integer root:** for large integers, perfect cubes, and their immediate neighbors,
+  `root³ <= value < (root+1)³` holds and the exactness flag is correct.
+- **Positive recovery:** exact root, range, re-encryption, and message SHA-256 all match.
+- **Negative rejection:** return `None` when the direct cube-root attack does not apply.
+  Checks also use fresh integers/ciphertexts and invalid e/c inputs beyond the public data.
 
-## 8. Analysis Questions
+Rejecting the negative case does not establish security against every other attack.
+
+## 6. Submission Requirements
+
+Submit completed `recover.py` and Part05 of the [report template](../REPORT_TEMPLATE.md).
+Include the recovered integer/message, re-encryption/hash results, the reason for negative-case rejection,
+and answers to every Checkpoint Question below.
+
+## 7. Checkpoint Questions
 
 1. Why does RSA encryption equal ordinary integer cubing when `m^3<n`?
 2. What goes wrong with floating-point cube roots on large integers?

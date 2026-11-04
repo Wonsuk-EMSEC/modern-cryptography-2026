@@ -2,19 +2,29 @@
 
 [한국어](../../../../labs/lab03/part08/README.md) | **English**
 
+A device computing RSA signatures with CRT has an error in one branch.
+Recover the private exponent from the faulty signature and prove recovery by signing a fresh value
+issued by the server. Then check whether verifying signatures before release blocks the same fault.
+
 ## 1. Learning Objectives
 
-Explain why a fault in one CRT branch can expose an RSA private key, and evaluate whether
-public-key verification before output prevents leakage in this fault model. This educational
-raw RSA integer-representative primitive differs from Part07's RSA-PSS scheme.
+1. **Recover the private exponent:** find a factor of n from a fault in one CRT branch.
+2. **Generate a fresh signature:** sign a new value using the recovered exponent.
+3. **Check the countermeasure:** block faulty signatures while allowing valid ones.
 
-## 2. Challenge Scenario
+This Part signs integer representatives directly with raw RSA. Distinguish it from Part07's RSA-PSS.
 
-An embedded device injects an error into one residue of its CRT signature calculation.
-Recover the private key using the public key, representative `mu`, and faulty signature.
-Prove recovery by signing a **fresh, unpredictable `mu2` issued afterward** by the server.
+```mermaid
+flowchart LR
+    C["course container<br/>attack.py · HTTP client"]
+    S["Lab server<br/>lab03-target or instructor-hosted server"]
+    C -->|HTTP / JSON request| S
+    S -->|HTTP / JSON response| C
+```
 
-## 3. Provided Materials
+Use one lab server. Follow the [shared server setup](../README.md#server-setup) for its address and connection check.
+
+## 2. Provided Materials
 
 - [starter/attack.py](../../../../labs/lab03/part08/starter/attack.py): TODOs for private-exponent recovery, fresh signing, and requests.
 - [data/protocol.json](../../../../labs/lab03/part08/data/protocol.json): public protocol and limits.
@@ -22,22 +32,53 @@ Prove recovery by signing a **fresh, unpredictable `mu2` issued afterward** by t
 - [Shared HTTP client](../../../../labs/lab03/common/service_client.py): `TargetClient.request(method, path, payload=None)`.
 - `GET /part08/challenge`: a fresh session, RSA-2048 public key, and `mu`.
 
+**Edit `starter/attack.py`.** Public challenge values are issued by the server at runtime.
+
+## 3. Tasks
+
+### Stage 1: Recover the private exponent from a faulty signature
+
+> **Factor recovery**
+>
+> $$v=s_{faulty}^{e}\bmod n,\qquad p=\gcd(v-\mu,n)$$
+>
+> Check whether this GCD reveals a factor of n when only one CRT branch is faulty.
+
+- **`recover_private_exponent(n, e, mu, faulty_signature)`: recover the private exponent**
+
+    Implement this in `starter/attack.py`. Obtain a factor using the formula above and check `1 < p < n`.
+    Calculate the other factor q and phi, then return the private exponent d, the inverse of e, as an integer.
+    The fault affects only one CRT branch; the other residue remains correct.
+
+- **`forge_signature(mu2, d, n)`: sign a fresh value**
+
+    Implement this in the same file. Use recovered d to calculate the raw RSA signature of `mu2` and return an integer.
+    Verifying the signature with the public key must recover `mu2`.
+    Sign the **fresh, unpredictable `mu2` issued afterward** by the server, not the original `mu`.
+
+### Stage 2: Check server verification and countermeasures
+
+- **`attack(client, challenge)`: prove recovery and test the protected path**
+
+    The checker passes a fresh session, public key, and `mu`. The starter already calls `/part08/sign`
+    to obtain the faulty signature and `mu2`. That request is allowed only once per session.
+    Continue with these actions in the same session:
+
+    1. Submit a signature of fresh `mu2` to `/part08/verify` and check acceptance.
+    2. Send `fault:true` to `/part08/secure-sign`; check rejection and the **absence of a `signature` field**.
+    3. With `fault:false`, obtain a valid signature and verify with the public key that it represents **the original `mu`**.
+
+    `fault` is a boolean, not a string (`True`/`False` in Python).
+    The protected path signs only the original `mu`, never `mu2` or arbitrary values.
+    Check every response. The function need not return a value;
+    the checker then queries `/part08/result` for completion. Do not contact the server on module import.
+
+<details>
+<summary>Request/response fields and limits</summary>
+
 No private key or factors are provided. Public integers are canonical decimal strings without
 leading zeroes, satisfying `0 <= value < n`. Sessions are 32 lowercase hexadecimal characters,
 valid for 30 minutes. The request limit is 16 KiB; the server socket timeout is 5 seconds.
-
-## 4. Tasks
-
-1. Obtain a fresh session, then request its faulty signature and fresh `mu2` at `/part08/sign`.
-   Only one CRT branch is faulty; the other residue remains correct.
-2. Analyze `v = faulty_signature^e mod n` and `gcd(v - mu, n)`. Complete
-   `recover_private_exponent()` and verify that the recovered factor is nontrivial.
-3. Sign `mu2` with the recovered exponent and submit to `/part08/verify`. A correct signature
-   of the original `mu` does not satisfy the fresh proof.
-4. Request `/part08/secure-sign` with `fault:true`; confirm rejection and the complete absence
-   of a signature field. With `fault:false`, obtain a normal signature and verify it with the
-   public key. This endpoint signs only the original `mu`, never arbitrary inputs or `mu2`.
-5. Complete all three objectives, then fetch the flag from `/part08/result`.
 
 Field sets must match exactly; extra JSON fields are rejected. The common response field
 `ok` describes request processing; `accepted` describes application acceptance.
@@ -55,83 +96,56 @@ Field sets must match exactly; extra JSON fields are rejected. The common respon
 Invalid input returns 400, unknown or expired sessions 404, completed-step replay or incorrect
 ordering 409, and oversized requests 413. New sessions use fresh `mu` and `mu2` values.
 
-## 5. How to Run
+</details>
 
-Follow the [Lab03 setup](../README.md) first. The instructor must build or publish the local
-image; do not assume the GHCR tag is already published. From the repository root on the host:
+## 4. How to Run
 
-```console
-docker compose -f docker/compose.yml --profile lab03 up -d --wait course lab03-target
-docker compose -f docker/compose.yml --profile lab03 ps
-docker compose -f docker/compose.yml exec course bash
-```
-
-The expected target state is `healthy`. Inside the course container:
+Complete the [shared server setup](../README.md#server-setup), then run in the **course container terminal**.
+If the server is already connected, continue here.
 
 ```console
-cd /workspace
-python3 -c 'from labs.lab03.common.service_client import TargetClient; print(TargetClient().request("GET", "/health"))'
+cd /workspace/labs/lab03/part08
+python3 tests/check.py
 ```
 
-Response verified in an actual HTTP test:
+Failure is expected while TODOs remain: the output starts with `Part08 incomplete:` and includes error details.
+With a working server connection, the incomplete starter fails at a `NotImplementedError`.
+Implement or fix the functions, then run the same command again. Each run obtains a new session.
 
-```text
-{'ok': True, 'service': 'lab03-target'}
-```
-
-Check the starter:
-
-```console
-python3 labs/lab03/part08/tests/check.py
-```
-
-Actual incomplete-starter output, exit status 1:
-
-```text
-Part08 incomplete: TODO: recover a factor, the second factor, and the private exponent
-```
-
-After completing the implementation, repeat the checker or run it directly:
-
-```console
-python3 labs/lab03/part08/starter/attack.py
-```
-
-The completed checker prints this first line, followed by a runtime server-issued `LAB03{...}`
-value. This first line was verified with the instructor reference implementation.
+On success, the first line is:
 
 ```text
 Part08 complete: target verified all objectives
 ```
 
-Select another implementation with `--solution /workspace/path/attack.py`, or an instructor
-server with `--url https://instructor-provided-address` or `LAB03_TARGET_URL`. On connection
-errors, check health, execution inside the course container, and the URL. Request a fresh
-session if expired. Inspect logs or stop the target from the host:
+The next line contains the server-issued `LAB03{...}` flag. Submit it through the instructor's designated channel.
 
-```console
-docker compose -f docker/compose.yml --profile lab03 logs --tail=30 lab03-target
-docker compose -f docker/compose.yml --profile lab03 stop lab03-target
-```
+<details>
+<summary>Additional options and troubleshooting</summary>
 
-## 6. Success Conditions
+`python3 starter/attack.py` runs the same checks. Use `--solution PATH` for another implementation.
+Select an instructor-hosted server with `--url URL` or `LAB03_TARGET_URL`.
+The submitted client has a 60-second limit. For connection errors, logs, or shutdown, follow the
+[shared guide](../README.md#server-setup).
 
-The server returns the flag only after verifying **all three** objectives: a valid signature
-of fresh `mu2`, blocked faulty output, and successful normal signing. Merely submitting factors,
-reusing the faulty signature, or rejecting every input does not satisfy these conditions.
+</details>
 
-The local target is for practice. A user controlling Docker can inspect local images and
-runtime state. Hidden evaluation uses an instructor-managed target with separate keys and
-flags. Container permissions or unavailable source alone cannot protect local secrets.
+## 5. Success Conditions
 
-## 7. Submission Requirements
+- The server verifies a valid signature of fresh `mu2`.
+- With a fault, the protected path rejects the request and returns no signature field.
+- Without a fault, the protected path returns a signature of the original `mu` that verifies with the public key.
 
-Submit the completed `attack.py`, an explanation of factor and exponent recovery, public-key
-verification of the fresh signature, protected fault/no-fault request and response records,
-the flag, and the answers below. Use the instructor's flag channel. Do not publish another
-session's private key.
+All three conditions must hold in the same session for a flag. This countermeasure is evaluated against a fault in one CRT branch, not every possible physical fault attack.
 
-## 8. Analysis Questions
+## 6. Submission Requirements
+
+Submit completed `attack.py` and Part08 of the [report template](../REPORT_TEMPLATE.md).
+Include factor recovery and private-exponent derivation, public-key verification of the fresh signature,
+fault/no-fault request/response records, the server flag, and answers to every Checkpoint Question below.
+Submit flags through the instructor's designated channel; do not publish another session's private key.
+
+## 7. Checkpoint Questions
 
 1. Why does the GCD reveal a factor when just one CRT branch is faulty?
 2. Why require a signature of fresh `mu2` instead of the original representative?
