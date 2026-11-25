@@ -19,9 +19,14 @@ DEFAULT_CERT_DIR = PART.parent / "part02/output"
 def verify_certificate(root: Path, intermediate: Path | None,
                        leaf: Path, hostname: str) -> subprocess.CompletedProcess[str]:
     """Run OpenSSL's server-certificate verification and return its result."""
-    # TODO: Build an openssl verify command with root as the only trusted CA,
-    # intermediate as an untrusted chain certificate when present, server
-    # purpose, and hostname checking. Capture both stdout and stderr.
+    command = ["openssl", "verify", "-no-CApath", "-no-CAstore",
+               "-CAfile", str(root)]
+    if intermediate is not None:
+        command += ["-untrusted", str(intermediate)]
+
+    # TODO: Add the TLS server purpose, hostname check, and leaf path to
+    # command. Run it with subprocess.run(), capturing stdout and stderr;
+    # return the CompletedProcess even when verification rejects the leaf.
     raise NotImplementedError("verify both trust chain and requested DNS name")
 
 

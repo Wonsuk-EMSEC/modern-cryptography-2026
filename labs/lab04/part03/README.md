@@ -47,6 +47,21 @@ python3 labs/lab04/part03/check.py
 서버 인증서는 같은 파일을 사용하고 조건 하나씩만 바꿉니다. 중간 CA를 신뢰
 기준에 직접 추가하지 마세요. `part02/output/`은 CA 재시작 후 새로 발급받아야 합니다.
 
+### TODO 완료 후 확인할 결과
+
+`verify_chain.py`의 출력에는 다음 세 줄이 **이 순서대로** 나타나고, 마지막에
+`LAB04{...}`가 표시됩니다.
+
+```text
+trusted chain and correct name: ACCEPT
+trusted chain, wrong name: REJECT
+missing intermediate: REJECT
+```
+
+다른 결과가 나오면 프로그램이 오류로 중단됩니다. `check.py`도 같은 세 조건을
+재검사하며 모두 맞으면 `Part03: chain and hostname decisions: OK`를 출력합니다.
+이 Part는 새 인증서 파일을 만들지 않고 Part02의 파일을 읽습니다.
+
 ## 확인 질문
 
 1. 인증서의 서명이 맞는데도 접속을 거부해야 하는 경우는 언제인가요?

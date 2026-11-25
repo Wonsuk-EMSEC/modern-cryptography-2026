@@ -98,6 +98,18 @@ fingerprint, and DNS SAN side by side. Confirm that the intercepted
 certificate's issuer matches the certificate shown in the browser. Run the
 optional check after completing the TODO while `lab04-proxy` is running.
 
+### What to check after completing the TODO
+
+- `compare_certificates.py` prints JSON with `original` and `intercepted`.
+  Each has `subject`, `issuer`, `fingerprint`, and `dns_names` fields. Both
+  `dns_names` lists contain `lab04.local.test`, and each `fingerprint` is
+  64 hexadecimal characters.
+- The original and proxy certificates have different `issuer` and
+  `fingerprint` values. When `check.py` confirms this, it prints
+  `Part04: original and intercepted certificate identities: OK`.
+- The JSON does not contain a Flag. After sending the practice token in the
+  browser step above, find `LAB04{...}` in the **proxy logs**.
+
 ## Cleanup
 
 On the **host PC**, remove `Lab04 MITM Practice Root` from the browser's or

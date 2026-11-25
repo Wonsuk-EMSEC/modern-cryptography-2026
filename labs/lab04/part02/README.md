@@ -43,6 +43,19 @@ CA 컨테이너를 재시작하면 CA 키와 인증서가 새로 만들어집니
 이 명령으로 새 CSR과 인증서를 다시 발급받으세요. `part02/output/` 파일은
 [Part03](../part03/README.md)에서 사용합니다.
 
+### TODO 완료 후 확인할 결과
+
+- `part02/output/`에 `request.csr`, `server.pem`, `intermediate.pem`,
+  `root.pem` 네 파일이 생성됩니다. 개인키 파일은 이 디렉토리에 복사되지 않습니다.
+- 프로그램에 `Certificate files: /workspace/labs/lab04/part02/output`과
+  `Issued name: lab04.local.test; CSR and certificate public key match: OK`,
+  `LAB04{...}`가 표시됩니다. 두 번째 줄은 발급된 서버 인증서의 공개키가
+  CSR·개인키의 공개키와 같고, 요청한 DNS 이름이 인증서에 있음을 확인한 뒤
+  출력됩니다.
+- `check.py`가 CSR 서명, 공개키 일치, 서버 용도, Root까지의 체인을 다시
+  확인하면 `Part02: CSR, public key, extensions, and trusted chain: OK`를
+  출력합니다.
+
 ## 확인 질문
 
 1. CSR에는 어떤 정보가 들어가고, 어떤 정보는 CA가 발급 시 결정하나요?

@@ -154,40 +154,40 @@
       "english_sha256": "5964a86d87b79e4ba8af5efa1b024475efa2f81f953926611e945c4a3aca086a"
     },
     "labs/lab04/README.md": {
-      "korean_sha256": "a0bde6115b7e883b27030cd1295217c5e2ab18188a37370f1eeb2d1e3724a669",
-      "english_sha256": "15f35acd1777d1378910c0111e5568cbb7d420bac0124bf9d340872243c45858"
+      "korean_sha256": "985260d95044e332081a46dee45eaa09630120932bb516f438cbbd7ce16b6730",
+      "english_sha256": "c7f9127258a3542d2cbd4d27d5e9a2afeee46fc46cab7669dc3c4545e4d7cebf"
     },
     "labs/lab04/part01/README.md": {
-      "korean_sha256": "6187d87134951ff292e155dcfa5b06323e6d44b425bddb513192820621e87b26",
-      "english_sha256": "f5e1fd2f79d5e82c9ae141f88448c04fc6fa787195487e6b07322457ff725576"
+      "korean_sha256": "78b957cbbce973241eeeabc42dc944f2519b7eff6f8882b188557059794bdcaa",
+      "english_sha256": "b0a2a0952a4e7ca5bbcfdc14a2d9662b19bd22425a1734852e0b9d99f5bdeb84"
     },
     "labs/lab04/part02/README.md": {
-      "korean_sha256": "744a2c1b0f1e19fa0944143c10c4d8a90a8676ad5e330897926635021027de73",
-      "english_sha256": "e53fe13936640a9c86adf0c3affa8097b9ace6a0a04bf478bbef8758d556f37b"
+      "korean_sha256": "3f49c56fb889676a7c4df7672741631b10d98b2e761fce196fb02dc0b4f9f516",
+      "english_sha256": "426a4853bc4b388d1dbc5b8f0601b5c3c094dec50236f0fc6b2897e4d7a8c1e4"
     },
     "labs/lab04/part03/README.md": {
-      "korean_sha256": "186a7af94a2c8f2e831ae9e676726605de72579fa4afff5933d4cd69d8ed71ea",
-      "english_sha256": "d1077814bf99371c681885cdd7217da2d3eb6e55f98e2bb50b532a50467e6c0a"
+      "korean_sha256": "6e7fae61ef18ee0cddffd12e8c6c4e4f85ad8a41bd49d25facbbd6d8e7d0fc08",
+      "english_sha256": "c97578af44cc1f0753d955ad2fe46788ad0580550609184a64c4ab342e0f0206"
     },
     "labs/lab04/part04/README.md": {
-      "korean_sha256": "9cbb9ffab618a859700c30c1de9983ea8e0d361e7f23036ce1c350057981f8bd",
-      "english_sha256": "770b86d3ecbc77d061dbd5ffcc71400849c77e78fb341e0aee806bf20b353ca8"
+      "korean_sha256": "1ab24ce6ae9bc465318aed12d595691e1eeb2d64ed1ad4b674ad7b613e77a95c",
+      "english_sha256": "c9809b8ceac1a24b884567b905aed9cf30a8415f19e0ef495d7ab1994835cb6f"
     },
     "labs/lab04/part05/README.md": {
-      "korean_sha256": "bfc41afc616433a248fa4549a9f9b3c928a8f30611c865cfeeb7e5e50934d072",
-      "english_sha256": "88984aaed4ace8ba4dd5ffb56ad9654137171fb1202ba7564ce760597aa54a7a"
+      "korean_sha256": "cebe91dccf786469a5a1b4848b1bffb8fa3314009a0768b5cab72a01e4430f2d",
+      "english_sha256": "f7be58f35aa406edc9b502759dbd30bac219774330d223b2ec109fb91a380044"
     },
     "labs/lab04/part06/README.md": {
-      "korean_sha256": "a6982b4e6f7286f6604232e4a5a00659b13bcfcff5c473f3caa3f33c1837664a",
-      "english_sha256": "0332ff1b16b1c2f10639dfd0b4fcc85911edeae37892c04046ba828dfea9efcb"
+      "korean_sha256": "9b9378f17cd86bb7fb141a1cea7d503a3b994da0f8002302adfc49a8d3947141",
+      "english_sha256": "1f64b38da511108ec52ee0179b1228ff66c0d4cd127036a03ed0aa97a20ee378"
     },
     "labs/lab04/part07/README.md": {
-      "korean_sha256": "4a4b074a131260c68afbc77da22deef46a369c90bd0e359534e07626ceb94674",
-      "english_sha256": "844bdfa6a651f519607d85d2c76ff0df12ac02f2983cdea307294fb6157985fc"
+      "korean_sha256": "e8ea595d797ceaf2144f8ad369008f448ffb1b58b93c76ef56fbd97064de5e42",
+      "english_sha256": "f28b2aa8c1183674837795ae77aba9d640e4c5ea6fadb4c1a51b5fde0e876727"
     },
     "labs/lab04/part08/README.md": {
-      "korean_sha256": "3148c3ed4f2ec20284c1512a1015c80aed5f475accfa292fe4d089db76f689cd",
-      "english_sha256": "a6b2b9458a69398eb64511a299764fcce14ec7a773105bd7a215d601ed3abd55"
+      "korean_sha256": "275ad5aeb98128a53465741a3d645a70db4aa63fafe01c440eb964b81a98eda6",
+      "english_sha256": "309a56c03ed75469f5d2bf8152f3dc1c2a4b4a188ce6f95aa8086504c699d0ba"
     }
   }
 }

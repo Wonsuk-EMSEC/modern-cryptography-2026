@@ -34,7 +34,21 @@ python3 labs/lab04/part05/find_collision.py
 python3 labs/lab04/part05/test_part05_materials.py
 ```
 
-The first command raises `NotImplementedError` while the TODO remains. The public test checks **only the supplied materials**, so it can pass before you implement the TODO. Once complete, the program prints two different file names, matching MD5 hashes, different SHA-256 hashes, and `LAB04{...}`.
+The first command raises `NotImplementedError` while the TODO remains. The public test checks **only the supplied materials**, so it can pass before you implement the TODO.
+
+## What to Check After Completing the TODO
+
+Run `find_collision.py` again. It prints these items in order; read the actual file names and digests from your own run.
+
+```text
+files: <first file name> <second file name>
+MD5: <hash shared by both files>
+SHA-256 #1: <first file's hash>
+SHA-256 #2: <second file's hash>
+LAB04{...}
+```
+
+`files:` must name **two files with different contents**. `MD5:` is shared by the pair, while `SHA-256 #1` and `SHA-256 #2` must differ. If those conditions fail, the program raises an error before printing the completion marker. An `OK` from `test_part05_materials.py` confirms the sample files, not whether your collision-finding TODO is correct.
 
 ## Checkpoint Questions
 

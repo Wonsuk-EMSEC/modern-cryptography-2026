@@ -12,16 +12,16 @@ OpenSSL로 RSA 키 쌍을 만들고 PBKDF2 기반 암호화 PKCS#8 개인키를 
 변경할 수 있는 이유와 역사적인 MD5 인증서 충돌의 영향을 분석합니다. 약한
 비밀번호로 보호한 개인키 파일을 사전으로 복구하고, CRL로 인증서 폐기를 확인합니다.
 
-| Part | 주제 | 시작 파일 |
-|---|---|---|
-| [01](part01/README.md) | OpenSSL 키 생성, 개인키 복호화와 OID 확인 | `part01/decrypt_key.py` |
-| [02](part02/README.md) | CA 컨테이너에 CSR 제출 | `part02/enroll.py` |
-| [03](part03/README.md) | 체인과 DNS 이름 검증 | `part03/verify_chain.py` |
-| [04](part04/README.md) | PC의 CA 신뢰와 로컬 HTTPS 중계 | `part04/compare_certificates.py` |
-| [05](part05/README.md) | 제공 파일에서 MD5 충돌쌍 찾기 | `part05/find_collision.py` |
-| [06](part06/README.md) | 역사적 가짜 중간 CA 복원과 체인 검증 | `part06/investigate.py` |
-| [07](part07/README.md) | 암호화된 개인키 파일 사전 공격 | `part07/attack.py` |
-| [08](part08/README.md) | CRL을 이용한 인증서 폐기 확인 | `part08/revoke.py` |
+| Part | 주제 | 시작 파일 | 완료 후 확인할 결과 |
+|---|---|---|---|
+| [01](part01/README.md) | OpenSSL 키 생성, 개인키 복호화와 OID 확인 | `part01/decrypt_key.py` | 개인키·공개키 일치와 완료 표식 |
+| [02](part02/README.md) | CA 컨테이너에 CSR 제출 | `part02/enroll.py` | 발급 인증서 파일과 CSR·인증서 공개키 일치 |
+| [03](part03/README.md) | 체인과 DNS 이름 검증 | `part03/verify_chain.py` | 올바른 체인·이름 수락, 오류 사례 거부 |
+| [04](part04/README.md) | PC의 CA 신뢰와 로컬 HTTPS 중계 | `part04/compare_certificates.py` | 원본·프록시 인증서 비교와 프록시 로그의 Flag |
+| [05](part05/README.md) | 제공 파일에서 MD5 충돌쌍 찾기 | `part05/find_collision.py` | 서로 다른 파일의 동일한 MD5와 다른 SHA-256 |
+| [06](part06/README.md) | 역사적 가짜 중간 CA 복원과 체인 검증 | `part06/investigate.py` | 복원 파일, 과거 정책 수락과 현대 정책 거부 |
+| [07](part07/README.md) | 암호화된 개인키 파일 사전 공격 | `part07/attack.py` | 시도 횟수·시간과 복호화한 Flag |
+| [08](part08/README.md) | CRL을 이용한 인증서 폐기 확인 | `part08/revoke.py` | 폐기 전 수락, 갱신 CRL 적용 시 거부, 새 인증서 수락 |
 
 각 Part 디렉토리에 학생이 수정하는 실습 코드와 직접 실행되는 `main()`이 있습니다.
 **각 Part를 완료하려면 해당 Python 파일의 TODO를 직접 구현해야 합니다.** 먼저
@@ -31,6 +31,7 @@ OpenSSL로 RSA 키 쌍을 만들고 PBKDF2 기반 암호화 PKCS#8 개인키를 
 Part04의 Flag는 실습용 HTTPS 통신에서
 찾고, Part07의 Flag는 개인키 복구 후 제공 암호문에서 찾습니다. Part04는 Flag
 관찰과 `compare_certificates.py` 완성을 모두 수행합니다.
+각 Part의 README에는 실행 화면의 구체적인 확인 항목을 적었습니다.
 
 ## 필요한 Docker 이미지
 

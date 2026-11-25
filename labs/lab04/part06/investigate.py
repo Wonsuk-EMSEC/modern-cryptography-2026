@@ -20,15 +20,26 @@ HISTORICAL_TIME = "1091664000"
 
 def collision_evidence(legitimate_der: bytes, template_der: bytes) -> bool:
     """Check different TBS bytes, matching MD5, and different SHA-256 values."""
-    # TODO: parse both DER certificates and compare their tbs_certificate_bytes.
+    legitimate = x509.load_der_x509_certificate(legitimate_der)
+    template = x509.load_der_x509_certificate(template_der)
+    legitimate_tbs = legitimate.tbs_certificate_bytes
+    template_tbs = template.tbs_certificate_bytes
+    # TODO: Return True only when the two TBS values differ, their MD5 digests
+    # match, and their SHA-256 digests differ. Hash the TBS bytes, not the
+    # complete DER certificate (which includes its signature).
     raise NotImplementedError("compare the two signed certificate bodies")
 
 
 def transplant_signature(legitimate_der: bytes, template_der: bytes,
                          offset: int, size: int) -> bytes:
     """Return the rogue template with the legitimate certificate's signature."""
-    # TODO: extract the legitimate certificate's signature and replace only the
-    # empty signature bytes at [offset:offset+size] in the rogue template.
+    legitimate = x509.load_der_x509_certificate(legitimate_der)
+    signature = legitimate.signature
+    if len(signature) != size:
+        raise ValueError("signature does not fit the template slot")
+    # TODO: Check that template_der[offset:offset+size] is an empty slot.
+    # Replace only that slice with signature; keep every other byte intact.
+    # A slice such as template_der[:offset] gives the unchanged prefix.
     raise NotImplementedError("reuse the CA signature on the colliding TBS")
 
 

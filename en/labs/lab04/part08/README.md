@@ -49,7 +49,30 @@ python3 labs/lab04/part08/revoke.py
 python3 labs/lab04/part08/check.py
 ```
 
-The unfinished TODO raises `NotImplementedError`. After implementation, check all four verification results and the `LAB04{...}` completion marker. The `part08/output/` directory holds the CRLs from before and after revocation and the old and new server certificates. Run the public check after the program creates these files. The marker confirms the exercise flow; it does not certify the revocation state of any real service.
+The unfinished TODO raises `NotImplementedError`. Run the public check after
+`revoke.py` creates the required files.
+
+## What to check after completing the TODO
+
+When `revoke.py` succeeds, the four results in the table appear in order:
+`ACCEPT`, `ACCEPT`, `REJECT`, `ACCEPT`. The last line is a `LAB04{...}` completion
+marker. The third `REJECT` must be caused by the updated CRL rejecting the
+revoked certificate.
+
+`part08/output/` contains `root.pem`, `intermediate.pem`, `old.pem`, `new.pem`,
+`before.crl`, and `after.crl`. The old and new certificates have the same CSR
+public key but different serial numbers. Compare the serial numbers directly:
+
+```console
+openssl x509 -in labs/lab04/part08/output/old.pem -noout -serial
+openssl x509 -in labs/lab04/part08/output/new.pem -noout -serial
+```
+
+When `check.py` passes, it prints
+`Part08: CRL, serial numbers, and hostname decisions: OK`. It also checks CRL
+signatures, the revoked serial number, the reissued certificate, and rejection
+of an incorrect hostname. The marker confirms the practice flow; it does not
+certify the revocation state of any real service.
 
 Inspect the updated CRL's issuer and revoked serial number directly:
 

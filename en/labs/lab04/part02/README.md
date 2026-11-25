@@ -44,6 +44,19 @@ The CA creates new keys and certificates when its container restarts. After a
 restart, rerun this command to get a new CSR and certificate. [Part03](../part03/README.md)
 uses the files in `part02/output/`.
 
+### What to check after completing the TODO
+
+- `part02/output/` contains four files: `request.csr`, `server.pem`,
+  `intermediate.pem`, and `root.pem`. The private-key file is not copied there.
+- The program prints `Certificate files: /workspace/labs/lab04/part02/output`,
+  `Issued name: lab04.local.test; CSR and certificate public key match: OK`,
+  and `LAB04{...}`. The second line appears after it checks the issued server
+  certificate's public key against the CSR/private key and finds the requested
+  DNS name in the certificate.
+- `check.py` rechecks the CSR signature, public-key match, server purpose,
+  and chain to the Root. It prints
+  `Part02: CSR, public key, extensions, and trusted chain: OK` when they pass.
+
 ## Checkpoint questions
 
 1. Which information comes from a CSR, and which fields does the CA choose at issuance?

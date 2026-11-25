@@ -14,16 +14,16 @@ practice site, and analyze the effect of a historical MD5 certificate
 collision. Recover a private key protected by a weak password using an offline
 dictionary, then check revocation with a CRL.
 
-| Part | Topic | Starting file |
-|---|---|---|
-| [01](part01/README.md) | Generate a key pair, inspect OIDs, and open the encrypted private key | `part01/decrypt_key.py` |
-| [02](part02/README.md) | Submit a CSR to the CA container | `part02/enroll.py` |
-| [03](part03/README.md) | Verify a chain and DNS name | `part03/verify_chain.py` |
-| [04](part04/README.md) | PC trust settings and a local HTTPS proxy | `part04/compare_certificates.py` |
-| [05](part05/README.md) | Find an MD5 collision in supplied files | `part05/find_collision.py` |
-| [06](part06/README.md) | Reconstruct a historical rogue intermediate CA | `part06/investigate.py` |
-| [07](part07/README.md) | Dictionary attack on an encrypted private key | `part07/attack.py` |
-| [08](part08/README.md) | Check certificate revocation with a CRL | `part08/revoke.py` |
+| Part | Topic | Starting file | Result to check after completion |
+|---|---|---|---|
+| [01](part01/README.md) | Generate a key pair, inspect OIDs, and open the encrypted private key | `part01/decrypt_key.py` | Private/public key match and completion marker |
+| [02](part02/README.md) | Submit a CSR to the CA container | `part02/enroll.py` | Issued certificate files and matching CSR/certificate public keys |
+| [03](part03/README.md) | Verify a chain and DNS name | `part03/verify_chain.py` | Valid chain and name accepted; invalid cases rejected |
+| [04](part04/README.md) | PC trust settings and a local HTTPS proxy | `part04/compare_certificates.py` | Original/proxy certificate comparison and Flag in proxy logs |
+| [05](part05/README.md) | Find an MD5 collision in supplied files | `part05/find_collision.py` | Different files with matching MD5 and different SHA-256 |
+| [06](part06/README.md) | Reconstruct a historical rogue intermediate CA | `part06/investigate.py` | Reconstructed file, legacy acceptance and modern rejection |
+| [07](part07/README.md) | Dictionary attack on an encrypted private key | `part07/attack.py` | Attempt count, elapsed time, and decrypted Flag |
+| [08](part08/README.md) | Check certificate revocation with a CRL | `part08/revoke.py` | Acceptance before revocation, rejection with the updated CRL, and acceptance of the new certificate |
 
 Each Part keeps its task script and optional public check beside its README.
 To complete a Part, fill in the task script's TODOs yourself and run its
@@ -32,6 +32,7 @@ form `LAB04{...}` let you check your progress in each Part. Find Part04's Flag
 in synthetic HTTPS traffic and recover
 Part07's Flag from ciphertext after unlocking the private key. In Part04, you
 must both observe the Flag and complete `compare_certificates.py`.
+Each Part README lists specific output and behavior to check after running the task.
 
 ## Required Docker images
 

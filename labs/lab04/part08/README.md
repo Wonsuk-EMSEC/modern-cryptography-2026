@@ -49,7 +49,28 @@ python3 labs/lab04/part08/revoke.py
 python3 labs/lab04/part08/check.py
 ```
 
-TODO가 남아 있으면 `NotImplementedError`가 발생합니다. 구현을 마친 뒤 네 검증 결과와 `LAB04{...}` 완료 표식을 확인하세요. `part08/output/`에는 폐기 전후 CRL과 이전·새 서버 인증서가 저장됩니다. 공개 검사는 프로그램 실행을 마친 뒤 이 파일들을 확인합니다. 완료 표식은 실행 흐름을 확인하는 피드백이며, 실제 서비스의 폐기 상태를 증명하지 않습니다.
+TODO가 남아 있으면 `NotImplementedError`가 발생합니다. 공개 검사는
+`revoke.py`가 필요한 파일을 만든 다음 실행하세요.
+
+## TODO 완료 후 확인할 결과
+
+`revoke.py`가 성공하면 위 표의 `ACCEPT`, `ACCEPT`, `REJECT`, `ACCEPT` 결과가
+순서대로 출력되고 마지막 줄에 `LAB04{...}` 완료 표식이 나옵니다. 세 번째
+`REJECT`는 갱신된 CRL에 의해 폐기된 인증서가 거부된 경우여야 합니다.
+
+`part08/output/`에는 `root.pem`, `intermediate.pem`, `old.pem`, `new.pem`,
+`before.crl`, `after.crl`이 생깁니다. `old.pem`과 `new.pem`은 같은 CSR의 공개키를
+담지만 일련번호가 달라야 합니다. 두 일련번호는 다음처럼 직접 비교할 수 있습니다.
+
+```console
+openssl x509 -in labs/lab04/part08/output/old.pem -noout -serial
+openssl x509 -in labs/lab04/part08/output/new.pem -noout -serial
+```
+
+`check.py`까지 통과하면 `Part08: CRL, serial numbers, and hostname decisions: OK`가
+표시됩니다. 이 검사는 CRL 서명과 폐기된 일련번호, 재발급 인증서, 잘못된 호스트
+이름의 거부도 확인합니다. 완료 표식은 실습 실행 흐름에 대한 피드백입니다.
+실제 서비스의 폐기 상태를 증명하지는 않습니다.
 
 갱신된 CRL의 발급자와 폐기된 일련번호를 직접 살펴보려면 다음을 실행하세요.
 

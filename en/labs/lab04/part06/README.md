@@ -46,15 +46,23 @@ python3 labs/lab04/part06/investigate.py
 python3 labs/lab04/part06/test_part06_materials.py
 ```
 
-The first command raises `NotImplementedError` while the TODOs remain. The public test checks **only the supplied materials**, so it can pass before implementation. A correct implementation produces output with these results:
+The first command raises `NotImplementedError` while the TODOs remain. The public test checks **only the supplied materials**, so it can pass before implementation.
+
+## What to Check After Completing the TODOs
+
+Run `investigate.py` again after completing both TODOs. It prints these items in order; read the MD5 value and completion marker from your own run.
 
 ```text
 legitimate CA role: False
 rogue CA role: True
+TBS MD5: <hash shared by the two signed bodies>
 legacy chain: accepted
 modern chain: rejected
 LAB04{...}
+reconstructed certificate: /tmp/lab04-rogue-reconstructed.der
 ```
+
+`legitimate CA role` and `rogue CA role` show a server certificate and an intermediate CA certificate, respectively. `legacy chain` must be accepted and `modern chain` rejected; otherwise the program raises an error. The last path holds the reconstructed **certificate**, not a private key. An `OK` from `test_part06_materials.py` confirms only the format of the supplied files, not your two TODO implementations.
 
 Verification time is fixed at **2004-08-05 00:00 UTC**, inside the certificates' validity periods. `legacy chain` is an offline reproduction using OpenSSL `-auth_level 0` to allow weak signatures; `modern chain` uses `-auth_level 1` and rejects the weak MD5 signature. This command checks **only the certificate chain**; it does not check a hostname, establish a TLS connection, or show that a current browser trusts the chain.
 

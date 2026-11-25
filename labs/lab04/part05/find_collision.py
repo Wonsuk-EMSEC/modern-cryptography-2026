@@ -12,7 +12,14 @@ DATA = Path(__file__).resolve().parent / "data"
 
 def find_collision(samples: list[Path]) -> tuple[Path, Path]:
     """Return two distinct files with different bytes and the same MD5 digest."""
-    # TODO: read every sample, group by MD5, and return the collision pair.
+    seen: dict[bytes, tuple[Path, bytes]] = {}
+    for path in samples:
+        contents = path.read_bytes()
+        digest = hashlib.md5(contents).digest()
+        # TODO: If digest is already in seen, compare the actual bytes too.
+        # A matching digest for identical bytes is not a collision.
+        # Return the two Path objects only for different contents; otherwise
+        # remember this sample so later paths can be compared.
     raise NotImplementedError("find the two different samples with matching MD5")
 
 

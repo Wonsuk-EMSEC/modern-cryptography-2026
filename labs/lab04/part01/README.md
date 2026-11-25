@@ -81,6 +81,17 @@ python3 labs/lab04/part01/check.py
 비밀번호가 틀리면 개인키를 열 수 없습니다. 두 번째 명령은 선택적 검사입니다.
 `private_encrypted.pem`을 보관해 Part02에서 사용하세요.
 
+### TODO 완료 후 확인할 결과
+
+- `decrypt_key.py`가 `Encrypted private key:`, `Public key:` 뒤에 사용한 파일
+  경로를 표시하고 `Private/public key match: OK`와 `LAB04{...}`를 출력합니다.
+  개인키나 비밀번호 자체는 출력하지 않습니다.
+- 다른 비밀번호를 입력하면 `Could not open the private key with that password`가
+  표시되며, 공개키 일치나 완료 표식은 출력되지 않습니다.
+- `check.py`는 별도로 생성한 키로 올바른 비밀번호 복구와 잘못된 비밀번호 거부를
+  검사한 뒤 `Part01: correct password recovers the key; wrong password fails: OK`를
+  출력합니다.
+
 ## 확인 질문
 
 1. `genpkey`가 만드는 RSA 키 쌍에서 공개키와 개인키는 어떤 관계인가요?

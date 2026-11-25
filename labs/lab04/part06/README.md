@@ -45,15 +45,23 @@ python3 labs/lab04/part06/investigate.py
 python3 labs/lab04/part06/test_part06_materials.py
 ```
 
-TODO가 남아 있으면 첫 번째 명령은 `NotImplementedError`로 끝납니다. 공개 검사는 **자료 구성만** 확인하므로 구현 전에도 통과할 수 있습니다. 구현이 맞으면 프로그램은 다음 요지를 출력합니다.
+TODO가 남아 있으면 첫 번째 명령은 `NotImplementedError`로 끝납니다. 공개 검사는 **자료 구성만** 확인하므로 구현 전에도 통과할 수 있습니다.
+
+## 완료 후 확인할 결과
+
+두 TODO를 완성하고 `investigate.py`를 다시 실행하면 다음 항목이 순서대로 표시됩니다. MD5 값과 완료 표식은 실행 결과에서 확인하세요.
 
 ```text
 legitimate CA role: False
 rogue CA role: True
+TBS MD5: <두 인증서 본문에 공통인 해시>
 legacy chain: accepted
 modern chain: rejected
 LAB04{...}
+reconstructed certificate: /tmp/lab04-rogue-reconstructed.der
 ```
+
+`legitimate CA role`과 `rogue CA role`은 각각 일반 서버 인증서와 중간 CA 인증서의 역할을 보여 줍니다. `legacy chain`은 허용되고 `modern chain`은 거부되어야 하며, 다르게 나오면 프로그램이 오류를 냅니다. 마지막 경로의 파일은 복원한 **인증서**이며 개인키가 아닙니다. `test_part06_materials.py`의 `OK`는 제공 자료 형식만 확인한 결과로, 두 TODO의 구현 결과를 판정하지 않습니다.
 
 검증 시점은 자료의 유효기간 안인 **2004-08-05 00:00 UTC**로 고정되어 있습니다. `legacy chain`은 OpenSSL `-auth_level 0`으로 약한 서명을 허용한 오프라인 재현이며, `modern chain`은 `-auth_level 1`에서 MD5 서명을 약하다고 거부합니다. 이 명령은 **인증서 체인만** 검사하며 호스트 이름, 실제 TLS 연결, 오늘날 브라우저의 신뢰 여부는 검사하지 않습니다.
 

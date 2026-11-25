@@ -20,6 +20,16 @@ def find_password(encrypted_key: bytes, candidates: list[str]) -> tuple[bytes, i
     A candidate that cannot unlock this key is not a match. Raise ValueError if
     the list has no match. Do not print the password or decrypted private key.
     """
+    attempts = 0
+    for candidate in candidates:
+        if not candidate:
+            continue
+        attempts += 1
+        password = candidate.encode("utf-8")
+        # TODO: Try serialization.load_der_private_key(encrypted_key, password=...).
+        # A wrong password raises ValueError; continue to the next candidate.
+        # When a key opens, return (password, attempts). If none opens, raise
+        # ValueError instead of printing a password or a private key.
     raise NotImplementedError("try the candidate passwords against the key")
 
 

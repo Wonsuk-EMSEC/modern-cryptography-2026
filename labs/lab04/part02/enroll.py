@@ -24,8 +24,12 @@ DEFAULT_CA_URL = "http://lab04-ca:8080"
 
 def make_csr(private_key, hostname: str) -> bytes:
     """Create a PEM CSR with this key and hostname in subjectAltName."""
-    # TODO: Build and sign a CSR. Put hostname in DNS subjectAltName;
-    # use SHA-256 and return PEM bytes. The key stays in this container.
+    subject = x509.Name([x509.NameAttribute(x509.NameOID.COMMON_NAME, hostname)])
+    builder = x509.CertificateSigningRequestBuilder().subject_name(subject)
+
+    # TODO: Add hostname as a DNS SubjectAlternativeName extension to builder.
+    # Sign the finished builder with private_key and hashes.SHA256(), then
+    # return the signed request as PEM bytes. The key stays in this container.
     raise NotImplementedError("create a CSR with DNS subjectAltName")
 
 

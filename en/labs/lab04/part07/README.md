@@ -46,6 +46,25 @@ implemented, the second prints attempts, elapsed time, attempts per second,
 and the Flag. Do not hard-code a candidate password. Relate the cost of one
 attempt to the PBKDF2 iteration count you inspected in Part01.
 
+## What to check after completing the TODO
+
+When `attack.py` finishes, its output has this form. The numbers and Flag depend
+on the exercise files and execution environment; these are placeholders.
+
+```text
+Attempts: <tries through the successful candidate>
+Elapsed seconds: <measured time>
+Attempts per second: <measured rate>
+LAB04{...}
+```
+
+`Attempts` includes the successful candidate. The final Flag line means the
+recovered private key's public part matched the supplied certificate and the
+key opened `flag.enc`. If the elapsed time is too short to calculate a rate,
+`Elapsed too short to measure` appears instead of the rate line. The public
+materials check prints `OK` after checking file structure; it does not check
+whether your password-search TODO is correct.
+
 Submit the modified `attack.py`, the Flag and attempt/time output, and answers
 to these questions. Do not submit the password or decrypted private-key file.
 

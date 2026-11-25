@@ -92,6 +92,17 @@ python3 check.py
 나란히 출력하세요. 브라우저에서 본 인증서와 가로챈 인증서의 발급자가 같은지도
 확인합니다. `check.py`는 구현 후 실행하는 선택적 검사입니다.
 
+### TODO 완료 후 확인할 결과
+
+- `compare_certificates.py`는 JSON의 `original`과 `intercepted` 항목에 각각
+  `subject`, `issuer`, `fingerprint`, `dns_names`를 출력합니다. 두 항목 모두
+  `dns_names`에 `lab04.local.test`가 있고, `fingerprint`는 64자리 16진수입니다.
+- 원본과 프록시 인증서의 `issuer` 및 `fingerprint`는 서로 달라야 합니다.
+  `check.py`가 이를 확인하면
+  `Part04: original and intercepted certificate identities: OK`를 출력합니다.
+- 코드의 JSON 출력에는 Flag가 없습니다. `LAB04{...}`는 위 브라우저 단계에서
+  실습 토큰을 전송한 뒤 **프록시 로그**에서 확인합니다.
+
 ## 실습 종료
 
 **호스트 PC**에서 `Lab04 MITM Practice Root`를 브라우저 또는 사용자 신뢰

@@ -19,8 +19,13 @@ PUBLIC_KEY = PART / "output/public.pem"
 
 def decrypt_key(encrypted_pem: bytes, password: bytes) -> rsa.RSAPrivateKey:
     """Return the RSA private key opened with its known password."""
-    # TODO: Open the encrypted PKCS#8 PEM with the supplied password.
-    # Use cryptography's serialization.load_pem_private_key().
+    # The OpenSSL command in the README creates an encrypted PKCS#8 PEM.
+    if not encrypted_pem.startswith(b"-----BEGIN ENCRYPTED PRIVATE KEY-----"):
+        raise ValueError("expected an encrypted PKCS#8 PEM file")
+
+    # TODO: Pass encrypted_pem and the password bytes to
+    # serialization.load_pem_private_key(). Return the RSA private key;
+    # let an incorrect password raise ValueError.
     raise NotImplementedError("decrypt the encrypted private key")
 
 

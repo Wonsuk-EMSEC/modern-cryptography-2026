@@ -25,10 +25,12 @@ HOSTNAME = "lab04.local.test"
 def verify_with_crl(root: Path, intermediate: Path, leaf: Path,
                     crl: Path | None, hostname: str) -> subprocess.CompletedProcess[str]:
     """Verify the server chain and name, adding leaf CRL checking when given a CRL."""
-    # TODO: Run `openssl verify` and return subprocess.CompletedProcess.
-    # Trust only root; use intermediate as an untrusted chain certificate.
-    # Check server purpose and hostname. If crl is not None, supply that CRL
-    # and enable revocation checking for the leaf certificate. Capture output.
+    command = ["openssl", "verify", "-no-CApath", "-no-CAstore",
+               "-CAfile", str(root), "-untrusted", str(intermediate)]
+    # TODO: Add the SSL-server purpose and hostname options. When crl is not
+    # None, also add its path and leaf CRL checking; append leaf last.
+    # Then run command with subprocess.run(..., capture_output=True, text=True)
+    # and return its CompletedProcess, including failed verification results.
     raise NotImplementedError("verify the chain, name, and optional leaf CRL")
 
 

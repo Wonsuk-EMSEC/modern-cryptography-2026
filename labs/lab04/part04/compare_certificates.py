@@ -13,9 +13,12 @@ from cryptography.hazmat.primitives import hashes
 
 def describe(certificate_pem: bytes) -> dict[str, str | list[str]]:
     certificate = x509.load_pem_x509_certificate(certificate_pem)
-    # TODO: return a dictionary with the certificate's subject, issuer,
-    # SHA-256 fingerprint, and DNS names in Subject Alternative Name.
-    # The fingerprint should be hexadecimal; names should be a list.
+    subject = certificate.subject.rfc4514_string()
+    issuer = certificate.issuer.rfc4514_string()
+
+    # TODO: Find the certificate's SHA-256 fingerprint (as hex) and DNS names
+    # from SubjectAlternativeName (as a list). Return a dictionary with keys
+    # "subject", "issuer", "fingerprint", and "dns_names".
     raise NotImplementedError("describe this certificate")
 
 

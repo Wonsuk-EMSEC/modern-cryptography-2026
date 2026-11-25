@@ -48,6 +48,22 @@ Use the same server certificate and change one condition at a time. Do not add
 the intermediate CA directly as a trust anchor. Regenerate `part02/output/`
 after the CA restarts.
 
+### What to check after completing the TODO
+
+`verify_chain.py` prints these three lines **in this order**, followed by
+`LAB04{...}`:
+
+```text
+trusted chain and correct name: ACCEPT
+trusted chain, wrong name: REJECT
+missing intermediate: REJECT
+```
+
+The program stops with an error if a result differs. `check.py` independently
+rechecks the same three conditions and prints
+`Part03: chain and hostname decisions: OK` when they all pass. This Part reads
+the certificates from Part02 and does not create new certificate files.
+
 ## Checkpoint questions
 
 1. When should a connection be rejected even though its certificate signature is valid?
