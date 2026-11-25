@@ -63,32 +63,17 @@ git pull --ff-only
 보존하면서 합칠 수 있도록 강사에게 도움을 요청하세요. 갱신 후에는
 [1단계](#1-prepare-the-common-course-image)에서 공통 이미지를 다시 빌드합니다.
 
-**아직 수업용 이미지를 빌드하지 않았다면** 먼저
-[사전 준비 사항](../../README.md#0-prerequisites)을 완료하세요. 로컬 복사본도
-없다면 [저장소를 복제](../../README.md#1-clone-the-course-repository)하고,
-이미 있다면 위 안내대로 갱신합니다. Docker가 실행 중인지 확인하세요.
-**호스트 터미널**(Windows에서는 Ubuntu/WSL)에서 `docker/`와 `labs/`가 있는
-저장소 루트로 이동한 뒤 다음을 실행합니다.
+Lab02를 처음 시작한다면 [사전 준비 사항](../../README.md#0-prerequisites)을
+완료하고 [저장소를 복제](../../README.md#1-clone-the-course-repository)하세요.
+이미 복제했다면 위 안내대로 갱신합니다. Docker가 실행 중인지 확인하세요.
 
-```console
-docker compose -f docker/compose.yml build course
-```
+| 서비스 | 이미지 | 준비와 사용 범위 |
+| --- | --- | --- |
+| `course` | `modern-cryptography-2026` | 로컬에서 빌드하며 모든 Part에서 사용 |
+| `lab02-target` | `ghcr.io/wonsuk-emsec/modern-cryptography-2026-lab02-target:2026-lab02-v1` | Part 4–6에서만 Compose가 GHCR에서 자동으로 내려받아 사용 |
 
-이 명령은 `docker/Dockerfile`을 사용하여 실습에 필요한 도구와 Python
-라이브러리를 포함한 공통 `modern-cryptography-2026` 이미지를 빌드합니다.
-첫 빌드는 몇 분 걸릴 수 있습니다. 성공적으로 완료되면 이미지가 준비된 것이므로
-[2단계](#2-start-the-services-you-need)에서 컨테이너를 시작하세요. 아래 1단계에서
-같은 빌드를 반복할 필요는 없습니다.
-
-Part 4–6에는 자신의 컴퓨터에서 실행하는 대상 컨테이너도 필요합니다.
-Lab 01 Part 2의 SSH 대상과 같은 방식입니다. Lab02 대상은 미리 빌드된 이미지로
-제공되며, Docker Compose가 GitHub Container Registry(GHCR)에서 자동으로
-내려받습니다. 강사가 운영하는 별도 서버는 필요하지 않습니다.
-
-| 서비스 | 용도 |
-| --- | --- |
-| `course` | 모든 실습에서 공유하는 셸, Python 코드, 저장소 파일 |
-| `lab02-target` | Part 4–6에서 상호 작용하는 로컬 애플리케이션 |
+Part 1–3과 7은 `course`만 필요합니다. Part 4–6의 대상도 학생 컴퓨터에서
+컨테이너로 실행되며, 강사가 운영하는 별도 서버에 접속하지 않습니다.
 
 <a id="1-prepare-the-common-course-image"></a>
 ### 1. 공통 수업용 이미지 준비
@@ -123,11 +108,8 @@ Lab 01 환경 준비에서 사용한 것과 같은 이미지 빌드 명령입니
 몇 분 걸릴 수 있으며, 이후 빌드에서는 가능한 경우 캐시된 레이어를 재사용합니다.
 Lab02 환경을 준비한 뒤에는 갱신된 환경 파일이 제공될 때만 다시 빌드하면 됩니다.
 
-추가 대상 서비스에는 별도 빌드 파일이 있습니다. Lab 01 SSH 대상은
-`docker/lab01-ssh-target/Dockerfile`, Lab02 애플리케이션은
-`docker/lab02-target/Dockerfile`을 사용합니다. 강사가 비공개 서버 파일로
-Lab02 대상을 빌드하고 이미지를 제공합니다. Part 4–6에서는 2단계에서 해당
-이미지를 시작하세요. 위의 공통 수업용 빌드는 여러분의 작업 환경만 준비합니다.
+이 빌드는 모든 Part의 작업 환경만 준비합니다. Part 4–6 대상 이미지는
+2단계에서 Compose가 가져오므로 학생이 직접 빌드하지 않습니다.
 
 <a id="2-start-the-services-you-need"></a>
 ### 2. 필요한 서비스 시작
@@ -159,13 +141,7 @@ Docker Compose가 해당 이미지를 내려받아 실행하므로 학생은 대
 이미지 자체는 로컬에서 조사할 수 있습니다. 이 실습에서는 이미지 안의 파일을
 읽는 대신 제공된 클라이언트를 통해 플래그를 복구하세요.
 
-대상은 다음 GHCR 이미지 이름을 사용합니다.
-
-```text
-ghcr.io/wonsuk-emsec/modern-cryptography-2026-lab02-target:2026-lab02-v1
-```
-
-`docker/compose.yml`에는 `build` 항목 없이 이 이미지가 지정되어 있습니다.
+`docker/compose.yml`에는 위 표의 GHCR 이미지가 `build` 항목 없이 지정되어 있습니다.
 Compose가 필요할 때 자동으로 가져오므로 수동 다운로드, `docker load`,
 공개 패키지용 레지스트리 로그인은 필요하지 않습니다. Lab02 파일과 대상 이미지는
 한 쌍의 **`2026-lab02-v1`** 릴리스입니다. Part 5의 암호문은 대상 이미지와
@@ -311,7 +287,7 @@ docker compose -f docker/compose.yml --profile lab02 down
 다음 명령으로 컨테이너와 네트워크를 중지하고 제거하세요.
 
 ```console
-docker compose -f docker/compose.yml --profile lab01-ssh --profile lab02 down
+docker compose -f docker/compose.yml --profile lab01-ssh --profile lab02 --profile lab03 --profile lab04 down
 ```
 
 클라이언트가 연결하지 못하면 호스트 터미널에서 `ps`를 실행해 대상이 실행 중인지

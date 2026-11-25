@@ -28,9 +28,17 @@ VS Code에서는 공통 [수업용 컨테이너 설정 안내](../../README.md#u
 수업용 환경을 사용하며, 기본 인터프리터는 `/opt/course-venv/bin/python3`입니다.
 공통 안내에는 이전에 저장한 인터프리터 선택을 한 번 수정하는 방법도 나와 있습니다.
 
-터미널만 사용한다면 **호스트 터미널**에서 저장소 루트로 이동한 뒤 아래 명령을 실행합니다.
-필요한 경우 공통 이미지를 빌드하고, 공용 수업 컨테이너를 백그라운드에서 시작한 다음
-상태를 확인합니다.
+Lab01에 필요한 이미지는 다음과 같습니다. `course` 이미지는 모든 Part에서 사용하며,
+온라인 SSH 실험을 하는 Part 2에만 대상 이미지를 추가합니다. 두 이미지 모두
+`docker/compose.yml`의 `build` 설정에 따라 학생 컴퓨터에서 빌드합니다.
+
+| 서비스 | 이미지 | 사용 범위 |
+| --- | --- | --- |
+| `course` | `modern-cryptography-2026` | 모든 Part의 코드와 테스트 |
+| `lab01-ssh-target` | `modern-cryptography-2026-lab01-ssh-target` | Part 2의 온라인 SSH 실험만 |
+
+**호스트 터미널**에서 `docker/`와 `labs/`가 있는 저장소 루트로 이동한 뒤,
+공통 이미지를 빌드하고 `course` 컨테이너를 시작하세요.
 
 ```console
 docker compose -f docker/compose.yml build course
@@ -38,17 +46,19 @@ docker compose -f docker/compose.yml up -d course
 docker compose -f docker/compose.yml ps
 ```
 
-`-d` 옵션은 `course`를 백그라운드에서 실행합니다. `ps` 결과에 `Up`(실행 중)이 표시되어야 합니다.
-두 실습은 동일한 `docker/compose.yml`과 수업 컨테이너를 사용합니다.
-대상 서버에는 별도 프로필이 있으며 **기본적으로 시작되지 않습니다**.
+`-d` 옵션은 `course`를 백그라운드에서 실행합니다. `ps` 결과에 `Up`(실행 중)이
+표시되어야 합니다. Part 1과 3–5에는 이 컨테이너만 필요합니다.
 
-| 대상 서비스 | 프로필 | 사용 실습 |
-| --- | --- | --- |
-| `lab01-ssh-target` | `lab01-ssh` | Lab01 Part 2 |
-| `lab02-target` | `lab02` | Lab02 Part 4–6 |
+Part 2의 온라인 실험을 할 때만 저장소 루트의 **호스트 터미널**에서 SSH 대상을
+빌드하고 시작하세요. `lab01-ssh` 프로필의 대상은 기본적으로 시작되지 않습니다.
 
-대상 서버는 해당 Part에서 필요할 때만 그 Part의 README에 따라 시작합니다.
-Lab01 Part 2는 [SSH 대상 설정 안내](part2_dictionary_attack/README.md#step-1-build-and-start-the-isolated-target)를 따르세요.
+```console
+docker compose -f docker/compose.yml --profile lab01-ssh up -d --build --wait lab01-ssh-target
+docker compose -f docker/compose.yml --profile lab01-ssh ps
+```
+
+대상 사용과 종료 방법은 [Part 2의 SSH 대상 안내](part2_dictionary_attack/README.md#step-1-build-and-start-the-isolated-target)를
+따르세요. [Lab02](../lab02/README.md)의 Part 4–6에는 별도로 제공되는 대상 이미지가 필요합니다.
 
 컨테이너에 연결된 VS Code에서는 통합 터미널을 엽니다. 터미널만 사용한다면
 **호스트 터미널**에서 실행 중인 수업 컨테이너의 셸을 엽니다.

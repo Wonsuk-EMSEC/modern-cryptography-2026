@@ -17,12 +17,35 @@ docker/
 │   ├── README.md
 │   └── sshd_config
 ├── lab02-target/
-    ├── Dockerfile                # Lab02 Parts 4–6 server; staff build
-    └── README.md
-└── lab03-target/
-    ├── Dockerfile                # Lab03 Parts 06/08 server; staff build
-    └── README.md
+│   ├── Dockerfile                # Lab02 Parts 4–6 server; staff build
+│   └── README.md
+├── lab03-target/
+│   ├── Dockerfile                # Lab03 Parts 06/08 server; staff build
+│   └── README.md
+├── lab04-ca/
+│   ├── Dockerfile                # Lab04 local practice CA
+│   └── server.py
+└── lab04-proxy/
+    ├── Dockerfile                # Lab04 local HTTPS interception practice
+    └── server.py
 ```
+
+## Images required by each lab
+
+Every lab uses `modern-cryptography-2026`, built locally from the repository's
+`docker/Dockerfile` and run as the `course` service. Start an additional image
+only for the Parts that need it.
+
+| Lab | Additional image (service) | Preparation and scope |
+|---|---|---|
+| Lab01 | `modern-cryptography-2026-lab01-ssh-target` (`lab01-ssh-target`) | Build locally for Part 2 only |
+| Lab02 | `ghcr.io/wonsuk-emsec/modern-cryptography-2026-lab02-target:2026-lab02-v1` (`lab02-target`) | Compose downloads it when needed for Parts 4–6 |
+| Lab03 | `ghcr.io/wonsuk-emsec/modern-cryptography-2026-lab03-target:2026-lab03-v1` (`lab03-target`) | Compose downloads it when the local target is selected for Parts 06 and 08 |
+| Lab04 | `modern-cryptography-2026-lab04-ca` (`lab04-ca`), `modern-cryptography-2026-lab04-proxy` (`lab04-proxy`) | Build locally after `course`, for the CA in Parts 02 and 08 and the proxy in Part04 |
+
+If you select the instructor-hosted server for Lab03, you do not need the
+`lab03-target` image. Lab04 Part03 needs the certificate produced in Part02,
+but performs its verification in `course`. See each lab README for commands.
 
 ## Build once and use for any lab
 
@@ -112,11 +135,11 @@ docker compose -f docker/compose.yml --profile lab02 down
 Use the target-only `stop` command above if you want to keep the course
 container available for other labs.
 
-When finished with **all** labs, remove the course container, all three targets,
+When finished with **all** labs, remove the course container, the lab target containers,
 and their networks:
 
 ```console
-docker compose -f docker/compose.yml --profile lab01-ssh --profile lab02 --profile lab03 down
+docker compose -f docker/compose.yml --profile lab01-ssh --profile lab02 --profile lab03 --profile lab04 down
 ```
 
 ## Lab03 target
@@ -138,6 +161,28 @@ images using the [Lab03 build guide](lab03-target/README.md). The target uses GH
 tag `2026-lab03-v1`; publication must be verified separately. Local targets are for
 practice. Real grading secrets belong on instructor-hosted targets; students can
 select the hosted service with `LAB03_TARGET_URL`.
+
+## Lab04 services
+
+Build the shared `course` image first, then build the practice `lab04-ca` and
+`lab04-proxy` images using the commands in the
+[Lab04 overview](../labs/lab04/README.md). `lab04-ca` accepts CSRs only on its
+Docker network and provides a CRL for [Part08](../labs/lab04/part08/README.md).
+`lab04-proxy` runs both the synthetic HTTPS target and the
+practice interception proxy; only the proxy is exposed to the host at
+`127.0.0.1:18080`. The services use separate practice CAs and generate new
+keys when recreated. Reissue old practice materials or remove and reimport a
+PC-trusted practice CA after recreation.
+
+```console
+docker compose -f docker/compose.yml --profile lab04 build lab04-ca lab04-proxy
+docker compose -f docker/compose.yml --profile lab04 up -d --wait course lab04-ca lab04-proxy
+docker compose -f docker/compose.yml --profile lab04 ps
+docker compose -f docker/compose.yml --profile lab04 down
+```
+
+For browser trust, proxy settings, and cleanup, see
+[Part04](../labs/lab04/part04/README.md).
 
 ## Adding a future lab
 

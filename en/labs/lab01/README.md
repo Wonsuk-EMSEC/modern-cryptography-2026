@@ -32,9 +32,18 @@ integrated terminal use the course environment, with
 `/opt/course-venv/bin/python3` as the default interpreter. The common guide
 also explains how to correct a previously saved interpreter selection once.
 
-For a terminal-only session, run the commands below from the repository root
-in a **host terminal** to build the common image if needed, start the shared
-course container in the background, and check its status:
+Lab01 uses the following images. The `course` image is needed for every Part;
+only the online SSH experiment in Part 2 needs the additional target image.
+Compose builds both images locally from the `build` entries in
+`docker/compose.yml`.
+
+| Service | Image | Used for |
+| --- | --- | --- |
+| `course` | `modern-cryptography-2026` | Code and tests in every Part |
+| `lab01-ssh-target` | `modern-cryptography-2026-lab01-ssh-target` | The online SSH experiment in Part 2 only |
+
+In a **host terminal**, go to the repository root containing `docker/` and
+`labs/`, then build the common image and start the `course` container:
 
 ```console
 docker compose -f docker/compose.yml build course
@@ -43,16 +52,20 @@ docker compose -f docker/compose.yml ps
 ```
 
 The `-d` option runs `course` in the background. `ps` should show it as `Up`
-(running). Both labs use this same `docker/compose.yml` and course container.
-The target servers have separate profiles and **do not start by default**:
+(running). Parts 1 and 3–5 need only this container.
 
-| Target service | Profile | Used in |
-| --- | --- | --- |
-| `lab01-ssh-target` | `lab01-ssh` | Lab01 Part 2 |
-| `lab02-target` | `lab02` | Lab02 Parts 4–6 |
+For the online experiment in Part 2, build and start the SSH target from the
+repository root in a **host terminal**. The target's `lab01-ssh` profile does
+not start by default.
 
-Start a target only when its Part requires it, following that Part's README.
-For Lab01 Part 2, follow the [SSH target setup](part2_dictionary_attack/README.md#step-1-build-and-start-the-isolated-target).
+```console
+docker compose -f docker/compose.yml --profile lab01-ssh up -d --build --wait lab01-ssh-target
+docker compose -f docker/compose.yml --profile lab01-ssh ps
+```
+
+Follow the [Part 2 SSH target guide](part2_dictionary_attack/README.md#step-1-build-and-start-the-isolated-target)
+for use and cleanup. [Lab02](../lab02/README.md) Parts 4–6 use a separately
+provided target image.
 
 If using VS Code in the container, open its integrated terminal. For a
 terminal-only session, open the running course container from the **host

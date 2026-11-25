@@ -17,12 +17,35 @@ docker/
 │   ├── README.md
 │   └── sshd_config
 ├── lab02-target/
-    ├── Dockerfile                # Lab02 Parts 4–6 server; staff build
-    └── README.md
-└── lab03-target/
-    ├── Dockerfile                # Lab03 Parts 06/08 server; staff build
-    └── README.md
+│   ├── Dockerfile                # Lab02 Parts 4–6 server; staff build
+│   └── README.md
+├── lab03-target/
+│   ├── Dockerfile                # Lab03 Parts 06/08 server; staff build
+│   └── README.md
+├── lab04-ca/
+│   ├── Dockerfile                # Lab04 local practice CA
+│   └── server.py
+└── lab04-proxy/
+    ├── Dockerfile                # Lab04 local HTTPS interception practice
+    └── server.py
 ```
+
+## Lab별 필요한 이미지
+
+모든 Lab은 저장소의 `docker/Dockerfile`로 직접 빌드하는
+`modern-cryptography-2026` 이미지(`course` 서비스)를 사용합니다.
+추가 이미지는 해당 Part에서만 필요합니다.
+
+| Lab | 추가 이미지 (서비스) | 준비 방법과 사용 범위 |
+|---|---|---|
+| Lab01 | `modern-cryptography-2026-lab01-ssh-target` (`lab01-ssh-target`) | Part 2에서만 로컬 빌드 |
+| Lab02 | `ghcr.io/wonsuk-emsec/modern-cryptography-2026-lab02-target:2026-lab02-v1` (`lab02-target`) | Part 4–6에서만 Compose가 필요 시 다운로드 |
+| Lab03 | `ghcr.io/wonsuk-emsec/modern-cryptography-2026-lab03-target:2026-lab03-v1` (`lab03-target`) | Part06·08의 로컬 대상 선택 시 Compose가 필요 시 다운로드 |
+| Lab04 | `modern-cryptography-2026-lab04-ca` (`lab04-ca`), `modern-cryptography-2026-lab04-proxy` (`lab04-proxy`) | 각각 Part02·08의 CA와 Part04의 프록시; 공통 이미지 빌드 후 로컬 빌드 |
+
+Lab03에서 교수자 제공 서버를 선택하면 `lab03-target` 이미지는 필요하지
+않습니다. Lab04 Part03은 Part02에서 만든 인증서가 필요하지만 검증 자체는
+`course`에서 실행합니다. 상세 실행 명령은 각 Lab의 README를 따르세요.
 
 ## 한 번 빌드하여 모든 실습에서 사용하기
 
@@ -107,10 +130,10 @@ docker compose -f docker/compose.yml --profile lab02 down
 
 다른 실습을 위해 수업 컨테이너를 유지하려면 위의 대상 전용 `stop` 명령을 사용합니다.
 
-**모든** 실습을 마쳤다면 수업 컨테이너, 세 대상과 해당 네트워크를 제거합니다.
+**모든** 실습을 마쳤다면 수업 컨테이너, 실습 대상 컨테이너와 해당 네트워크를 제거합니다.
 
 ```console
-docker compose -f docker/compose.yml --profile lab01-ssh --profile lab02 --profile lab03 down
+docker compose -f docker/compose.yml --profile lab01-ssh --profile lab02 --profile lab03 --profile lab04 down
 ```
 
 ## Lab03 대상
@@ -131,6 +154,27 @@ docker compose -f docker/compose.yml --profile lab03 stop lab03-target
 대상 이미지는 GHCR의 `2026-lab03-v1` 태그를 사용하며, 게시 여부는 별도 확인해야
 합니다. 로컬 대상은 연습용입니다. 실제 평가용 비밀은 교수자 관리 서버에서 사용하고,
 학생 클라이언트는 `LAB03_TARGET_URL`로 관리 서버에 연결할 수 있습니다.
+
+## Lab04 서비스
+
+[Lab04 공통 안내](../labs/lab04/README.md)의 명령으로 공통 `course` 이미지를 먼저
+빌드한 뒤 실습용 `lab04-ca`와 `lab04-proxy` 이미지를 빌드하세요.
+`lab04-ca`는 Docker 내부에서만 CSR을 받아 실습용 인증서를 발급하고,
+[Part08](../labs/lab04/part08/README.md)에서 폐기 목록(CRL)을 제공합니다.
+`lab04-proxy`는 실습 사이트와 HTTPS 프록시를 함께 실행하며, 호스트의
+`127.0.0.1:18080`에만 노출됩니다. 두 서비스의 실습용 CA는 각각 다르고,
+컨테이너를 다시 만들면 새 키를 생성합니다. 기존 생성물과 PC에 등록한
+실습용 CA는 갱신·제거 후 다시 진행하세요.
+
+```console
+docker compose -f docker/compose.yml --profile lab04 build lab04-ca lab04-proxy
+docker compose -f docker/compose.yml --profile lab04 up -d --wait course lab04-ca lab04-proxy
+docker compose -f docker/compose.yml --profile lab04 ps
+docker compose -f docker/compose.yml --profile lab04 down
+```
+
+브라우저의 CA 신뢰·프록시 설정과 실습 후 복구 절차는
+[Part04 안내](../labs/lab04/part04/README.md)를 따르세요.
 
 ## 이후 실습 추가하기
 

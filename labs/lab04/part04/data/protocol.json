@@ -1,0 +1,8 @@
+{
+  "hostname": "lab04.local.test",
+  "browser_proxy_host": "127.0.0.1",
+  "browser_proxy_port": 18080,
+  "proxy_ca_path": "/lab04-proxy-ca.pem",
+  "original_certificate_path": "/lab04-target-cert.pem",
+  "intercepted_certificate_path": "/lab04-intercept-cert.pem"
+}

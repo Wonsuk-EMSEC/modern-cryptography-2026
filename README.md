@@ -17,7 +17,10 @@
 - `labs/`: 한국어 실습 안내와 공통 코드·데이터
 - `en/`: 동일한 구조의 영어 안내 문서
 
-실습 안내: [Lab 01](labs/lab01/README.md) · [Lab 02](labs/lab02/README.md) · [Lab 03](labs/lab03/README.md)
+실습 안내: [Lab 01](labs/lab01/README.md) · [Lab 02](labs/lab02/README.md) · [Lab 03](labs/lab03/README.md) · [Lab 04](labs/lab04/README.md)
+
+Lab 04에서는 각 Part의 README 옆에 있는 미완성 Python 코드를 학생이 직접 완성합니다.
+선택적인 검사 파일도 같은 디렉토리에 있습니다.
 
 한국어와 영어 문서는 같은 실습 코드, 데이터, Docker 환경을 사용합니다.
 영어 문서를 읽더라도 실행 경로는 `/workspace/labs/...`입니다.
@@ -132,7 +135,7 @@ docker compose -f docker/compose.yml exec course bash
 대상 서버, 관련 네트워크를 중지하고 제거하세요.
 
 ```console
-docker compose -f docker/compose.yml --profile lab01-ssh --profile lab02 --profile lab03 down
+docker compose -f docker/compose.yml --profile lab01-ssh --profile lab02 --profile lab03 --profile lab04 down
 ```
 
 ### 4. 환경 확인

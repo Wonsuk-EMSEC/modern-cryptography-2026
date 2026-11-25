@@ -57,6 +57,12 @@ git pull --ff-only origin main
 
 Start Docker, then run in a **host terminal at the repository root**.
 
+| Parts | Required Docker images | How they are obtained |
+|---|---|---|
+| Parts 01–05 and 07 | `modern-cryptography-2026` (`course`) | Built locally from this repository by the command below |
+| Parts 06 and 08 with a local target | `course` + `ghcr.io/wonsuk-emsec/modern-cryptography-2026-lab03-target:2026-lab03-v1` (`lab03-target`) | Build `course` locally; the [server setup](#server-setup) command automatically pulls the target image when needed |
+| Parts 06 and 08 with an instructor-hosted server | `course` | No local target image needed |
+
 ```console
 docker compose -f docker/compose.yml build course
 docker compose -f docker/compose.yml up -d course

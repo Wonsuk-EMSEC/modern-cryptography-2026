@@ -34,6 +34,7 @@ labs/lab01/part4_system_hashes/generated/
 labs/lab02/part7_aes_cpa/plots/
 /labs/example_traces.png
 /labs/key_guess_scores_byte_*.png
+/labs/lab04/*/output/
 /labs/sample_correlations_byte_*.png
 lab02-target-image.tar.gz
 

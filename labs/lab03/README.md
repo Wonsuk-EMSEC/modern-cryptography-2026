@@ -55,6 +55,12 @@ git pull --ff-only origin main
 
 Docker를 실행한 뒤 **호스트 터미널의 저장소 루트**에서 실행하세요.
 
+| 실습 | 필요한 Docker 이미지 | 준비 방식 |
+|---|---|---|
+| Part01–05·07 | `modern-cryptography-2026` (`course`) | 아래 명령으로 저장소에서 로컬 빌드 |
+| Part06·08, 로컬 대상 사용 | `course` + `ghcr.io/wonsuk-emsec/modern-cryptography-2026-lab03-target:2026-lab03-v1` (`lab03-target`) | `course`는 로컬 빌드, 대상 이미지는 [서버 준비](#server-setup) 명령에서 필요 시 자동 다운로드 |
+| Part06·08, 교수자 제공 서버 사용 | `course` | 로컬 대상 이미지는 필요 없음 |
+
 ```console
 docker compose -f docker/compose.yml build course
 docker compose -f docker/compose.yml up -d course

@@ -18,6 +18,7 @@ services:
       - lab01-ssh-internal
       - lab02-internal
       - lab03-internal
+      - lab04-internal
     stdin_open: true
     tty: true
 
@@ -88,10 +89,65 @@ services:
       retries: 20
       start_period: 10s
 
+  lab04-ca:
+    profiles:
+      - lab04
+    build:
+      context: ..
+      dockerfile: docker/lab04-ca/Dockerfile
+    image: modern-cryptography-2026-lab04-ca
+    hostname: lab04-ca
+    expose:
+      - "8080"
+    networks:
+      - lab04-internal
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=2).read()"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+  lab04-proxy:
+    profiles:
+      - lab04
+    build:
+      context: ..
+      dockerfile: docker/lab04-proxy/Dockerfile
+    image: modern-cryptography-2026-lab04-proxy
+    hostname: lab04-proxy
+    ports:
+      - "127.0.0.1:18080:8080"
+    networks:
+      - default
+      - lab04-internal
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=2).read()"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
 networks:
   lab01-ssh-internal:
     internal: true
   lab02-internal:
     internal: true
   lab03-internal:
+    internal: true
+  lab04-internal:
     internal: true

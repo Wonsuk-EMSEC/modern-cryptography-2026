@@ -63,34 +63,19 @@ retrying. If the branches have diverged, ask the instructor for help
 reconciling them while preserving your work. After updating, continue to
 [step 1](#1-prepare-the-common-course-image) to rebuild the common image.
 
-**If you have not built the course image yet**, first complete the
-[prerequisites](../../README.md#0-prerequisites). If you do not have a local
-copy yet, [clone the repository](../../README.md#1-clone-the-course-repository);
-otherwise, update your existing copy as described above.
-Make sure Docker is running. In your **host terminal** (Ubuntu/WSL on
-Windows), go to the repository root containing `docker/` and `labs/`, then
-run:
+If this is your first lab, complete the
+[prerequisites](../../README.md#0-prerequisites) and
+[clone the repository](../../README.md#1-clone-the-course-repository).
+Otherwise, update your existing copy as described above. Make sure Docker is
+running.
 
-```console
-docker compose -f docker/compose.yml build course
-```
+| Service | Image | Preparation and use |
+| --- | --- | --- |
+| `course` | `modern-cryptography-2026` | Build locally; used in every Part |
+| `lab02-target` | `ghcr.io/wonsuk-emsec/modern-cryptography-2026-lab02-target:2026-lab02-v1` | Compose pulls automatically from GHCR for Parts 4–6 only |
 
-This command uses `docker/Dockerfile` to build the shared
-`modern-cryptography-2026` image, including the tools and Python libraries
-required for the labs. The first build may take several minutes. Once it
-finishes successfully, your image is ready: continue to
-[step 2](#2-start-the-services-you-need) to start the container. You do not
-need to repeat the same build in step 1 below.
-
-Parts 4–6 also need a target container running on your own computer. This is
-the same workflow used for the SSH target in Lab 01 Part 2. The Lab02 target
-is supplied as a prebuilt image that Docker Compose downloads automatically
-from GitHub Container Registry (GHCR). No instructor-hosted server is needed.
-
-| Service | Purpose |
-| --- | --- |
-| `course` | Your shell, Python code, and repository files, shared by all labs |
-| `lab02-target` | The local application you interact with in Parts 4–6 |
+Parts 1–3 and 7 need only `course`. The Parts 4–6 target also runs in a
+container on your computer; it does not require an instructor-hosted server.
 
 ### 1. Prepare the common course image
 
@@ -126,12 +111,8 @@ build may take several minutes; subsequent builds reuse cached layers where
 possible. After preparing the environment for Lab02, you only need to rebuild
 when updated environment files are provided.
 
-Additional target services have separate build recipes:
-`docker/lab01-ssh-target/Dockerfile` for the Lab 01 SSH target and
-`docker/lab02-target/Dockerfile` for the Lab02 application. The instructor
-builds the Lab02 target from private server files and provides its image.
-For Parts 4–6, start that image in step 2; the common course build above
-prepares only your working environment.
+This build prepares the working environment for every Part. Compose pulls the
+Parts 4–6 target image in step 2; students do not build that image.
 
 ### 2. Start the services you need
 
@@ -164,15 +145,10 @@ locally.
 The image can still be inspected locally. For this lab, recover flags through
 the supplied clients instead of reading files inside the image.
 
-The target uses the following GHCR image name:
-
-```text
-ghcr.io/wonsuk-emsec/modern-cryptography-2026-lab02-target:2026-lab02-v1
-```
-
-`docker/compose.yml` specifies this image without a `build` section. Compose
-pulls it automatically when needed; no manual download, `docker load`, or
-registry login is needed for the public package. The Lab02 files and target
+`docker/compose.yml` specifies the GHCR image in the table above without a
+`build` section. Compose pulls it automatically when needed; no manual
+download, `docker load`, or registry login is needed for the public package.
+The Lab02 files and target
 image are a paired **`2026-lab02-v1`** release: Part 5's ciphertext must match
 the target image. Keep them on the same release when updating.
 
@@ -318,7 +294,7 @@ If you have finished all lab work and no longer need any course containers,
 stop and remove them and their networks from the **host terminal**:
 
 ```console
-docker compose -f docker/compose.yml --profile lab01-ssh --profile lab02 down
+docker compose -f docker/compose.yml --profile lab01-ssh --profile lab02 --profile lab03 --profile lab04 down
 ```
 
 If a client cannot connect, check `ps` in the host terminal and confirm that

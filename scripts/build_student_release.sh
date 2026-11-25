@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build the Lab01–Lab03 student archive. Target images are distributed separately.
+# Build the Lab01–Lab04 student archive. Lab04 local services build from this archive.
 set -euo pipefail
 
 usage() {
@@ -43,17 +43,27 @@ required_files=(
     labs/lab03/part03/data/primes3072.txt
     labs/lab03/part07/data/trusted_public.pem
     labs/lab03/part07/data/update.sig
+    labs/lab04/part05/data/sample_00.bin
+    labs/lab04/part05/data/sample_01.bin
+    labs/lab04/part06/data/legitimate.der
+    labs/lab04/part06/data/rogue_template.der
+    labs/lab04/part06/data/historical_server.der
+    labs/lab04/part06/data/historical_root.crt
+    labs/lab04/part07/data/encrypted_key.der
+    labs/lab04/part07/data/certificate.crt
+    labs/lab04/part07/data/flag.enc
+    labs/lab04/part07/data/wordlist.txt
 )
 for required_file in "${required_files[@]}"; do
     if [[ ! -f "$repo_root/$required_file" ]]; then
         echo "missing course data file: $required_file" >&2
-        echo "check the instructor Lab01/Lab02/Lab03 preparation steps before packaging" >&2
+        echo "check the instructor Lab01–Lab04 preparation steps before packaging" >&2
         exit 2
     fi
 done
 
 # This manifest is intentionally file-level rather than directory-level. It
-# prevents stray files under either lab from becoming part of a student bundle.
+# prevents stray files under the labs from becoming part of a student bundle.
 student_paths=(
     .devcontainer/devcontainer.json
     README.md
@@ -87,6 +97,15 @@ student_paths=(
     en/labs/lab02/part5_padding_oracle/README.md
     en/labs/lab02/part6_mte_vs_etm/README.md
     en/labs/lab02/part7_aes_cpa/README.md
+    en/labs/lab04/README.md
+    en/labs/lab04/part01/README.md
+    en/labs/lab04/part02/README.md
+    en/labs/lab04/part03/README.md
+    en/labs/lab04/part04/README.md
+    en/labs/lab04/part05/README.md
+    en/labs/lab04/part06/README.md
+    en/labs/lab04/part07/README.md
+    en/labs/lab04/part08/README.md
     docker/README.md
     docker/Dockerfile
     docker/compose.yml
@@ -95,6 +114,10 @@ student_paths=(
     docker/lab01-ssh-target/sshd_config
     docker/lab02-target/Dockerfile
     docker/lab02-target/README.md
+    docker/lab04-ca/Dockerfile
+    docker/lab04-ca/server.py
+    docker/lab04-proxy/Dockerfile
+    docker/lab04-proxy/server.py
     labs/__init__.py
     labs/lab01/LICENSE
     labs/lab01/Makefile
@@ -302,6 +325,57 @@ student_paths=(
     labs/lab03/part08/starter/attack.py
     labs/lab03/part08/tests/check.py
     labs/lab03/tests/test_materials.py
+    labs/lab04/README.md
+    labs/lab04/part01/README.md
+    labs/lab04/part01/data/.gitkeep
+    labs/lab04/part01/decrypt_key.py
+    labs/lab04/part01/check.py
+    labs/lab04/part02/README.md
+    labs/lab04/part02/data/.gitkeep
+    labs/lab04/part02/enroll.py
+    labs/lab04/part02/check.py
+    labs/lab04/part03/README.md
+    labs/lab04/part03/data/.gitkeep
+    labs/lab04/part03/verify_chain.py
+    labs/lab04/part03/check.py
+    labs/lab04/part04/README.md
+    labs/lab04/part04/data/protocol.json
+    labs/lab04/part04/compare_certificates.py
+    labs/lab04/part04/check.py
+    labs/lab04/part05/README.md
+    labs/lab04/part05/data/sample_00.bin
+    labs/lab04/part05/data/sample_01.bin
+    labs/lab04/part05/data/sample_02.bin
+    labs/lab04/part05/data/sample_03.bin
+    labs/lab04/part05/data/sample_04.bin
+    labs/lab04/part05/data/sample_05.bin
+    labs/lab04/part05/data/sample_06.bin
+    labs/lab04/part05/data/sample_07.bin
+    labs/lab04/part05/data/sample_08.bin
+    labs/lab04/part05/data/sample_09.bin
+    labs/lab04/part05/data/sample_10.bin
+    labs/lab04/part05/data/sample_11.bin
+    labs/lab04/part05/find_collision.py
+    labs/lab04/part05/test_part05_materials.py
+    labs/lab04/part06/README.md
+    labs/lab04/part06/data/legitimate.der
+    labs/lab04/part06/data/rogue_template.der
+    labs/lab04/part06/data/historical_server.der
+    labs/lab04/part06/data/historical_root.crt
+    labs/lab04/part06/data/template.json
+    labs/lab04/part06/investigate.py
+    labs/lab04/part06/test_part06_materials.py
+    labs/lab04/part07/README.md
+    labs/lab04/part07/data/encrypted_key.der
+    labs/lab04/part07/data/certificate.crt
+    labs/lab04/part07/data/flag.enc
+    labs/lab04/part07/data/wordlist.txt
+    labs/lab04/part07/attack.py
+    labs/lab04/part07/test_part07_materials.py
+    labs/lab04/part08/README.md
+    labs/lab04/part08/data/.gitkeep
+    labs/lab04/part08/revoke.py
+    labs/lab04/part08/check.py
 )
 for student_path in "${student_paths[@]}"; do
     if [[ ! -e "$repo_root/$student_path" ]]; then
