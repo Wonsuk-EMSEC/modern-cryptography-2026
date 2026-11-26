@@ -25,10 +25,16 @@
 시스템에 설치된 다른 CA가 결과에 영향을 주지 않도록 신뢰 저장소를 지정하세요.
 OpenSSL 옵션은 `openssl verify -help`로 확인할 수 있습니다.
 
-## 실행과 예상 동작
+## 1. Part02에서 발급받은 인증서 준비하기
 
-먼저 Part02의 발급 결과를 준비하세요. **course 컨테이너의 `/workspace`**에서
-실행합니다.
+먼저 Part02를 완료하세요. `part02/output/`의 `root.pem`, `intermediate.pem`,
+`server.pem`을 사용합니다. 이 Part는 새 인증서 파일을 만들지 않고 기존 파일을
+읽어 검증하므로 CA에 요청하거나 따로 접속할 필요는 없습니다.
+**기존 course 터미널의 `/workspace`**에서 진행하세요.
+
+## 2. 코드로 인증서 체인과 이름 검증하기
+
+`verify_chain.py`의 `verify_certificate()` TODO를 완성한 뒤 실행합니다.
 
 ```console
 python3 labs/lab04/part03/verify_chain.py
@@ -49,20 +55,25 @@ python3 labs/lab04/part03/check.py
 
 ### TODO 완료 후 확인할 결과
 
-`verify_chain.py`의 출력에는 다음 세 줄이 **이 순서대로** 나타나고, 마지막에
-`LAB04{...}`가 표시됩니다.
+- `verify_chain.py`는 세 사례의 검증 결과를 **다음 순서대로** 출력하고,
+  마지막에 완료 표식을 표시합니다. 두 `REJECT`는 의도된 검증 결과입니다.
 
-```text
-trusted chain and correct name: ACCEPT
-trusted chain, wrong name: REJECT
-missing intermediate: REJECT
-```
+  ```text
+  trusted chain and correct name: ACCEPT
+  trusted chain, wrong name: REJECT
+  missing intermediate: REJECT
+  LAB04{...}
+  ```
 
-다른 결과가 나오면 프로그램이 오류로 중단됩니다. `check.py`도 같은 세 조건을
-재검사하며 모두 맞으면 `Part03: chain and hostname decisions: OK`를 출력합니다.
-이 Part는 새 인증서 파일을 만들지 않고 Part02의 파일을 읽습니다.
+  다른 결과가 나오면 프로그램이 오류로 중단됩니다.
 
-## 확인 질문
+- `check.py`는 같은 세 조건을 재검사하며, 모두 맞으면 다음 문구를 출력합니다.
+
+  ```text
+  Part03: chain and hostname decisions: OK
+  ```
+
+## Checkpoint Questions
 
 1. 인증서의 서명이 맞는데도 접속을 거부해야 하는 경우는 언제인가요?
 2. Root CA와 중간 CA는 검증에서 각각 어떤 역할을 하나요?
