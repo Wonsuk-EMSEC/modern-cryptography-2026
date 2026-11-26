@@ -42,16 +42,7 @@ Python 3, C 구현에는 GCC와 OpenSSL을 사용합니다. 코드, 재현 가�
 
 ## 실행 방법
 
-### 1. 최신 실습 자료 받기
-
-**호스트 터미널**에서 실행하세요. `cd` 경로는 저장소를 내려받은 위치에 맞추세요.
-
-```console
-cd modern-cryptography-2026
-git pull --ff-only origin main
-```
-
-### 2. 공통 실습 환경 시작하기
+### 1. 공통 실습 환경 시작하기
 
 Docker를 실행한 뒤 **호스트 터미널의 저장소 루트**에서 실행하세요.
 
@@ -79,7 +70,7 @@ make -C labs/lab03 test
 
 `make test`는 자료·도구 검사이며, 구현을 완료하지 않아도 `OK`가 나와야 합니다.
 
-### 3. 각 Part 구현하고 검사하기
+### 2. 각 Part 구현하고 검사하기
 
 - [Part01](part01/README.md)부터 각 Part의 README를 읽고 `starter/`의 TODO를 구현하세요.
 - 컴파일, 개별 실험, 예상 출력은 해당 Part의 안내를 따릅니다.
@@ -97,7 +88,7 @@ python3 -m labs.lab03.check --part 1
 
 <a id="server-setup"></a>
 
-### 4. Part06·08 서버 준비
+### 3. Part06·08 서버 준비
 
 두 Part는 `course`에서 작성한 코드가 서버에 요청을 보내는 실습입니다.
 서버는 문제를 제공하고 결과를 판정합니다. **접속 방법은 아래에서 하나만 선택하세요.**
@@ -162,7 +153,7 @@ python3 -c "from labs.lab03.common.service_client import TargetClient; print(Tar
 docker compose -f docker/compose.yml --profile lab03 logs --tail 30 lab03-target
 ```
 
-### 5. 실습 종료하기
+### 4. 실습 종료하기
 
 컨테이너 터미널에서 나옵니다.
 

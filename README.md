@@ -83,7 +83,21 @@ cd modern-cryptography-2026
 
 이후 명령은 별도 안내가 없는 한 저장소 루트 디렉토리에서 실행합니다.
 
+#### 이미 저장소를 복제했다면: 최신 실습 자료 받기
+
+각 실습을 시작하기 전에 **호스트 터미널의 저장소 루트**에서 다음 명령으로
+최신 자료를 받으세요.
+
+```console
+git pull --ff-only origin main
+```
+
 ### 2. 강의 Docker 이미지 빌드
+
+먼저 Docker Desktop을 실행하고 Docker 엔진이 시작될 때까지 기다리세요.
+Docker 명령어 입력 시 오류가 나면 Docker Desktop이 실행 중인지 확인하세요.
+특히 `Cannot connect to the Docker daemon` 같은 연결 오류가 나오면
+Docker Desktop을 실행한 뒤 명령을 다시 입력하세요.
 
 ```console
 docker compose -f docker/compose.yml build course

@@ -80,7 +80,21 @@ cd modern-cryptography-2026
 
 Run the remaining commands from this repository root directory.
 
+#### If you already cloned the repository: get the latest lab materials
+
+Before starting each lab, run the following command from the **repository root
+in your host terminal** to get the latest materials:
+
+```console
+git pull --ff-only origin main
+```
+
 ### 2. Build the course Docker image
+
+First, launch Docker Desktop and wait for the Docker engine to start.
+If a Docker command fails, check that Docker Desktop is running.
+For connection errors such as `Cannot connect to the Docker daemon`,
+launch Docker Desktop and then run the command again.
 
 ```console
 docker compose -f docker/compose.yml build course

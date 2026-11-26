@@ -44,16 +44,7 @@ provide local feedback; they do not determine the final grade.
 
 ## How to Run
 
-### 1 Download the latest materials
-
-Run in a **host terminal**. Adjust the `cd` path to where you downloaded the repository.
-
-```console
-cd modern-cryptography-2026
-git pull --ff-only origin main
-```
-
-### 2 Start the shared environment
+### 1 Start the shared environment
 
 Start Docker, then run in a **host terminal at the repository root**.
 
@@ -81,7 +72,7 @@ make -C labs/lab03 test
 
 `make test` checks materials and tools; it should report `OK` even before you finish the implementations.
 
-### 3 Implement and check each Part
+### 2 Implement and check each Part
 
 - Start with [Part01](part01/README.md), read each Part's README, and implement its `starter/` TODOs.
 - Follow that Part for compilation, individual experiments, and expected output.
@@ -99,7 +90,7 @@ Replace the number after `--part` with the Part number, from 1 to 8. Checks are 
 
 <a id="server-setup"></a>
 
-### 4 Prepare the server for Parts06 and08
+### 3 Prepare the server for Parts06 and08
 
 Your code in `course` sends requests to a server that provides challenges and checks results.
 **Choose just one connection method below.**
@@ -165,7 +156,7 @@ Inspect local server logs in a **host terminal at the repository root**:
 docker compose -f docker/compose.yml --profile lab03 logs --tail 30 lab03-target
 ```
 
-### 5 Finish the session
+### 4 Finish the session
 
 Leave the **container terminal**.
 
