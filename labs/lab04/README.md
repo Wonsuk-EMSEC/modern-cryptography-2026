@@ -41,6 +41,16 @@ Part04의 Flag는 실습용 HTTPS 통신에서
 | `modern-cryptography-2026-lab04-ca` (`lab04-ca`) | 공통 이미지 위에 `docker/lab04-ca/Dockerfile`로 직접 빌드 | Part02·08, Part03에 사용할 인증서 발급 |
 | `modern-cryptography-2026-lab04-proxy` (`lab04-proxy`) | 공통 이미지 위에 `docker/lab04-proxy/Dockerfile`로 직접 빌드 | Part04 |
 
+위 이미지로 실행하는 컨테이너의 관계는 아래와 같습니다.
+세 컨테이너를 함께 켜지만, **명령을 입력할 곳은 `course` 하나**입니다.
+CA와 프록시는 켜 둔 상태에서 요청을 받아 처리합니다.
+
+```mermaid
+flowchart LR
+    course["course · 내가 실습하는 곳"] --> ca["lab04-ca · 인증서 발급"]
+    course --> proxy["lab04-proxy · 통신 중계"]
+```
+
 Part01·05·06·07은 `course` 이미지만 사용합니다. Part03의 체인 검증도
 `course`에서 실행하지만 Part02에서 만든 인증서 파일이 먼저 필요합니다.
 Lab04의 대상 이미지는 외부 레지스트리에서 따로 받지 않습니다.
@@ -56,6 +66,9 @@ docker compose -f docker/compose.yml --profile lab04 build lab04-ca lab04-proxy
 docker compose -f docker/compose.yml --profile lab04 up -d --wait course lab04-ca lab04-proxy
 docker compose -f docker/compose.yml exec course bash
 ```
+
+위 명령으로 세 컨테이너를 켜고 `course`에 접속합니다.
+Part02에서 CA를 시작하라는 안내가 나와도, 중간에 꺼 두지 않았다면 이미 준비된 상태입니다.
 
 이후 **course 컨테이너**에서 `/workspace`를 기준으로 각 Part의 README와 실행 명령을
 따릅니다. Part01에서 생성한 키 파일은 Part02에서 사용하므로 자신의 비밀번호를

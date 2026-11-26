@@ -39,43 +39,137 @@ its behavior.
 
 ## How to Run
 
-First complete the [shared Lab04 Docker setup](../README.md). Run Docker commands
-below in a **host terminal at the repository root**. Open the browser on your PC.
+First complete the [shared Lab04 Docker setup](../README.md). If you have not
+stopped the services, the proxy is already running; you do not need to open a
+shell in the proxy container. Use **the browser on your PC** for this Part and
+run the certificate comparison code in **your existing course terminal**.
+
+Check the service status in a **host terminal at the repository root**:
+
+```console
+docker compose -f docker/compose.yml --profile lab04 ps
+```
+
+If you stopped the services, restart them in the same host terminal:
 
 ```console
 docker compose -f docker/compose.yml --profile lab04 up -d --wait course lab04-proxy
-docker compose -f docker/compose.yml --profile lab04 ps
 ```
 
 Confirm that `lab04-proxy` is `healthy`. The proxy is available only on the
 host's `127.0.0.1:18080`. The practice name `lab04.local.test` is sent by the
 browser to the proxy; you need not change the PC's DNS or hosts file.
 
-1. **Before trusting the certificate:** Set the browser's HTTPS proxy to
-   `127.0.0.1`, port `18080`, and open `https://lab04.local.test/`. Expect a
-   certificate trust warning. Do not bypass the warning.
-2. **Import the practice CA:** In the host browser, open
-   `http://127.0.0.1:18080/lab04-proxy-ca.pem` and download only the CA's
-   **public certificate**. In the browser's certificate-authority settings,
-   import it as trusted for identifying websites. Its displayed name is
-   `Lab04 MITM Practice Root`. There is no need to copy the private key to the
-   PC. Browser menus vary; restart the browser if necessary after the import.
-3. **Connect again:** Open the same practice URL in a new tab. The page title
-   now reads `Observed Through Proxy`. Inspect the certificate shown by the
-   browser and note its issuer and target name.
-4. **Observe the Flag:** Click **Send practice token** on the page, then read
-   the logs in a **host terminal**:
+### Configure the Chrome proxy
 
-   ```console
-   docker compose -f docker/compose.yml --profile lab04 logs --tail 50 lab04-proxy
-   ```
+Chrome uses the operating system's proxy settings by default.
+Expand the instructions for the operating system **on your PC**. Note your
+existing settings so you can restore them afterward.
 
-   Find the practice `LAB04{...}` value in a `Lab04 proxy observed token response`
-   or `Lab04 proxy observed submitted body` line. The value is generated at
-   runtime.
+<details>
+<summary>macOS · Chrome</summary>
 
-Setting the browser proxy and trusting its CA are separate actions. Importing
-the CA alone does not route traffic through the proxy.
+1. Open **System Settings → Network → your connected Wi-Fi → Details → Proxies**.
+   For a wired connection, select the network you are using instead of Wi-Fi.
+2. Turn on **Secure web proxy (HTTPS)**.
+3. Enter `127.0.0.1` for the server and `18080` for the port.
+   Turn off **Proxy server requires password**. You do not need to enable
+   the HTTP or SOCKS proxy for this lab.
+4. Click **OK** to apply.
+
+[Apple: Change proxy settings](https://support.apple.com/en-euro/guide/mac-help/-mchlp2591/mac)
+
+</details>
+
+<details>
+<summary>Windows · Chrome</summary>
+
+1. Open **Settings → Network & internet → Proxy** in Windows, not WSL or the container.
+2. Under **Manual proxy setup → Use a proxy server**, select **Set up** and turn
+   on **Use a proxy server**. In Windows 10, you can turn on the switch directly
+   on that screen.
+3. Enter `127.0.0.1` for **Proxy IP address** and `18080` for **Port**.
+   Do not add `lab04.local.test` to the proxy exception list.
+4. Click **Save** to apply.
+
+[Microsoft: Use a proxy server in Windows](https://support.microsoft.com/en-us/windows/experience/connectivity-networking/use-a-proxy-server-in-windows)
+
+</details>
+
+After configuring the proxy, proceed to the connection before trusting the
+certificate below. This setting can affect other web connections. The practice
+proxy handles only the practice site, so restore your previous proxy settings
+after the lab. For Chrome's default behavior, see the
+[Chromium network settings documentation](https://www.chromium.org/developers/design-documents/network-settings/).
+
+### 1. Connect before trusting the certificate
+
+With the proxy configured, open `https://lab04.local.test/` in **Chrome on your PC**.
+Expect a certificate trust warning. Do not bypass it to continue.
+
+### 2. Download and trust the practice CA
+
+Open this URL in Chrome to download the CA's **public certificate**:
+
+```text
+http://127.0.0.1:18080/lab04-proxy-ca.pem
+```
+
+This URL connects directly to the server and works without proxy configuration.
+**Downloading the certificate, trusting the CA, and configuring the proxy are
+separate tasks.** You do not need to copy a private key to your PC.
+After downloading, follow the instructions for your operating system below.
+
+<details>
+<summary>macOS · Import with Keychain Access</summary>
+
+1. Press **⌘ + Space**, search for `Keychain Access`, and open it. This is
+   different from the **Passwords** app.
+2. Select the **login** keychain. If the keychain list is hidden, open it with
+   **Window → Keychain Viewer** or **⌘ + 1**.
+3. Drag the downloaded `lab04-proxy-ca.pem` into the Keychain Access window to import it.
+4. Double-click the imported **Lab04 MITM Practice Root** and expand **Trust**.
+5. Set **Secure Sockets Layer (SSL)** to **Always Trust** and close the window.
+   Authenticate with your Mac user credentials if prompted.
+
+[Apple: Add certificates](https://support.apple.com/en-ca/guide/keychain-access/kyca2431/mac) ·
+[Show keychains](https://support.apple.com/en-ca/guide/keychain-access/kyca1085/mac) ·
+[Change trust settings](https://support.apple.com/en-ca/guide/keychain-access/kyca11871/mac)
+
+</details>
+
+<details>
+<summary>Windows · Import into the current user's certificate store</summary>
+
+1. Press **Win + R** and enter `certmgr.msc` to open the **current user** certificate manager.
+2. Select **Trusted Root Certification Authorities → Certificates**.
+3. Right-click and select **All Tasks → Import**.
+4. Select the downloaded `lab04-proxy-ca.pem`. If it is not visible, change
+   the file type filter to **All Files**.
+5. Confirm that the store is **Trusted Root Certification Authorities** and
+   finish importing. Check that the certificate name is **Lab04 MITM Practice Root**.
+
+[Microsoft: Manage certificate stores](https://learn.microsoft.com/en-us/windows-server/identity/ad-cs/inspect-certificates-manage-certificate-stores)
+
+</details>
+
+### 3. Reconnect and find the Flag
+
+Completely quit and reopen Chrome, then visit `https://lab04.local.test/`.
+After a successful connection, the page title is **Observed Through Proxy**.
+Inspect the issuer and target name in the browser's certificate viewer.
+
+Click **Send practice token** on the page, then read the logs in a
+**host terminal at the repository root**:
+
+```console
+docker compose -f docker/compose.yml --profile lab04 logs --tail 50 lab04-proxy
+```
+
+Find the practice `LAB04{...}` value in a line containing
+`Lab04 proxy observed token response` or `Lab04 proxy observed submitted body`.
+This value is generated at runtime. Trusting the CA without configuring the
+proxy does not route traffic through this lab's proxy.
 
 ## Compare the Certificates in Code
 
@@ -114,8 +208,12 @@ optional check after completing the TODO while `lab04-proxy` is running.
 
 On the **host PC**, remove `Lab04 MITM Practice Root` from the browser's or
 user's trust list and restore the HTTPS proxy setting to its previous value.
-Restart the browser if needed. Then stop the proxy in a **host terminal at the
-repository root**:
+Restart the browser if needed.
+
+- **macOS:** Delete the certificate you added from the **login** keychain in Keychain Access.
+- **Windows:** Delete the certificate you added from **Trusted Root Certification Authorities → Certificates** in `certmgr.msc`.
+
+Then stop the proxy in a **host terminal at the repository root**:
 
 ```console
 docker compose -f docker/compose.yml --profile lab04 stop lab04-proxy
@@ -130,6 +228,8 @@ is no longer trusted by the PC.
 Record the initial trust error, successful connection after import, the two
 certificates' differing issuers and fingerprints, and the Flag seen in proxy
 logs. Do not submit a practice CA private key or real account information.
+
+## Checkpoint Questions
 
 1. Why did the browser accept the proxy's certificate instead of the original
    server's certificate?

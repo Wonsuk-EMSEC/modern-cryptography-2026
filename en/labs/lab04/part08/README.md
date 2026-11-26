@@ -12,7 +12,15 @@ Use the certificate signing request (CSR) from [Part02](../part02/README.md) to 
 
 ## Prerequisites and materials
 
-Start `course` and `lab04-ca` using the [shared Lab04 Docker environment](../README.md), and **complete Part02 first**. You need `labs/lab04/part02/output/request.csr`. Restarting the CA generates new CA keys and clears its revocation records. You may reuse the CSR, but start this Part's comparison again and do not mix earlier certificates or CRLs with the new CA's materials.
+**Complete Part02 first.** You need `labs/lab04/part02/output/request.csr`.
+If you have not stopped the services since the [shared Lab04 setup](../README.md),
+the CA is already running. Continue in **your existing course terminal**;
+the code sends issuance and revocation requests to the CA. You do not need
+to open a separate connection to the CA.
+
+Restarting the CA generates new CA keys and clears its revocation records.
+You may reuse the CSR, but rerun this Part from the beginning and do not mix
+previous certificates or CRLs with the new CA's materials.
 
 | Path | Contents |
 |---|---|
@@ -80,7 +88,7 @@ Inspect the updated CRL's issuer and revoked serial number directly:
 openssl crl -in labs/lab04/part08/output/after.crl -noout -issuer -text
 ```
 
-## Checkpoint questions
+## Checkpoint Questions
 
 1. Why should a revoked certificate be rejected even if its signature and validity period are still valid?
 2. What are the separate roles of `-CRLfile` and `-crl_check`?

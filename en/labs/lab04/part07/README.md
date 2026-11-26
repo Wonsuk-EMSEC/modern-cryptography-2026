@@ -68,6 +68,8 @@ whether your password-search TODO is correct.
 Submit the modified `attack.py`, the Flag and attempt/time output, and answers
 to these questions. Do not submit the password or decrypted private-key file.
 
+## Checkpoint Questions
+
 1. Why can someone with a file copy try candidates without a login rate limit?
 2. Why can a dictionary still be tried against one salted file?
 3. How do iteration count and password predictability each affect attack cost?

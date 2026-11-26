@@ -12,7 +12,13 @@
 
 ## 선행 준비와 제공 자료
 
-[Lab04 공통 Docker 환경](../README.md)의 `course`와 `lab04-ca`를 시작하고 **Part02를 먼저 완료**하세요. `labs/lab04/part02/output/request.csr`이 필요합니다. CA를 재시작하면 CA 키와 폐기 기록이 초기화됩니다. CSR 파일은 재사용할 수 있지만 이전 실행의 인증서·CRL과 새 CA의 자료를 섞지 말고 이 Part를 처음부터 다시 실행하세요.
+**Part02를 먼저 완료**하세요. `labs/lab04/part02/output/request.csr`이 필요합니다.
+[Lab04 공통 준비](../README.md) 이후 서비스를 중지하지 않았다면 CA는 이미 실행 중입니다.
+**기존 course 터미널**에서 진행하면 코드가 CA에 발급·폐기 요청을 보냅니다.
+CA에 따로 접속할 필요는 없습니다.
+
+CA를 재시작하면 CA 키와 폐기 기록이 초기화됩니다. CSR 파일은 재사용할 수 있지만
+이전 실행의 인증서·CRL과 새 CA의 자료를 섞지 말고 이 Part를 처음부터 다시 실행하세요.
 
 | 경로 | 내용 |
 |---|---|
@@ -78,7 +84,7 @@ openssl x509 -in labs/lab04/part08/output/new.pem -noout -serial
 openssl crl -in labs/lab04/part08/output/after.crl -noout -issuer -text
 ```
 
-## 확인 질문
+## Checkpoint Questions
 
 1. 폐기된 인증서의 서명과 유효기간이 정상이어도 왜 사용을 거부해야 하나요?
 2. `-CRLfile`과 `-crl_check`는 각각 어떤 역할을 하나요?

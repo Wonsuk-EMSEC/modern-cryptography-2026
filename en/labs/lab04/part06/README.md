@@ -36,9 +36,17 @@ steps below specify their required behavior.
 
 `investigate.py` saves the reconstructed certificate at `/tmp/lab04-rogue-reconstructed.der`. OpenSSL uses `historical_root.crt` **only as the `-CAfile` input for an individual offline command**. Do not install this historical root in your computer's operating system or browser trust store.
 
-## How to Run
+## 1. Prepare the supplied certificates and environment
 
-Start the [shared Lab04 Docker environment](../README.md), then run these commands in the **course container at `/workspace`**. No network server or additional packages are needed.
+If you finished the [shared Lab04 setup](../README.md), continue at
+**`/workspace` in your existing course terminal**. Use the supplied certificates and template metadata in `part06/data/`.
+This Part reads local files only; no connection to the CA or proxy, or additional
+packages, is needed.
+
+## 2. Reconstruct and verify the certificate in code
+
+Complete both the `collision_evidence()` and `transplant_signature()` TODOs in
+`investigate.py`, then run the commands below.
 
 ```console
 cd /workspace
@@ -48,21 +56,41 @@ python3 labs/lab04/part06/test_part06_materials.py
 
 The first command raises `NotImplementedError` while the TODOs remain. The public test checks **only the supplied materials**, so it can pass before implementation.
 
-## What to Check After Completing the TODOs
+### What to check after completing the TODO
 
-Run `investigate.py` again after completing both TODOs. It prints these items in order; read the MD5 value and completion marker from your own run.
+- `investigate.py` prints the two certificates' CA roles, verification results,
+  completion marker, and reconstructed file path. Read the MD5 value and
+  completion marker from your own run.
 
-```text
-legitimate CA role: False
-rogue CA role: True
-TBS MD5: <hash shared by the two signed bodies>
-legacy chain: accepted
-modern chain: rejected
-LAB04{...}
-reconstructed certificate: /tmp/lab04-rogue-reconstructed.der
-```
+  ```text
+  legitimate CA role: False
+  rogue CA role: True
+  TBS MD5: <hash shared by the two signed bodies>
+  legacy chain: accepted
+  modern chain: rejected
+  LAB04{...}
+  reconstructed certificate: /tmp/lab04-rogue-reconstructed.der
+  ```
 
-`legitimate CA role` and `rogue CA role` show a server certificate and an intermediate CA certificate, respectively. `legacy chain` must be accepted and `modern chain` rejected; otherwise the program raises an error. The last path holds the reconstructed **certificate**, not a private key. An `OK` from `test_part06_materials.py` confirms only the format of the supplied files, not your two TODO implementations.
+  `legitimate CA role` and `rogue CA role` show a server certificate and an
+  intermediate CA certificate, respectively. `legacy chain` must be accepted
+  and `modern chain` rejected; otherwise the program raises an error.
+  The last path holds the reconstructed certificate **inside the course
+  container**, not a private key.
+
+- `test_part06_materials.py` checks the supplied certificate formats and template
+  metadata, then prints the following. Execution time varies by environment.
+
+  ```text
+  .
+  ----------------------------------------------------------------------
+  Ran 1 test in <elapsed time>s
+
+  OK
+  ```
+
+  This `OK` confirms the materials check. **It does not evaluate your two TODO
+  implementations.**
 
 Verification time is fixed at **2004-08-05 00:00 UTC**, inside the certificates' validity periods. `legacy chain` is an offline reproduction using OpenSSL `-auth_level 0` to allow weak signatures; `modern chain` uses `-auth_level 1` and rejects the weak MD5 signature. This command checks **only the certificate chain**; it does not check a hostname, establish a TLS connection, or show that a current browser trusts the chain.
 

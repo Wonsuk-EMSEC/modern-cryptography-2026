@@ -24,9 +24,16 @@ Can two different certificate bodies have the same MD5 hash? Find a genuine coll
 2. Run the completed program and compare the two files' MD5 and SHA-256 hashes. The printed `LAB04{...}` is this Part's completion marker.
 3. Note that these binary samples are signed certificate bodies, not complete certificates, and record why a collision matters to signature verification.
 
-## How to Run
+## 1. Prepare the supplied samples and environment
 
-Start the [shared Lab04 Docker environment](../README.md), then run these commands in the **course container at `/workspace`**. No additional packages or server are needed.
+If you finished the [shared Lab04 setup](../README.md), continue at
+**`/workspace` in your existing course terminal**. Use the twelve supplied samples in `part05/data/`.
+This Part reads local files only; no connection to the CA or proxy, or additional
+packages, is needed.
+
+## 2. Find the collision pair in code
+
+Complete the `find_collision()` TODO in `find_collision.py`, then run the commands below.
 
 ```console
 cd /workspace
@@ -36,19 +43,36 @@ python3 labs/lab04/part05/test_part05_materials.py
 
 The first command raises `NotImplementedError` while the TODO remains. The public test checks **only the supplied materials**, so it can pass before you implement the TODO.
 
-## What to Check After Completing the TODO
+### What to check after completing the TODO
 
-Run `find_collision.py` again. It prints these items in order; read the actual file names and digests from your own run.
+- `find_collision.py` prints the two file names, MD5 and SHA-256 hashes, and
+  completion marker. Read the actual file names and hashes from your own run.
 
-```text
-files: <first file name> <second file name>
-MD5: <hash shared by both files>
-SHA-256 #1: <first file's hash>
-SHA-256 #2: <second file's hash>
-LAB04{...}
-```
+  ```text
+  files: <first file name> <second file name>
+  MD5: <hash shared by both files>
+  SHA-256 #1: <first file's hash>
+  SHA-256 #2: <second file's hash>
+  LAB04{...}
+  ```
 
-`files:` must name **two files with different contents**. `MD5:` is shared by the pair, while `SHA-256 #1` and `SHA-256 #2` must differ. If those conditions fail, the program raises an error before printing the completion marker. An `OK` from `test_part05_materials.py` confirms the sample files, not whether your collision-finding TODO is correct.
+  `files:` must name **two files with different contents**. Their MD5 hashes must
+  match and their SHA-256 hashes must differ. Otherwise, the program raises an
+  error before printing the completion marker.
+
+- `test_part05_materials.py` checks the number and structure of the sample files,
+  then prints the following. Execution time varies by environment.
+
+  ```text
+  .
+  ----------------------------------------------------------------------
+  Ran 1 test in <elapsed time>s
+
+  OK
+  ```
+
+  This `OK` confirms the materials check. **It does not check whether your
+  collision-finding TODO is correct.**
 
 ## Checkpoint Questions
 

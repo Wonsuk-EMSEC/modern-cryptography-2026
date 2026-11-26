@@ -35,9 +35,16 @@
 
 `investigate.py`는 복원된 인증서를 `/tmp/lab04-rogue-reconstructed.der`에 저장합니다. OpenSSL 검사에서 `historical_root.crt`는 **명령 한 번의 `-CAfile` 입력**으로만 사용합니다. 개인 PC의 운영체제나 브라우저 신뢰 목록에 이 역사적 루트를 설치하지 마세요.
 
-## 실행 방법
+## 1. 제공된 인증서와 실행 환경 준비하기
 
-[Lab04 공통 Docker 환경](../README.md)을 시작한 뒤 **course 컨테이너의 `/workspace`**에서 실행하세요. 네트워크 서버나 추가 패키지는 필요하지 않습니다.
+[Lab04 공통 준비](../README.md)를 마쳤다면 **기존 course 터미널의 `/workspace`**에서
+진행하세요. `part06/data/`에 제공된 인증서와 템플릿 메타데이터를 사용합니다.
+이 Part는 로컬 파일로 검증하므로 CA·프록시 접속이나 추가 패키지 설치는 필요하지 않습니다.
+
+## 2. 코드로 인증서를 복원하고 검증하기
+
+`investigate.py`의 `collision_evidence()`와 `transplant_signature()` 두 TODO를
+완성한 뒤 실행합니다.
 
 ```console
 cd /workspace
@@ -47,25 +54,42 @@ python3 labs/lab04/part06/test_part06_materials.py
 
 TODO가 남아 있으면 첫 번째 명령은 `NotImplementedError`로 끝납니다. 공개 검사는 **자료 구성만** 확인하므로 구현 전에도 통과할 수 있습니다.
 
-## 완료 후 확인할 결과
+### TODO 완료 후 확인할 결과
 
-두 TODO를 완성하고 `investigate.py`를 다시 실행하면 다음 항목이 순서대로 표시됩니다. MD5 값과 완료 표식은 실행 결과에서 확인하세요.
+- `investigate.py`는 두 인증서의 CA 역할과 검증 결과, 완료 표식, 복원 파일 경로를
+  출력합니다. MD5 값과 완료 표식은 직접 실행한 결과에서 확인하세요.
 
-```text
-legitimate CA role: False
-rogue CA role: True
-TBS MD5: <두 인증서 본문에 공통인 해시>
-legacy chain: accepted
-modern chain: rejected
-LAB04{...}
-reconstructed certificate: /tmp/lab04-rogue-reconstructed.der
-```
+  ```text
+  legitimate CA role: False
+  rogue CA role: True
+  TBS MD5: <두 인증서 본문에 공통인 해시>
+  legacy chain: accepted
+  modern chain: rejected
+  LAB04{...}
+  reconstructed certificate: /tmp/lab04-rogue-reconstructed.der
+  ```
 
-`legitimate CA role`과 `rogue CA role`은 각각 일반 서버 인증서와 중간 CA 인증서의 역할을 보여 줍니다. `legacy chain`은 허용되고 `modern chain`은 거부되어야 하며, 다르게 나오면 프로그램이 오류를 냅니다. 마지막 경로의 파일은 복원한 **인증서**이며 개인키가 아닙니다. `test_part06_materials.py`의 `OK`는 제공 자료 형식만 확인한 결과로, 두 TODO의 구현 결과를 판정하지 않습니다.
+  `legitimate CA role`과 `rogue CA role`은 각각 일반 서버 인증서와 중간 CA 인증서의
+  역할을 보여 줍니다. `legacy chain`은 허용되고 `modern chain`은 거부되는 것이
+  정상입니다. 다르게 나오면 프로그램이 오류를 냅니다.
+  마지막 경로는 **course 컨테이너 안**에 저장한 복원 인증서이며 개인키가 아닙니다.
+
+- `test_part06_materials.py`는 제공 인증서의 형식과 템플릿 메타데이터를 확인한 뒤
+  다음과 같이 출력합니다. 실행 시간은 환경에 따라 달라집니다.
+
+  ```text
+  .
+  ----------------------------------------------------------------------
+  Ran 1 test in <실행 시간>s
+
+  OK
+  ```
+
+  이 `OK`는 자료 검사 통과를 뜻합니다. **두 TODO의 구현 결과는 판정하지 않습니다.**
 
 검증 시점은 자료의 유효기간 안인 **2004-08-05 00:00 UTC**로 고정되어 있습니다. `legacy chain`은 OpenSSL `-auth_level 0`으로 약한 서명을 허용한 오프라인 재현이며, `modern chain`은 `-auth_level 1`에서 MD5 서명을 약하다고 거부합니다. 이 명령은 **인증서 체인만** 검사하며 호스트 이름, 실제 TLS 연결, 오늘날 브라우저의 신뢰 여부는 검사하지 않습니다.
 
-## 생각해 볼 질문
+## Checkpoint Questions
 
 1. 서명 바이트는 같은데 인증서의 CA 역할이 달라질 수 있었던 이유는 무엇인가요?
 2. 정상 인증서의 서명을 위조 템플릿에 옮겨도 `TBSCertificate`를 바꾸면 안 되는 이유는 무엇인가요?
