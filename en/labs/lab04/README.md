@@ -42,6 +42,16 @@ Each Part README lists specific output and behavior to check after running the t
 | `modern-cryptography-2026-lab04-ca` (`lab04-ca`) | Build locally from `docker/lab04-ca/Dockerfile` on top of the course image | Parts 02 and 08; issuance of Part03's input certificate |
 | `modern-cryptography-2026-lab04-proxy` (`lab04-proxy`) | Build locally from `docker/lab04-proxy/Dockerfile` on top of the course image | Part04 |
 
+The containers started from these images work together as follows.
+All three run together, but **enter your lab commands only in `course`**.
+The CA and proxy stay running and handle incoming requests.
+
+```mermaid
+flowchart LR
+    course["course · your lab workspace"] --> ca["lab04-ca · certificate issuance"]
+    course --> proxy["lab04-proxy · traffic relay"]
+```
+
 Parts 01, 05, 06, and 07 use only the `course` image. Part03 also verifies in
 `course`, but first needs the certificate files produced in Part02. No Lab04
 target image needs to be pulled separately from an external registry.
@@ -57,6 +67,9 @@ docker compose -f docker/compose.yml --profile lab04 build lab04-ca lab04-proxy
 docker compose -f docker/compose.yml --profile lab04 up -d --wait course lab04-ca lab04-proxy
 docker compose -f docker/compose.yml exec course bash
 ```
+
+These commands start all three containers and open a shell in `course`.
+When Part02 tells you to start the CA, it is already ready unless you stopped it.
 
 In the **course container**, follow each Part's README from `/workspace`.
 Part02 uses the key made in Part01, so remember its password. Generated keys

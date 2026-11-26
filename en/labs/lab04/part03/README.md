@@ -25,10 +25,16 @@ Check the TLS server purpose and the requested `hostname` as well. Specify the
 trust store so other CAs installed on the system cannot change the result.
 Use `openssl verify -help` to inspect available options.
 
-## Run and expected behavior
+## 1. Prepare the certificates issued in Part02
 
-Prepare the Part02 output first. Run these commands **inside the course container
-at `/workspace`**:
+Complete Part02 first. This Part uses `root.pem`, `intermediate.pem`, and
+`server.pem` in `part02/output/`. It reads and verifies existing files without
+creating new certificates, so no requests or separate connection to the CA
+are needed. Continue at **`/workspace` in your existing course terminal**.
+
+## 2. Verify the certificate chain and name in code
+
+Complete the `verify_certificate()` TODO in `verify_chain.py`, then run it.
 
 ```console
 python3 labs/lab04/part03/verify_chain.py
@@ -50,21 +56,25 @@ after the CA restarts.
 
 ### What to check after completing the TODO
 
-`verify_chain.py` prints these three lines **in this order**, followed by
-`LAB04{...}`:
+- `verify_chain.py` prints the three verification results **in the following
+  order**, followed by the completion marker. Both `REJECT` results are expected.
 
-```text
-trusted chain and correct name: ACCEPT
-trusted chain, wrong name: REJECT
-missing intermediate: REJECT
-```
+  ```text
+  trusted chain and correct name: ACCEPT
+  trusted chain, wrong name: REJECT
+  missing intermediate: REJECT
+  LAB04{...}
+  ```
 
-The program stops with an error if a result differs. `check.py` independently
-rechecks the same three conditions and prints
-`Part03: chain and hostname decisions: OK` when they all pass. This Part reads
-the certificates from Part02 and does not create new certificate files.
+  The program stops with an error if a result differs.
 
-## Checkpoint questions
+- `check.py` rechecks the same three conditions and prints this when all pass:
+
+  ```text
+  Part03: chain and hostname decisions: OK
+  ```
+
+## Checkpoint Questions
 
 1. When should a connection be rejected even though its certificate signature is valid?
 2. What are the Root and intermediate CAs' different roles during verification?

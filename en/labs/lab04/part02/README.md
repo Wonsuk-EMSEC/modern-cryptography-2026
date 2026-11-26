@@ -24,10 +24,21 @@ The CA issues a server certificate for this name and rejects requests for
 `CA:TRUE`. Provided code handles the `POST /issue` request and response. The
 response contains public certificates for the server, intermediate CA, and Root CA.
 
-## Run and observe
+## 1. Prepare the Part01 private key and environment
 
-Finish Part01 and start `lab04-ca` first. Run these commands **inside the course
-container at `/workspace`**:
+Complete Part01 first. If you finished the [shared Lab04 setup](../README.md)
+and have not stopped the services, the CA is already running. Continue at
+**`/workspace` in your existing course terminal**. The code sends requests to
+the CA; you do not need to open a shell in the CA container.
+
+Use `part01/output/private_encrypted.pem` from Part01 and its password.
+You do not need to generate another private key or copy it to the CA.
+
+## 2. Create a CSR and request a certificate in code
+
+Complete the `make_csr()` TODO in `enroll.py`, then run it.
+Wait for the first command to save the certificate files successfully before
+running the second command to check them.
 
 ```console
 python3 labs/lab04/part02/enroll.py
@@ -46,18 +57,27 @@ uses the files in `part02/output/`.
 
 ### What to check after completing the TODO
 
-- `part02/output/` contains four files: `request.csr`, `server.pem`,
-  `intermediate.pem`, and `root.pem`. The private-key file is not copied there.
-- The program prints `Certificate files: /workspace/labs/lab04/part02/output`,
-  `Issued name: lab04.local.test; CSR and certificate public key match: OK`,
-  and `LAB04{...}`. The second line appears after it checks the issued server
-  certificate's public key against the CSR/private key and finds the requested
-  DNS name in the certificate.
-- `check.py` rechecks the CSR signature, public-key match, server purpose,
-  and chain to the Root. It prints
-  `Part02: CSR, public key, extensions, and trusted chain: OK` when they pass.
+- `enroll.py` checks that the issued server certificate's public key matches the
+  CSR/private key and that the certificate contains the requested DNS name,
+  then prints the output path and completion marker.
 
-## Checkpoint questions
+  ```text
+  Certificate files: /workspace/labs/lab04/part02/output
+  Issued name: lab04.local.test; CSR and certificate public key match: OK
+  LAB04{...}
+  ```
+
+  `part02/output/` contains four files: `request.csr`, `server.pem`,
+  `intermediate.pem`, and `root.pem`. The private-key file is not copied there.
+
+- `check.py` rechecks the CSR signature, public-key match, server purpose,
+  and chain to the Root, then prints:
+
+  ```text
+  Part02: CSR, public key, extensions, and trusted chain: OK
+  ```
+
+## Checkpoint Questions
 
 1. Which information comes from a CSR, and which fields does the CA choose at issuance?
 2. Why must the issued certificate's public key match the CSR's public key?
